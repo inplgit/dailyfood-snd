@@ -1,0 +1,69 @@
+# Ignore Node.js dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Ignore Laravel dependencies
+/vendor/
+composer.lock
+
+# Ignore environment files
+.env
+.env.* 
+.htaccess
+
+# Ignore Laravel storage & logs
+storage/
+storage/logs/
+storage/framework/cache/
+storage/framework/sessions/
+storage/framework/views/
+storage__/
+storage/app/public/shop_image/
+storage/app/public/uploads/
+storage/app/public/visitshope/
+storage/app/public/profile/
+
+
+routes_old/
+resources_old/
+
+
+
+# Ignore build files
+/public/build/
+/public/hot/
+
+
+
+
+
+public.zip
+
+
+# Ignore IDE/editor settings
+.vscode/
+.idea/
+*.sublime-workspace
+
+# Ignore OS/system files
+.DS_Store
+Thumbs.db
+
+# Ignore large media files
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.zip
+*.tar.gz
+*.rar
+*.7z
+*.iso
+*.psd
+*.ai
+*.exe
+*.dll
+
+# Ignore Git large objects
+.git/ 
