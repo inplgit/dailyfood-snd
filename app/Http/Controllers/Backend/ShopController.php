@@ -1138,18 +1138,18 @@ public function import_shops_store(Request $request)
             // ✅ Check format
             if (!isset($file[0][0]) || $file[0][0] !== "Distributor Code") {
                 $formatNotMatch[] = 'Sheet' . ($sheetIndex + 1);
-                dump("⚠️ Format not matched on Sheet " . ($sheetIndex + 1));
+                // dump("⚠️ Format not matched on Sheet " . ($sheetIndex + 1));
                 continue;
             }
 
             foreach ($file as $key => $value) {
                 if ($key === 0 || empty($value[9])) {
-                    dump("⏭️ Row skipped: " . ($key + 1));
+                    // dump("⏭️ Row skipped: " . ($key + 1));
                     continue; // Skip header or missing Shop Name
                 }
 
                 $rowNumber = $key + 1;
-                dump("➡️ Processing Row: $rowNumber");
+                // dump("➡️ Processing Row: $rowNumber");
 
                 $distributor_code = $value[0] ?? '';
                 $tso_code_raw = str_replace(' ', '', $value[2] ?? '');
@@ -1166,7 +1166,7 @@ public function import_shops_store(Request $request)
                         'tso_codes' => $tso_code_raw,
                         'message' => 'TSO(s) do not belong to the given distributor or distributor not found.'
                     ];
-                    dump("❌ Invalid Row: $rowNumber Distributor=$distributor_code TSO=$tso_code_raw");
+                    // dump("❌ Invalid Row: $rowNumber Distributor=$distributor_code TSO=$tso_code_raw");
                     continue;
                 }
 
@@ -1176,7 +1176,7 @@ public function import_shops_store(Request $request)
                 $shopExists = Shop::where('shop_code', $shop_code)->first();
                 if ($shopExists) {
                     $shopExistsList[] = $shop_code;
-                    dump("⚠️ Shop already exists: $shop_code (Row $rowNumber)");
+                    // dump("⚠️ Shop already exists: $shop_code (Row $rowNumber)");
                     continue;
                 }
 
@@ -1190,7 +1190,7 @@ public function import_shops_store(Request $request)
                         'username' => optional(Auth::user())->name ?? 'Imported'
                     ]
                 );
-                dump("✅ Route ID: " . $route->id);
+                // dump("✅ Route ID: " . $route->id);
 
                 // ✅ Create route_tso mapping
                 foreach ($valid_tso_ids as $tsoId) {
@@ -1244,7 +1244,7 @@ public function import_shops_store(Request $request)
                 $shop->location_radius = $value[24] ?? null;
                 $shop->save();
 
-                dump("✅ Inserted Shop ID: " . $shop->id . " Code: " . $shop->shop_code);
+                // dump("✅ Inserted Shop ID: " . $shop->id . " Code: " . $shop->shop_code);
                 $insertedCount++;
 
                 // ✅ Insert into shop_tso
@@ -1257,10 +1257,10 @@ public function import_shops_store(Request $request)
             }
         }
 
-        // ❌ Rollback if format/validation issues
+        
         if (count($invalidRows) > 0 || count($formatNotMatch) > 0) {
             DB::rollBack();
-            dump("🚨 Transaction Rolled Back! Invalid rows: " . count($invalidRows) . " Format issues: " . count($formatNotMatch));
+            // dump("🚨 Transaction Rolled Back! Invalid rows: " . count($invalidRows) . " Format issues: " . count($formatNotMatch));
             if ($shopExistsList) Session::flash('exists_count', count($shopExistsList));
             if ($invalidRows) Session::flash('invalid_rows', $invalidRows);
             if ($formatNotMatch) Session::flash('formatNotMatch', $formatNotMatch);
@@ -1268,7 +1268,7 @@ public function import_shops_store(Request $request)
         }
 
         DB::commit();
-        dump("🎉 Transaction Committed. Inserted Shops: $insertedCount");
+        // dump("🎉 Transaction Committed. Inserted Shops: $insertedCount");
 
         if ($shopExistsList) Session::flash('exists_count', count($shopExistsList));
       return redirect()->back()->with('success', "All shops imported successfully. Inserted: $insertedCount");
