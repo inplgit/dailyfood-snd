@@ -17,7 +17,6 @@ $master = new MasterFormsHelper();
             </thead>
             <tbody id="data">
                 @foreach ($tso as $key => $row)
-                @($tso);
                     <tr>
                         <td>{{ ++$key }}</td>
                         <td>{{ $row->route_name }}</td>
@@ -30,11 +29,15 @@ $master = new MasterFormsHelper();
                             </select>
                         </td>
                         <td>
-                            <select class="form-control select2 tso_ids" multiple="multiple" name="tso_ids[{{ $key }}][]" placeholder="Select TSO Name" required>
-                                <option value="" disabled>select</option>
+                            <select class="form-control select2 tso_ids" id="tso_ids" name="tso_ids[{{ $key }}]"
+                                required>
+                                <option value="">select</option>
                                 @foreach ( $master->get_all_tso_by_distributor_id($row->distributor_id) as $row2 )
                                     <option value="{{ $row2->id }}" {{$row->tso_id == $row2->id ? 'selected' : ''}}>{{ $row2->name }}</option>
                                 @endforeach
+                                {{-- @foreach ($master->get_all_tso() as $row1)
+                                    <option value="{{ $row1->id }}">{{ $row1->name }}</option>
+                                @endforeach --}}
                             </select>
                             <input type="hidden" name="ids[{{ $key }}]" value="{{ $row->id }}" />
                         </td>
