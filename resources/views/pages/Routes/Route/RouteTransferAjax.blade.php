@@ -17,6 +17,7 @@ $master = new MasterFormsHelper();
             </thead>
             <tbody id="data">
                 @foreach ($tso as $key => $row)
+                @($tso);
                     <tr>
                         <td>{{ ++$key }}</td>
                         <td>{{ $row->route_name }}</td>
