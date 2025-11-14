@@ -1002,7 +1002,7 @@
 
 
             {{-- @can('Create_Sub_Route', 'Sub_Route_List') --}}
-                <li class=" nav-item">
+                <li class=" nav-item hide">
                     <a class="d-flex align-items-center" href="#">
                         <i class="fa-solid fa-route"></i>
                         <span class="menu-title text-truncate">
