@@ -21,7 +21,7 @@
                 <a class="navbar-brand" href="{{ url('dashboard') }}">
                     <span class="brand-logo">
                         <!-- <img style="width: 175px;" src="{{ url('/public/assets/images/logo.png') }}"> -->
-                        <img class="logo_m" src="{{ url('/public/assets/images/logo.png') }}" onerror="this.onerror=null;this.src='{{ asset('logoo.png') }}'" />
+                        <img class="logo_m" src="{{ url('/public/assets/images/dailyfood_logo.jpeg') }}" onerror="this.onerror=null;this.src='{{ asset('logoo.png') }}'" />
                         <img class="logo_m hide" src="{{ asset('logo.png') }}">
                     </span>
                 </a>

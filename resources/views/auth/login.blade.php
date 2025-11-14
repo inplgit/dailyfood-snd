@@ -19,7 +19,11 @@
                     <div class="login_logo">
                         <a href="javascript:void(0);" class="brand-logo">
                             <span class="login-im">
-                                <img src="public/assets/images/login_logo2.png">
+                                <img src="public/assets/images/dailyfood_logo.jpeg"style="
+    margin-bottom: 7px;
+    width: 63%;
+    height: 101%;
+">
                             </span>
                         </a>
                     </div>
