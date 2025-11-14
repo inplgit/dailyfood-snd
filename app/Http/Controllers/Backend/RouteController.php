@@ -430,15 +430,26 @@ public function AddRouteMultiTso_update(Request $request, Route $route)
         $distributor_id = $request->distribuotr_id;
         $tso_id = $request->tso_id;
 
-        $routeIds = DB::table('route_tso')
-            ->where('tso_id', $tso_id)
-            ->pluck('route_id');
+        // $routeIds = DB::table('route_tso')
+        //     ->where('tso_id', $tso_id)
+        //     ->pluck('route_id');
 
-        $tso = Route::status()
-            ->where('distributor_id', $distributor_id)
-            ->whereIn('id', $routeIds)
-            ->get();
+        // $tso = Route::status()
+        //     ->where('distributor_id', $distributor_id)
+        //     ->whereIn('id', $routeIds)
+        //     ->get();
 
+
+        $tso = DB::table('routes as r')
+    ->join('route_tso as rt', 'r.id', '=', 'rt.route_id')
+    ->where('r.distributor_id', $distributor_id)
+    ->when($tso_id, function ($query) use ($tso_id) {
+        $query->where('rt.tso_id', $tso_id);
+    })
+    ->select('r.id', 'r.route_name', 'r.distributor_id', 'rt.tso_id')
+    ->get();
+
+            
         if ($request->ajax()) return view($this->page . 'RouteTransferAjax', compact('tso', 'tso_id'));
 
         return view($this->page . 'RouteTransfer');
@@ -573,7 +584,9 @@ public function AddRouteMultiTso_update(Request $request, Route $route)
         foreach ($ids as $key => $routeId) {
 
             // Get selected TSO array for this route
-            $selectedTsoIds = $tso_ids[$key] ?? [];
+            // $selectedTsoIds = $tso_ids[$key] ?? [];
+            $selectedTsoIds = (array) ($tso_ids[$key] ?? []);
+
 
             if (!empty($selectedTsoIds)) {
 
