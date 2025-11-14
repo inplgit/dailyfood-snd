@@ -1050,7 +1050,7 @@
 
             {{-- @can('Order_Summary_Report', 'Order_List_Report', 'Scheme_Product_Report', 'Product_Availability',
                 'Load_Sheet_Report', 'Order_VS_Execution', 'TSO_Target_Sheet') --}}
-                <li class=" nav-item">
+                <li class=" nav-item hide">
                     <a class="d-flex align-items-center" href="#">
                     <i class="fa-solid fa-file-invoice"></i>
                         <span class="menu-title text-truncate">
