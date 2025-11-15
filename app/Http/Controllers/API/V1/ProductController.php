@@ -39,7 +39,7 @@ class ProductController extends BaseController
         })
         // ->latest()->get();
  	->orderByRaw('CAST(orderby AS UNSIGNED) ASC')
-       ->latest()->paginate($request->limit??100);
+       ->latest()->paginate($request->limit??500);
 
       
         $products->getCollection()->transform(function ($product) {
