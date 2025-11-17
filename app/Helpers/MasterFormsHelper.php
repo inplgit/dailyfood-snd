@@ -801,7 +801,7 @@ public static function get_sale_qty2_excute_suumary_details_with_city($from , $t
         foreach ($result as $item) {
             $main_qty = '';
             $main_amount = 0;
-            if(in_array($item->stock_type,[1])){
+            // if(in_array($item->stock_type,[1])){
                 
                  $productPriceList = $productPrices[$item->product_id] ?? collect();
 
@@ -843,7 +843,7 @@ public static function get_sale_qty2_excute_suumary_details_with_city($from , $t
                         'main_amount' => $main_amount,
                     ];
                 }
-            } 
+            // } 
         }
         
         
