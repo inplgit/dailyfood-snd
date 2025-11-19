@@ -106,16 +106,16 @@ public function GetTsoByDistributor(Request $request)
 public function getTsoDistributorWiseRoute(Request $request, $distributor_id)
 {
     $tso_id = Auth::user()->tso->id;
-    $today = date('l'); // Get current day, e.g. "Monday"
+    $today = date('l'); // current day, e.g. "Wednesday"
 
     $routes = DB::table('route_tso as rt')
         ->join('routes as r', 'rt.route_id', '=', 'r.id')
+        ->join('route_days as rd', function($join) use ($today) {
+            $join->on('rd.route_id', '=', 'r.id')
+                 ->where('rd.day', $today); // only today's routes
+        })
         ->leftJoin('users as u', 'u.id', '=', 'rt.tso_id')
         ->leftJoin('shops as s', 's.route_id', '=', 'r.id')
-        ->leftJoin('route_days as rd', function($join) use ($today) {
-            $join->on('rd.route_id', '=', 'r.id')
-                 ->where('rd.day', $today); // Only today's routes
-        })
         ->select(
             'r.id',
             'r.route_name',
