@@ -245,7 +245,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
     <div class="row">
 
-        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
 
             <!-- Row 1 -->
             <table class="section-table">
@@ -299,7 +299,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
         </div>
 
-        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+        <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
 
             <table class="section-table">
                 <tr>
@@ -346,16 +346,6 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         </div>
 
     </div>
-
-
-
-
-
-    
-
-
-
-
 
 
     <!-- ITEMS TABLE -->
@@ -431,11 +421,22 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
         <div class="right-summary">
             <p><b>Targeted Discount in %:</b> {{ $so->discount_percent }}</p>
-            <p><b>TOTAL NET AMOUNT</b></p>
+            
+            <table class="item-table">
 
-            <p style="font-size:20px; border:1px solid #000; padding:5px; display:inline-block;">
-                <b>{{ number_format($grand_total - $so->discount_amount, 2) }}</b>
-            </p>
+                <tr>
+                    <td>
+                        <p><b>TOTAL NET AMOUNT</b></p>
+                    </td>
+
+                    <td>
+                        <p style="font-size:20px; border:1px solid #000; padding:5px; display:inline-block;"><b>{{ number_format($grand_total - $so->discount_amount, 2) }}</b></p>
+                    </td>
+                </tr>
+
+            </table>
+
+
         </div>
 
     </div>
