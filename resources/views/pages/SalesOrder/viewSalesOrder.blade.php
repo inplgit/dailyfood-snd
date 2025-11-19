@@ -416,8 +416,8 @@ h2,h3,h4,p,table{margin:0;padding:0;}
             <td></td>
             <td></td>
             <td></td>
-            <td></td>
             <td><u>1,080.00</u></td>
+            <td></td>
             <td><u>0.00</u></td>
             <td style="text-align:right;"><u>1,080.00</u></td>
         </tr>
