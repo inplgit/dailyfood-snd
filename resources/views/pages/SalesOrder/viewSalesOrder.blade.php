@@ -403,6 +403,10 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         @endforeach
 
         <tr  style="border-bottom:5px solid #000;">
+             <td></td>
+              <td></td>
+               <td></td>
+                <td></td>
             <td colspan="2" style="text-align:center;"><u>7.00</u></td>
             <td></td>
             <td><u>1,080.00</u></td>
