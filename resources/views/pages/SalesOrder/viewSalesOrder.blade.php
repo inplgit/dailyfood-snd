@@ -402,9 +402,18 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
         @endforeach
 
-        <tr>
-            <td colspan="14" style="text-align:right;"><b>Total:</b></td>
-            <td><b>{{ number_format($grand_total, 2) }}</b></td>
+        <tr  style="border-bottom:5px solid #000;">
+            <td colspan="2" style="text-align:center;"><u>7.00</u></td>
+            <td></td>
+            <td><u>1,080.00</u></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td><u>1,080.00</u></td>
+            <td></td>
+            <td><u>0.00</u></td>
+            <td style="text-align:right;"><u>1,080.00</u></td>
         </tr>
 
     </table>
