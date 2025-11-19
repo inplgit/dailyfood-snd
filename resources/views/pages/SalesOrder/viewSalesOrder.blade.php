@@ -224,7 +224,15 @@ h2,h3,h4,p,table{margin:0;padding:0;}
     {{-- ========== HEADER ========== --}}
     <div class="header">
         <div class="logo">
-            <img src="https://i.postimg.cc/mrL6bW3L/daily.png">
+            <div class="logo_wrp">
+                <a class="navbar-brand" href="{{ url('dashboard') }}">
+                    <span class="brand-logo">
+                        <!-- <img style="width: 175px;" src="{{ url('/public/assets/images/logo.png') }}"> -->
+                        <img class="logo_m" src="{{ url('/public/assets/images/dailyfood_logo.jpeg') }}" onerror="this.onerror=null;this.src='{{ asset('logoo.png') }}'" />
+                        <img class="logo_m hide" src="{{ asset('logo.png') }}">
+                    </span>
+                </a>
+            </div>
         </div>
 
         <div class="title">Sale Invoice</div>
@@ -240,59 +248,72 @@ h2,h3,h4,p,table{margin:0;padding:0;}
             <td width="20%"><b>Sale/Inv#</b></td>
             <td width="30%">{{ $so->invoice_no }}</td>
 
-            <td width="20%"><b>Invoice Date</b></td>
-            <td width="30%">{{ date("d-m-Y", strtotime($so->dc_date)) }}</td>
+           
         </tr>
 
         <tr>
             <td><b>Cust Name</b></td>
             <td>{{ $so->shop->company_name }}</td>
 
-            <td><b>Supply Date</b></td>
-            <td>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</td>
+
         </tr>
 
         <tr>
             <td><b>Address</b></td>
             <td>{{ $so->distributor->address ?? '--' }}</td>
 
-            <td><b>Due Date</b></td>
-            <td>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</td>
+
         </tr>
 
         <tr>
             <td><b>Contact</b></td>
             <td>{{ $so->shop->mobile ?? '--' }}</td>
 
-            <td><b>Tax Status</b></td>
-            <td>GENERAL STORE</td>
+
         </tr>
 
         <tr>
             <td><b>Main Area</b></td>
             <td>{{ $so->shop->main_area ?? '--' }}</td>
 
-            <td><b>Shop Type</b></td>
-            <td>{{ $so->shop->shop_type ?? '--' }}</td>
+
         </tr>
 
         <tr>
             <td><b>Sub Area</b></td>
             <td>{{ $so->shop->sub_area ?? '--' }}</td>
 
-            <td><b>Terms</b></td>
-            <td>Cash</td>
+
         </tr>
 
         <tr>
             <td><b>Block</b></td>
             <td>{{ $so->shop->block ?? '--' }}</td>
-
-            <td><b>Bus Type</b></td>
-            <td>{{ $so->tso->name }}</td>
         </tr>
     </table>
 
+
+        <table class="section-table">
+        <tr>
+
+
+
+            <td><b>Bus Type</b></td>
+            <td>{{ $so->tso->name }}</td>
+            <td><b>Terms</b></td>
+            <td>Cash</td>
+            <td><b>Shop Type</b></td>
+            <td>{{ $so->shop->shop_type ?? '--' }}</td>
+            <td><b>Tax Status</b></td>
+            <td>GENERAL STORE</td>
+            <td><b>Due Date</b></td>
+            <td>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</td>
+            <td><b>Supply Date</b></td>
+            <td>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</td>
+            <td width="20%"><b>Invoice Date</b></td>
+            <td width="30%">{{ date("d-m-Y", strtotime($so->dc_date)) }}</td>
+        </tr>
+        </table>
     <!-- ITEMS TABLE -->
     <table class="item-table">
 
@@ -376,155 +397,6 @@ h2,h3,h4,p,table{margin:0;padding:0;}
     </div>
 
     <!-- SIGNATURE BOXES -->
-    <div class="signature-area">
-        <div class="signature-box"></div>
-        <div class="signature-box"></div>
-        <div class="signature-box"></div>
-    </div>
-
-</div>
-
-
-
-
-<div class="invoice-container">
-
-    <div class="header">
-        <div class="logo">
-            <img src="https://i.postimg.cc/mrL6bW3L/daily.png">
-        </div>
-        <div class="title">Sale Invoice</div>
-        <div class="right-title">Farwa Traders</div>
-    </div>
-
-    <!-- Row 1 -->
-    <table class="section-table">
-        <tr>
-            <td width="20%"><b>Sale/Inv#</b></td>
-            <td width="30%">MO-006716</td>
-            <td width="20%"><b>Invoice Date</b></td>
-            <td width="30%">14-11-2025</td>
-        </tr>
-        <tr>
-            <td><b>Cust Name</b></td>
-            <td>Khan. Massalh</td>
-            <td><b>Supply Date</b></td>
-            <td>15-11-2025</td>
-        </tr>
-        <tr>
-            <td><b>Address</b></td>
-            <td>ghost market</td>
-            <td><b>Due Date</b></td>
-            <td>15-11-2025</td>
-        </tr>
-        <tr>
-            <td><b>Contact</b></td>
-            <td></td>
-            <td><b>Tax Status</b></td>
-            <td>GENERAL STORE</td>
-        </tr>
-        <tr>
-            <td><b>Main Area</b></td>
-            <td>MALIR</td>
-            <td><b>Shop Type</b></td>
-            <td>WHOLESALE</td>
-        </tr>
-        <tr>
-            <td><b>Sub Area</b></td>
-            <td>Ghanchi Market (Retail)</td>
-            <td><b>Terms</b></td>
-            <td>Cash</td>
-        </tr>
-        <tr>
-            <td><b>Block</b></td>
-            <td></td>
-            <td><b>Bus Type</b></td>
-            <td>ASM / TSO / SE / SM</td>
-        </tr>
-    </table>
-
-    <!-- ITEMS -->
-    <table class="item-table">
-        <tr>
-            <th>S#</th>
-            <th>Item Name</th>
-            <th>Packing</th>
-            <th>Brand</th>
-            <th>Qty</th>
-            <th>T.P</th>
-            <th>Amount</th>
-            <th>SC/B</th>
-            <th>Eu</th>
-            <th>T/O</th>
-            <th>AMT</th>
-            <th>A&D AMT</th>
-            <th>%</th>
-            <th>Add/less</th>
-            <th>Final Amount</th>
-        </tr>
-
-        <tr>
-            <td>1</td>
-            <td>MUSTARD POWDER 100g</td>
-            <td>X72</td>
-            <td>Cooking Club</td>
-            <td>3</td>
-            <td>120.00</td>
-            <td>360.00</td>
-            <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
-            <td>0</td>
-            <td>360.00</td>
-        </tr>
-
-        <tr>
-            <td>2</td>
-            <td>APPLE VINEGAR 315 ML</td>
-            <td>X24</td>
-            <td>Chtfo</td>
-            <td>2</td>
-            <td>180.00</td>
-            <td>360.00</td>
-            <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
-            <td>0</td>
-            <td>360.00</td>
-        </tr>
-
-        <tr>
-            <td>3</td>
-            <td>NATURAL JAMUN VINEGAR 31</td>
-            <td>X24</td>
-            <td>Chtfo</td>
-            <td>2</td>
-            <td>180.00</td>
-            <td>360.00</td>
-            <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
-            <td>0</td>
-            <td>360.00</td>
-        </tr>
-
-        <tr>
-            <td colspan="14" style="text-align:right;"><b>Total:</b></td>
-            <td><b>1,080.00</b></td>
-        </tr>
-    </table>
-
-    <div class="summary-box">
-        <div class="left-box">
-            <p><b>For Inquiry/Complaint:</b><br>
-            Contact/WhatsApp: 0300-0813906<br>
-            Email us at: support@dailyfoodindustries.com
-            </p>
-        </div>
-
-        <div class="right-summary">
-            <p><b>Targeted Discount in %:</b> 0</p>
-            <p><b>TOTAL NET AMOUNT</b></p>
-            <p style="font-size:20px; border:1px solid #000; padding:5px; display:inline-block;">
-                <b>1,080.00</b>
-            </p>
-        </div>
-    </div>
-
     <div class="signature-area">
         <div class="signature-box"></div>
         <div class="signature-box"></div>
