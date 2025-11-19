@@ -422,7 +422,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         <div class="right-summary">
             <p><b>Targeted Discount in %:</b> {{ $so->discount_percent }}</p>
             
-            <table class="item-table">
+            <table class="item-table" style=" width:55%;float:right;">
 
                 <tr>
                     <td>
@@ -430,7 +430,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                     </td>
 
                     <td>
-                        <p style="font-size:20px; border:1px solid #000; padding:5px; display:inline-block;"><b>{{ number_format($grand_total - $so->discount_amount, 2) }}</b></p>
+                        <p><b>{{ number_format($grand_total - $so->discount_amount, 2) }}</b></p>
                     </td>
                 </tr>
 
