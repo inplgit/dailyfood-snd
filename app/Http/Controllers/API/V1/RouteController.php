@@ -63,30 +63,71 @@ public function GetTsoByDistributor(Request $request)
 
 
 
+// public function getTsoDistributorWiseRoute(Request $request, $distributor_id)
+// {
+//     $tso_id = Auth::user()->tso->id;
+
+    
+
+//     $routes = DB::table('route_tso as rt')
+//         ->join('routes as r', 'rt.route_id', '=', 'r.id')
+//         ->leftJoin('users as u', 'u.id', '=', 'rt.tso_id')
+//         ->leftJoin('shops as s', 's.route_id', '=', 'r.id')
+//         ->leftJoin('route_days as rd', 'rd.route_id', '=', 'r.id')
+//       ->select(
+//     'r.id',
+//     'r.route_name',
+//     'r.distributor_id',
+//     'rt.tso_id',  // ➜ now appears in the JSON
+//     'r.status',
+//     'u.username',
+//     'r.created_at',
+//     'r.updated_at',
+//     DB::raw('COUNT(DISTINCT s.id) AS shops_count'),
+//     DB::raw("GROUP_CONCAT(DISTINCT rd.day ORDER BY rd.day SEPARATOR ', ') AS day")
+// )
+
+//         ->where('rt.tso_id', $tso_id)
+//         ->where('r.distributor_id', $distributor_id)
+//         ->where('r.status', 1)
+//         ->groupBy(
+//             'r.id', 'r.route_name', 'r.distributor_id',
+//             'rt.tso_id', 'r.status',
+//             'u.username', 'r.created_at', 'r.updated_at'
+//         )
+//         ->get();
+
+//     return $this->sendResponse($routes, 'Routes Retrieved Successfully');
+// }
+
+
+
+
 public function getTsoDistributorWiseRoute(Request $request, $distributor_id)
 {
     $tso_id = Auth::user()->tso->id;
-
-    
+    $today = date('l'); // Get current day, e.g. "Monday"
 
     $routes = DB::table('route_tso as rt')
         ->join('routes as r', 'rt.route_id', '=', 'r.id')
         ->leftJoin('users as u', 'u.id', '=', 'rt.tso_id')
         ->leftJoin('shops as s', 's.route_id', '=', 'r.id')
-        ->leftJoin('route_days as rd', 'rd.route_id', '=', 'r.id')
-      ->select(
-    'r.id',
-    'r.route_name',
-    'r.distributor_id',
-    'rt.tso_id',  // ➜ now appears in the JSON
-    'r.status',
-    'u.username',
-    'r.created_at',
-    'r.updated_at',
-    DB::raw('COUNT(DISTINCT s.id) AS shops_count'),
-    DB::raw("GROUP_CONCAT(DISTINCT rd.day ORDER BY rd.day SEPARATOR ', ') AS day")
-)
-
+        ->leftJoin('route_days as rd', function($join) use ($today) {
+            $join->on('rd.route_id', '=', 'r.id')
+                 ->where('rd.day', $today); // Only today's routes
+        })
+        ->select(
+            'r.id',
+            'r.route_name',
+            'r.distributor_id',
+            'rt.tso_id',
+            'r.status',
+            'u.username',
+            'r.created_at',
+            'r.updated_at',
+            DB::raw('COUNT(DISTINCT s.id) AS shops_count'),
+            DB::raw("GROUP_CONCAT(DISTINCT rd.day ORDER BY rd.day SEPARATOR ', ') AS day")
+        )
         ->where('rt.tso_id', $tso_id)
         ->where('r.distributor_id', $distributor_id)
         ->where('r.status', 1)
@@ -99,7 +140,6 @@ public function getTsoDistributorWiseRoute(Request $request, $distributor_id)
 
     return $this->sendResponse($routes, 'Routes Retrieved Successfully');
 }
-
 
 
 
