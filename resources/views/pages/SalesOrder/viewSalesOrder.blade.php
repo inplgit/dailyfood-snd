@@ -353,7 +353,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
         <tr>
             <th>S#</th>
-            <th>Item Name</th>
+            <th colspan="2">Item Name</th>
             <th>Packing</th>
             <th>Brand</th>
             <th>Qty</th>
@@ -382,6 +382,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
             <tr>
                 <td>{{ $s++ }}</td>
                 <td>{{ $row->product->product_name ?? '' }}</td>
+                 <td></td>
                 <td>{{ $row->product_flavour->flavour_name ?? '' }}</td>
                 <td>{{ $row->product->brand ?? '' }}</td>
                 <td>{{ number_format($row->qty) }}</td>
@@ -407,15 +408,16 @@ h2,h3,h4,p,table{margin:0;padding:0;}
               <td></td>
                <td></td>
                 <td></td>
-            <td colspan="2" style="text-align:center;"><u>7.00</u></td>
+                <td></td>
+            <td  style="text-align:right;"><u>7.00</u></td>
             <td></td>
             <td><u>1,080.00</u></td>
             <td></td>
             <td></td>
             <td></td>
             <td></td>
-            <td><u>1,080.00</u></td>
             <td></td>
+            <td><u>1,080.00</u></td>
             <td><u>0.00</u></td>
             <td style="text-align:right;"><u>1,080.00</u></td>
         </tr>
