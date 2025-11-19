@@ -294,26 +294,56 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
 
         <table class="section-table">
-        <tr>
+            <tr>
+                <td><b>Invoice Date</b></td>
+                <td>{{ date("d-m-Y", strtotime($so->dc_date)) }}</td>
 
+                <td><b>Supply Date</b></td>
+                <td>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</td>
 
-
-            <td><b>Bus Type</b></td>
-            <td>{{ $so->tso->name }}</td>
-            <td><b>Terms</b></td>
-            <td>Cash</td>
-            <td><b>Shop Type</b></td>
-            <td>{{ $so->shop->shop_type ?? '--' }}</td>
-            <td><b>Tax Status</b></td>
-            <td>GENERAL STORE</td>
-            <td><b>Due Date</b></td>
-            <td>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</td>
-            <td><b>Supply Date</b></td>
-            <td>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</td>
-            <td width="20%"><b>Invoice Date</b></td>
-            <td width="30%">{{ date("d-m-Y", strtotime($so->dc_date)) }}</td>
-        </tr>
+                <td><b>Due Date</b></td>
+                <td>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</td>
+            </tr>
         </table>
+
+        <table class="section-table">
+            <tr>
+                <td><b>Tax Status</b></td>    
+                <td><b>Shop Type</b></td>
+                <td><b>Bus Type</b></td>
+                <td><b>Terms</b></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>GENERAL STORE</td>
+                <td>WHOLESALE</td>
+                <td>Cash</td>
+            </tr>
+
+
+            <tr>
+                <td>ASM</td>
+                <td>{{ $so->tso->name }}</td>
+                <td>SE</td>
+                <td>SM</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>Syed Manzar Akbar Zaidi</td>
+                <td></td>
+            </tr>
+        </table>
+
+
+
+    
+
+
+
+
+
+
     <!-- ITEMS TABLE -->
     <table class="item-table">
 
