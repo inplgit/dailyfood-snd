@@ -67,3 +67,5 @@ Thumbs.db
 
 # Ignore Git large objects
 .git/ 
+bootstrap/cache/packages.php
+bootstrap/cache/services.php

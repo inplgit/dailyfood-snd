@@ -16,7 +16,7 @@
     <hr>
     <div class="model_content_custom">
         <div class="head_main">
-            <h1 class="for-print">Sales Order</h1>
+            <h1 class="for-print">Sales Orderss</h1>
         </div>
         <div class="logo_snd">
             <h1 class="subHeadingLabelClass">{{ $so->distributor->distributor_name }}</h1>
