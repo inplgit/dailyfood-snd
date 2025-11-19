@@ -195,6 +195,8 @@
 
 
 
+
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -209,14 +211,18 @@ body{
     background:#fff;
 }
 
-.container{
+.invoice-container{
     width: 900px;
     margin: auto;
-    padding: 25px 35px;
-    border:1px solid #555;
+    padding: 20px 30px;
+    border:1px solid #000;
 }
 
-/* Header */
+h2,h3,h4,p,table{
+    margin:0;
+    padding:0;
+}
+
 .header{
     display:flex;
     justify-content:space-between;
@@ -224,158 +230,145 @@ body{
     margin-bottom:10px;
 }
 
-.header-title{
+.logo img{
+    width: 80px;
+}
+
+.title{
     text-align:center;
-    font-size:22px;
+    font-size:20px;
     font-weight:bold;
     text-decoration:underline;
 }
 
 .right-title{
     text-align:right;
-    font-size:17px;
+    font-size:18px;
     font-weight:bold;
     text-decoration:underline;
 }
 
-/* Main Info Table */
-.info-table{
+.section-table{
     width:100%;
     border-collapse:collapse;
+    margin-top:10px;
     font-size:14px;
-    margin-top:20px;
 }
 
-.info-table td{
+.section-table td{
     border:1px solid #000;
-    padding:6px;
+    padding:5px;
 }
 
-/* Items Table */
 .item-table{
     width:100%;
     border-collapse:collapse;
-    margin-top:25px;
+    margin-top:15px;
     font-size:14px;
 }
 
 .item-table th,
 .item-table td{
     border:1px solid #000;
-    padding:6px;
+    padding:5px;
     text-align:center;
 }
 
-/* Left Box */
+.summary-box{
+    width:100%;
+    margin-top:20px;
+}
+
 .left-box{
     width:45%;
     height:120px;
     border:1px solid #000;
-    margin-top:20px;
+    display:inline-block;
+    vertical-align:top;
     padding:10px;
-    font-size:14px;
 }
 
-/* Right Summary */
-.summary-box{
+.right-summary{
     width:50%;
     float:right;
     text-align:right;
-    margin-top:20px;
 }
 
-.net-box{
-    border:1px solid #000;
-    display:inline-block;
-    padding:8px 20px;
-    font-size:22px;
-    font-weight:bold;
-}
-
-/* Signature Lines */
-.sign-row{
+.signature-area{
     width:100%;
-    margin-top:60px;
+    margin-top:40px;
     display:flex;
     justify-content:space-between;
 }
 
-.sign{
-    width:260px;
-    height:30px;
+.signature-box{
     border:1px solid #000;
+    width:250px;
+    height:30px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="invoice-container">
 
-    <!-- HEADER -->
     <div class="header">
-        <img src="LOGO.png" width="90"> 
-        <div class="header-title">Sale Invoice</div>
+        <div class="logo">
+            <img src="https://i.postimg.cc/mrL6bW3L/daily.png">
+        </div>
+        <div class="title">Sale Invoice</div>
         <div class="right-title">Farwa Traders</div>
     </div>
 
-    <!-- INFO TABLE -->
-    <table class="info-table">
-
+    <!-- Row 1 -->
+    <table class="section-table">
         <tr>
-            <td><b>Sale/Inv#</b></td>
-            <td>MO-006716</td>
-            <td><b>Invoice Date</b></td>
-            <td>14-11-2025</td>
+            <td width="20%"><b>Sale/Inv#</b></td>
+            <td width="30%">MO-006716</td>
+            <td width="20%"><b>Invoice Date</b></td>
+            <td width="30%">14-11-2025</td>
         </tr>
-
         <tr>
             <td><b>Cust Name</b></td>
             <td>Khan. Massalh</td>
             <td><b>Supply Date</b></td>
             <td>15-11-2025</td>
         </tr>
-
         <tr>
             <td><b>Address</b></td>
             <td>ghost market</td>
             <td><b>Due Date</b></td>
             <td>15-11-2025</td>
         </tr>
-
         <tr>
             <td><b>Contact</b></td>
             <td></td>
             <td><b>Tax Status</b></td>
             <td>GENERAL STORE</td>
         </tr>
-
         <tr>
             <td><b>Main Area</b></td>
             <td>MALIR</td>
             <td><b>Shop Type</b></td>
             <td>WHOLESALE</td>
         </tr>
-
         <tr>
             <td><b>Sub Area</b></td>
             <td>Ghanchi Market (Retail)</td>
             <td><b>Terms</b></td>
             <td>Cash</td>
         </tr>
-
         <tr>
             <td><b>Block</b></td>
             <td></td>
             <td><b>Bus Type</b></td>
             <td>ASM / TSO / SE / SM</td>
         </tr>
-
     </table>
 
-    <!-- ITEMS TABLE -->
+    <!-- ITEMS -->
     <table class="item-table">
-
         <tr>
             <th>S#</th>
             <th>Item Name</th>
@@ -402,12 +395,7 @@ body{
             <td>3</td>
             <td>120.00</td>
             <td>360.00</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
+            <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
             <td>0</td>
             <td>360.00</td>
         </tr>
@@ -420,12 +408,7 @@ body{
             <td>2</td>
             <td>180.00</td>
             <td>360.00</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
+            <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
             <td>0</td>
             <td>360.00</td>
         </tr>
@@ -438,12 +421,7 @@ body{
             <td>2</td>
             <td>180.00</td>
             <td>360.00</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
+            <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
             <td>0</td>
             <td>360.00</td>
         </tr>
@@ -452,31 +430,29 @@ body{
             <td colspan="14" style="text-align:right;"><b>Total:</b></td>
             <td><b>1,080.00</b></td>
         </tr>
-
     </table>
 
-
-    <!-- LEFT BOX -->
-    <div class="left-box">
-        <b>For Inquiry/Complaint:</b><br>
-        Contact/WhatsApp: 0300-0813906<br>
-        Email us at: support@dailyfoodindustries.com
-    </div>
-
-    <!-- RIGHT SUMMARY -->
     <div class="summary-box">
-        <p><b>Targeted Discount in %:</b> 0</p>
-        <p><b>TOTAL NET AMOUNT</b></p>
-        <div class="net-box">1,080.00</div>
+        <div class="left-box">
+            <p><b>For Inquiry/Complaint:</b><br>
+            Contact/WhatsApp: 0300-0813906<br>
+            Email us at: support@dailyfoodindustries.com
+            </p>
+        </div>
+
+        <div class="right-summary">
+            <p><b>Targeted Discount in %:</b> 0</p>
+            <p><b>TOTAL NET AMOUNT</b></p>
+            <p style="font-size:20px; border:1px solid #000; padding:5px; display:inline-block;">
+                <b>1,080.00</b>
+            </p>
+        </div>
     </div>
 
-    <div style="clear:both;"></div>
-
-    <!-- SIGNATURE BOXES -->
-    <div class="sign-row">
-        <div class="sign"></div>
-        <div class="sign"></div>
-        <div class="sign"></div>
+    <div class="signature-area">
+        <div class="signature-box"></div>
+        <div class="signature-box"></div>
+        <div class="signature-box"></div>
     </div>
 
 </div>
