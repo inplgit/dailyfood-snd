@@ -242,98 +242,112 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         </div>
     </div>
 
-    <!-- Row 1 -->
-    <table class="section-table">
-        <tr>
-            <td width="20%"><b>Sale/Inv#</b></td>
-            <td width="30%">{{ $so->invoice_no }}</td>
 
-           
-        </tr>
+    <div class="row">
 
-        <tr>
-            <td><b>Cust Name</b></td>
-            <td>{{ $so->shop->company_name }}</td>
+        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+
+            <!-- Row 1 -->
+            <table class="section-table">
+                <tr>
+                    <td width="20%"><b>Sale/Inv#</b></td>
+                    <td width="30%">{{ $so->invoice_no }}</td>
+        
+                
+                </tr>
+        
+                <tr>
+                    <td><b>Cust Name</b></td>
+                    <td>{{ $so->shop->company_name }}</td>
+        
+        
+                </tr>
+        
+                <tr>
+                    <td><b>Address</b></td>
+                    <td>{{ $so->distributor->address ?? '--' }}</td>
+        
+        
+                </tr>
+        
+                <tr>
+                    <td><b>Contact</b></td>
+                    <td>{{ $so->shop->mobile ?? '--' }}</td>
+        
+        
+                </tr>
+        
+                <tr>
+                    <td><b>Main Area</b></td>
+                    <td>{{ $so->shop->main_area ?? '--' }}</td>
+        
+        
+                </tr>
+        
+                <tr>
+                    <td><b>Sub Area</b></td>
+                    <td>{{ $so->shop->sub_area ?? '--' }}</td>
+        
+        
+                </tr>
+        
+                <tr>
+                    <td><b>Block</b></td>
+                    <td>{{ $so->shop->block ?? '--' }}</td>
+                </tr>
+            </table>
+
+        </div>
+
+        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+
+            <table class="section-table">
+                <tr>
+                    <td><b>Invoice Date</b></td>
+                    <td>{{ date("d-m-Y", strtotime($so->dc_date)) }}</td>
+        
+                    <td><b>Supply Date</b></td>
+                    <td>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</td>
+        
+                    <td><b>Due Date</b></td>
+                    <td>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</td>
+                </tr>
+            </table>
+        
+            <table class="section-table">
+                <tr>
+                    <td><b>Tax Status</b></td>    
+                    <td><b>Shop Type</b></td>
+                    <td><b>Bus Type</b></td>
+                    <td><b>Terms</b></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>GENERAL STORE</td>
+                    <td>WHOLESALE</td>
+                    <td>Cash</td>
+                </tr>
+        
+        
+                <tr>
+                    <td>ASM</td>
+                    <td>{{ $so->tso->name }}</td>
+                    <td>SE</td>
+                    <td>SM</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td>Syed Manzar Akbar Zaidi</td>
+                    <td></td>
+                </tr>
+            </table>
+
+        </div>
+
+    </div>
 
 
-        </tr>
-
-        <tr>
-            <td><b>Address</b></td>
-            <td>{{ $so->distributor->address ?? '--' }}</td>
-
-
-        </tr>
-
-        <tr>
-            <td><b>Contact</b></td>
-            <td>{{ $so->shop->mobile ?? '--' }}</td>
-
-
-        </tr>
-
-        <tr>
-            <td><b>Main Area</b></td>
-            <td>{{ $so->shop->main_area ?? '--' }}</td>
-
-
-        </tr>
-
-        <tr>
-            <td><b>Sub Area</b></td>
-            <td>{{ $so->shop->sub_area ?? '--' }}</td>
-
-
-        </tr>
-
-        <tr>
-            <td><b>Block</b></td>
-            <td>{{ $so->shop->block ?? '--' }}</td>
-        </tr>
-    </table>
-
-
-        <table class="section-table">
-            <tr>
-                <td><b>Invoice Date</b></td>
-                <td>{{ date("d-m-Y", strtotime($so->dc_date)) }}</td>
-
-                <td><b>Supply Date</b></td>
-                <td>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</td>
-
-                <td><b>Due Date</b></td>
-                <td>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</td>
-            </tr>
-        </table>
-
-        <table class="section-table">
-            <tr>
-                <td><b>Tax Status</b></td>    
-                <td><b>Shop Type</b></td>
-                <td><b>Bus Type</b></td>
-                <td><b>Terms</b></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td>GENERAL STORE</td>
-                <td>WHOLESALE</td>
-                <td>Cash</td>
-            </tr>
-
-
-            <tr>
-                <td>ASM</td>
-                <td>{{ $so->tso->name }}</td>
-                <td>SE</td>
-                <td>SM</td>
-            </tr>
-            <tr>
-                <td></td>
-                <td></td>
-                <td>Syed Manzar Akbar Zaidi</td>
-                <td></td>
-            </tr>
-        </table>
 
 
 
