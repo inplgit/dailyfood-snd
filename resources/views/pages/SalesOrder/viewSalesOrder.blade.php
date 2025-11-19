@@ -381,7 +381,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
             <tr>
                 <td>{{ $s++ }}</td>
-                <td>{{ $row->product->product_name ?? '' }}</td>
+                <td colspan="2">{{ $row->product->product_name ?? '' }}</td>
                  <td></td>
                 <td>{{ $row->product_flavour->flavour_name ?? '' }}</td>
                 <td>{{ $row->product->brand ?? '' }}</td>
@@ -405,7 +405,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
         <tr  style="border-bottom:5px solid #000;">
              <td></td>
-              <td></td>
+              <td colspan="2"></td>
                <td></td>
                 <td></td>
                 <td></td>
