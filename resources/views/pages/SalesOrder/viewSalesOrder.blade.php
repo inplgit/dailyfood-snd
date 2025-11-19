@@ -16,7 +16,7 @@
     <hr>
     <div class="model_content_custom">
         <div class="head_main">
-            <h1 class="for-print">Sales Orderss</h1>
+            <h1 class="for-print">Sales Order</h1>
         </div>
         <div class="logo_snd">
             <h1 class="subHeadingLabelClass">{{ $so->distributor->distributor_name }}</h1>
@@ -26,7 +26,7 @@
         <div class="row align-items-center">
             <div class="col-lg-7 well">
                 <table class="table table-bordered saleOrder_table">
-                    <tr><th><h4>Sales Order</h4></th></tr>
+                    <tr><th><h4>Sales Orderss</h4></th></tr>
                     <tr><th>Sale Order:</th><td>{{ $so->invoice_no }}</td></tr>
                     <tr><th>Sale Order Date:</th><td>{{ date("d-m-Y", strtotime($so->dc_date)) }}</td></tr>
                     <tr><th>Sale Order Delivery Date:</th><td>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</td></tr>
