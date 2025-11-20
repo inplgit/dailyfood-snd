@@ -442,7 +442,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
             </table>
             
             
-            <table class="item-table" style=" width:55%;float:right;">
+            <table class="item-table" style="width:55%;float:right;border: none !important;">
 
                 <tr>
                     <td style=" text-align:left;">
@@ -451,7 +451,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                 </tr>
 
 
-                <tr>
+                <tr style=" border:1px solid #000;">
                     <td style=" text-align:left;">
                         <p><b><u>TOTAL NET AMOUNT</u></b></p>
                     </td>
