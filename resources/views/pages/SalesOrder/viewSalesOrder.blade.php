@@ -446,7 +446,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
                 <tr>
                     <td style=" text-align:left;">
-                        <p><b>Targeted Discount in %:</b>{ $so->discount_percent }</p>
+                         <p><b>Targeted Discount in %:</b> {{ $so->discount_percent }}</p>
                     </td>
                 </tr>
 
