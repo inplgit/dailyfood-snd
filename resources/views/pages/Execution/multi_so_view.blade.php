@@ -45,7 +45,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         <div class="right" style="float: right">
             <!-- <button id="print" type="button" class="btn btn-success btn-sm right">Print</button> -->
 
-            <button class="btn btn-primary prinn pritns" onclick="printSection()">🖨️ Print</button>
+            <button class="btn btn-success btn-sm right prinn pritns" onclick="printSection()">🖨️ Print</button>
 
         </div>
 
@@ -235,7 +235,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                         <span class="brand-logo">
                             <!-- <img style="width: 175px;" src="{{ url('/public/assets/images/logo.png') }}"> -->
                             <img class="logo_m" src="{{ url('/public/assets/images/dailyfood_logo.jpeg') }}" onerror="this.onerror=null;this.src='{{ asset('logoo.png') }}'" />
-                            <img class="logo_m hide" src="{{ asset('logo.png') }}">
+                            <!-- <img class="logo_m hide" src="{{ asset('logo.png') }}"> -->
                         </span>
                     </a>
                 </div>
@@ -723,7 +723,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
     // ✅ Print CSS dynamically add karna
     const printStyle = `
       @media print {
-        @page{size:A4;margin:15mm 0mm 0mm 0mm !important;}
+        @page{size:A4;margin:15mm 15mm 15mm 15mm !important;}
         
 .table-bordered{border:1px solid #ddd !important;}
 .logo.logo-flex-cont{display:flex;align-items:baseline;}
