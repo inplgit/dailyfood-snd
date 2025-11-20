@@ -49,7 +49,10 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 </div>
 <br>
 <br>
-<div id="content" class="container print">
+
+
+<!-- old code -->
+<!-- <div id="content" class="container print">
     @foreach($sos as $key => $so)
     <div class="card ptb" style="page-break-before: always">
         <div class="logo_snd">
@@ -57,6 +60,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
             <h4 class="subHeadingLabelClass">{{ $so->distributor->address ?? '--' }}</h4>
         </div>
         <br>
+
         <div class="row align-items-center">
             <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7 well">
                 <table class="table table-bordered saleOrder_table">
@@ -137,23 +141,17 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                             @php $sheme_product[] = $row->sheme_product_id; @endphp
                         @endforeach
 
-         {{-- Totals Row --}}
+                        {{-- Totals Row --}}
                      
-			<tr class="bold">
+			            <tr class="bold">
                             <td colspan="3" class="text-right">Total Quantity</td>
                             <td colspan="7" >{{ number_format($total_qty) }}</td>
-
-                          
-                            
-
-                          
-
                             <td colspan="1" class="text-right">Total Net Amount</td>
                             <td style="background: #FAFAFA;">{{ number_format($total_amount - $so->discount_amount, 2) }}</td>
 
                         </tr>
 			
-			<tr class="bold">
+			            <tr class="bold">
                             <td colspan="3" class="text-right"style="border: none !important;"></td>
                             <td style="border: none !important;"></td>
 
@@ -162,10 +160,10 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
                             <td class="text-right"style="border: none !important;"></td>
                             <td style="border: none !important;"></td>
- 			    <td class="text-right"style="border: none !important;"></td>
+ 			                <td class="text-right"style="border: none !important;"></td>
                             <td style="border: none !important;"></td>
 
-       			    <td class="text-right">Bulk Discount</td>
+       			             <td class="text-right">Bulk Discount</td>
                             <td style="background: #FAFAFA;">{{ number_format($so->discount_amount, 2) }} ({{ $so->discount_percent }}%)</td>
                         </tr>
                         <tr class="bold">
@@ -177,7 +175,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
                             <td class="text-right"style="border: none !important;"></td>
                             <td style="border: none !important;"></td>
- 			    <td class="text-right"style="border: none !important;"></td>
+ 			                <td class="text-right"style="border: none !important;"></td>
                             <td style="border: none !important;"></td>
 
                             <td class="text-right">Total Amount</td>
@@ -215,12 +213,237 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         @endif
     </div>
     @endforeach
+</div> -->
+
+
+
+ <div id="content" class="card ptb container print" style="page-break-before: always">
+    <div class="invoice-container">
+        {{-- ========== HEADER ========== --}}
+        <div class="header">
+            <div class="logo logo-flex-cont">
+                <div class="logo_wrp">
+                    <a class="navbar-brand" href="{{ url('dashboard') }}">
+                        <span class="brand-logo">
+                            <!-- <img style="width: 175px;" src="{{ url('/public/assets/images/logo.png') }}"> -->
+                            <img class="logo_m" src="{{ url('/public/assets/images/dailyfood_logo.jpeg') }}" onerror="this.onerror=null;this.src='{{ asset('logoo.png') }}'" />
+                            <img class="logo_m hide" src="{{ asset('logo.png') }}">
+                        </span>
+                    </a>
+                </div>
+                <div class="logo-text">
+                    <p>Daily Food Industries</p>
+                </div>
+            </div>
+            <div class="title">{{ $so->distributor->distributor_name }}</div>
+            <div class="right-title">
+                {{ $so->distributor->address ?? '--' }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                <!-- Row 1 -->
+                <table class="section-table section-table2">
+                    <tr>
+                        <td style=" text-decoration:underline;font-style:italic;color:#000;" width="20%"><b>Sales Order</b></td>
+                        <td style=" border:2px solid #000 !important;" width="30%"><b>{{ $so->invoice_no }}</b></td>
+                    </tr>
+                    <tr>
+                        <td><u>Distributor:</u></td>
+                        <td><b>{{ $so->distributor->distributor_name }}</b></td>
+                    </tr>
+                    <tr>
+                        <td><u>Address</u></td>
+                        <td><b>{{ $so->distributor->address ?? '--' }}</b></td>
+                    </tr>
+                    <tr>
+                        <td><u>Contact</u></td>
+                        <td><b>{{ $so->shop->mobile ?? '--' }}</b></td>
+                    </tr>
+                    <tr>
+                        <td><u>Main Area</u></td>
+                        <td><b>{{ $so->shop->main_area ?? '--' }}</b></td>
+                    </tr>
+                    <tr>
+                        <td><u>Sub Area</u></td>
+                        <td><b>{{ $so->shop->sub_area ?? '--' }}</b></td>
+                    </tr>
+                    <tr>
+                        <td><u>Block</u></td>
+                        <td><b>{{ $so->shop->block ?? '--' }}</b></td>
+                    </tr>
+                    <tr>
+                        <td><u>Route:</u></th>
+                        <td><b>{{ $so->shop->route->route_name }}</b></td>
+                    </tr>
+                    <tr>
+                        <td><u>Sub Route::</u></td>
+                        <td><b>{{ $so->shop->route->sub_route->name ?? '' }}</b></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                <table class="section-table section-table2">
+                    <tr>
+                        <td><u>Sale Order Date:</u></td>
+                        <td><b>{{ date("d-m-Y", strtotime($so->dc_date)) }}</b></td>
+                        <td><u>Supply Date</u></td>
+                        <td><b>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</b></td>
+            
+                        <td><u>Due Date</u></td>
+                        <td><b>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</b></td>
+                    </tr>
+                </table>
+            
+                <table class="section-table">
+                    <tr>
+                        <td style=" text-align:center;"><u>Tax Status</u></td>   
+                        <td style=" text-align:center;"><u>Shop:</u></td>
+                        <td style=" text-align:center;"><u>Bus Type</u></u></td>
+                        <td style=" text-align:center;"><u>Invoice Type:</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>{{ $so->shop->company_name }}</td>
+                        <td>WHOLESALE</td>
+                        <td>Cash</td>
+                    </tr>
+                </table>
+
+                <table class="section-table">
+                    <tr> 
+                        <td style=" text-align:center;"><u>TSO:</u></td>
+                        <td style=" text-align:center;"><u>{{ $so->tso->name }}</u></td>
+                        <td style=" text-align:center;"><u>SE</u></td>
+                        <td style=" text-align:center;"><u>SM</u></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td style=" text-align:center;">Syed Manzar Akbar Zaidi</td>
+                        <td></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- ITEMS TABLE -->
+        <table class="item-table">
+            <tr>
+                <th>Sr No</th>
+                <th>Product</th>
+                <th>Flavour</th>
+                <th>QTY</th>
+                <th>Sale Type</th>
+                <th>Rate</th>
+                <th>Disc %</th>
+                <th>Disc Amount</th>
+                <th>Trade Offer</th>
+                <th>Scheme Product</th>
+                <th>Scheme Amount</th>
+                <th>Net Amount</th>
+            </tr>
+
+        
+            @php
+                $total_amount = 0;
+                $total_qty = 0;
+                $sheme_product = [];
+            @endphp
+
+            @foreach($so->saleOrderData as $key => $row)
+                @php
+                    $total_amount += $row->total;
+                    $total_qty += $row->qty;
+                    $sale_type = $master->uom_name($row->sale_type);
+                @endphp
+                <tr>
+                    <td>{{ ++$key }}</td>
+                    <td>{{ $row->product->product_name ?? '--' }}</td>
+                    <td>{{ $row->product_flavour->flavour_name ?? '' }}</td>
+                    <td>{{ $row->qty }}</td>
+                    <td>{{ $sale_type }}</td>
+                    <td>{{ $row->rate }}</td>
+                    <td>{{ number_format($row->discount, 2) }}</td>
+                    <td>{{ number_format($row->discount_amount, 2) }}</td>
+                    <td class="hide">{{ number_format($row->tax_amount, 2) }}</td>
+                    <td>{{ number_format($row->trade_offer_amount, 2) }}</td>
+                    <td>{{ $row->scheme->scheme_name ?? '--' }}</td>
+                    <td>{{ number_format($row->scheme_amount, 2) }}</td>
+                    <td>{{ number_format($row->total, 2) }}</td>
+                </tr>
+                @php $sheme_product[] = $row->sheme_product_id; @endphp
+            @endforeach
+        </table>
+
+        
+        <!-- SUMMARY -->
+        <div class="summary-box">
+            
+            <div class="left-box">
+                <p><b>For Inquiry/Complaint:</b><br>
+                Contact/WhatsApp: 0300-0813906<br>
+                Email us at: support@dailyfoodindustries.com
+                </p>
+            </div>
+        
+            <div class="right-summary">
+                <table class="item-table2">
+                    {{-- Totals Row --}}
+                    <tr style="border-bottom:5px solid #000;">
+                        <td style="text-align:left;"><u>{{ number_format($total_qty) }}</u></td>
+                        <td></td>
+                        <td colspan="3"></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td colspan="2"></td>
+                        <td style="text-align:right;"><u>{{ number_format($total_amount, 2) }}</u></td>
+                    </tr>
+                </table>
+                <table class="item-table" style="width:55%;float:right;border: none !important;">
+
+                    <tr>
+                        <td style=" text-align:left;">
+                            <p><b>Bulk Discount</b> {{ number_format($so->discount_amount, 2) }} ({{ $so->discount_percent }}%)</p>
+                        </td>
+                    </tr>
+
+
+                    <tr style=" border:1px solid #000;">
+                        <td style=" text-align:left;">
+                            <p><b><u>TOTAL NET AMOUNT</u></b></p>
+                        </td>
+
+                        <td  style=" text-align:right;">
+                            <p><b><u>{{ number_format($total_amount - $so->discount_amount, 2) }}</u></b></p>
+                        </td>
+                    </tr>
+
+                </table>
+            </div>
+        </div>
+
+        <!-- SIGNATURE BOXES -->
+        <div class="signature-area">
+            <div class="signature-box"></div>
+            <div class="signature-box"></div>
+            <div class="signature-box"></div>
+        </div>
+    </div>
 </div>
 
 
+<!-- new OLd copy design -->
 
-
- <div class="card ptb" style="page-break-before: always">
+ <!-- <div class="card ptb" style="page-break-before: always">
     <div class="invoice-container">
 
         {{-- ========== HEADER ========== --}}
@@ -229,7 +452,6 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                 <div class="logo_wrp">
                     <a class="navbar-brand" href="{{ url('dashboard') }}">
                         <span class="brand-logo">
-                            <!-- <img style="width: 175px;" src="{{ url('/public/assets/images/logo.png') }}"> -->
                             <img class="logo_m" src="{{ url('/public/assets/images/dailyfood_logo.jpeg') }}" onerror="this.onerror=null;this.src='{{ asset('logoo.png') }}'" />
                             <img class="logo_m hide" src="{{ asset('logo.png') }}">
                         </span>
@@ -252,7 +474,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
             <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
 
-                <!-- Row 1 -->
+              
                 <table class="section-table section-table2">
                     <tr>
                         <td style=" text-decoration:underline;font-style:italic;color:#000;" width="20%"><b>Sale/Inv#</b></td>
@@ -354,7 +576,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         </div>
 
 
-        <!-- ITEMS TABLE -->
+     
         <table class="item-table">
 
             <tr>
@@ -411,7 +633,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         </table>
 
         
-        <!-- SUMMARY -->
+        
         <div class="summary-box">
             
             <div class="left-box">
@@ -469,7 +691,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
         </div>
 
-        <!-- SIGNATURE BOXES -->
+       
         <div class="signature-area">
             <div class="signature-box"></div>
             <div class="signature-box"></div>
@@ -477,8 +699,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         </div>
 
     </div>
-</div>
-
+</div> -->
 
 
 @endsection
