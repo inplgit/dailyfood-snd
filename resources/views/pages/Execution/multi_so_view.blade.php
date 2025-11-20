@@ -43,8 +43,16 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 <div class="row mb">
     <div class="col-md-12">
         <div class="right" style="float: right">
-            <button id="print" type="button" class="btn btn-success btn-sm right">Print</button>
+            <!-- <button id="print" type="button" class="btn btn-success btn-sm right">Print</button> -->
+
+            <button class="btn btn-primary prinn pritns" onclick="printSection()">🖨️ Print</button>
+
         </div>
+
+
+
+
+
     </div>
 </div>
 <br>
@@ -703,3 +711,75 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
 
 @endsection
+
+
+
+
+
+
+
+<script>
+  function printSection() {
+    // ✅ Print CSS dynamically add karna
+    const printStyle = `
+      @media print {
+        @page{size:A4;margin:15mm 0mm 0mm 0mm !important;}
+        
+.table-bordered{border:1px solid #ddd !important;}
+.logo.logo-flex-cont{display:flex;align-items:baseline;}
+.logo-text p{color:#000;font-weight:bold;font-size:18px;}
+body{font-family:Arial,sans-serif;margin:0;padding:0;background:#fff;}
+.invoice-container{width:900px;margin:auto;padding:20px 0px;}
+h2,h3,h4,p,table{margin:0;padding:0;}
+.header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
+.logo img{width:80px;}
+.title{text-align:center;font-size:20px;font-weight:bold;text-decoration:underline;color:#000;}
+.right-title{text-align:right;font-size:18px;font-weight:bold;text-decoration:underline;color:#000;}
+.section-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px;}
+.section-table td{border:1px solid #000;padding:5px;color:#000;    font-size: 13px;}
+.section-table td b{color:#000;}
+.section-table2 td{border:none !important;color:#000;    font-size: 13px;}
+.item-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;border:1px solid #000;}
+.item-table th,.item-table td{border:1px solid #000;padding:5px;text-align:center;color:#000;font-size:13px;}
+.item-table td{border:none;}
+.item-table2{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;border:none;margin-bottom:12px;}
+.item-table2 th,.item-table2 td{border:1px solid #000;padding:5px;text-align:center;color:#000;font-size:13px;}
+.item-table2 td{border:none;}
+.summary-box{width:100%;margin-top:10px;display:flex;justify-content:space-between;align-items:flex-start;}
+.left-box{width:28%;height:180px;border:1px solid #000;padding:10px;display:flex;align-items:flex-end;}
+.left-box p{font-size:11px;color:#000;}
+.right-summary{width:70%;float:right;text-align:right;color:#000;}
+.signature-area{width:100%;margin-top:40px;display:flex;justify-content:space-between;}
+.signature-box{border:1px solid #000;width:250px;height:30px;}
+
+      }
+    `;
+
+    // ✅ Select element to print
+    const printContent = document.getElementById('print').innerHTML;
+    // ✅ Open new window for print
+    const printWindow = window.open('', '', 'width=900,height=700');
+    // ✅ Bootstrap 5 CSS link
+    const bootstrapCSS = `<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">`;
+    // ✅ Write content to print window
+    printWindow.document.write(`
+      <html>
+      <head>
+        <title>Print Preview</title>
+        ${bootstrapCSS}
+        <style>${printStyle}</style>
+      </head>
+      <body>
+        ${printContent}
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    // printWindow.close(); // optional
+  }
+</script>
+<!-- </head>
+<body> -->
+
