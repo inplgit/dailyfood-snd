@@ -22,12 +22,13 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 .section-table td b{color:#000;text-decoration:underline;}
 .section-table2 td{border:none !important;color:#000;}
 .item-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;}
-.item-table th,.item-table td{border:1px solid #000;padding:5px;text-align:center;}
+.item-table th,.item-table td{border:1px solid #000;padding:5px;text-align:center;color:#000;}
 .summary-box{width:100%;margin-top:20px;}
 .left-box{width:45%;height:120px;border:1px solid #000;display:inline-block;vertical-align:top;padding:10px;}
 .right-summary{width:50%;float:right;text-align:right;}
 .signature-area{width:100%;margin-top:40px;display:flex;justify-content:space-between;}
 .signature-box{border:1px solid #000;width:250px;height:30px;}
+
 
 
 </style>
@@ -250,49 +251,49 @@ h2,h3,h4,p,table{margin:0;padding:0;}
             <table class="section-table section-table2">
                 <tr>
                      <td style=" text-decoration:underline;font-style:italic;color:#000;" width="20%"><b>Sale/Inv#</b></td>
-                    <td width="30%">{{ $so->invoice_no }}</td>
+                    <td style=" border:2px solid #000 !important;" width="30%"><b>{{$so->invoice_no}}</b></td>
         
                 
                 </tr>
         
                 <tr>
                     <td><u>Cust Name</u></td>
-                    <td>{{ $so->shop->company_name }}</td>
+                    <td><b>{{ $so->shop->company_name }}</b></td>
         
         
                 </tr>
         
                 <tr>
                     <td><u>Address</u></td>
-                    <td>{{ $so->distributor->address ?? '--' }}</td>
+                    <td><b>{{ $so->distributor->address ?? '--' }}</b></td>
         
         
                 </tr>
         
                 <tr>
                     <td><u>Contact</u></td>
-                    <td>{{ $so->shop->mobile ?? '--' }}</td>
+                    <td><b>{{ $so->shop->mobile ?? '--' }}</b></td>
         
         
                 </tr>
         
                 <tr>
                     <td><u>Main Area</u></td>
-                    <td>{{ $so->shop->main_area ?? '--' }}</td>
+                    <td><b>{{ $so->shop->main_area ?? '--' }}</b></td>
         
         
                 </tr>
         
                 <tr>
                     <td><u>Sub Area</u></td>
-                    <td>{{ $so->shop->sub_area ?? '--' }}</td>
+                    <td><b>{{ $so->shop->sub_area ?? '--' }}</b></td>
         
         
                 </tr>
         
                 <tr>
                     <td><u>Block</u></td>
-                    <td>{{ $so->shop->block ?? '--' }}</td>
+                    <td><b>{{ $so->shop->block ?? '--' }}</b></td>
                 </tr>
             </table>
 
@@ -302,23 +303,23 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
             <table class="section-table section-table2">
                 <tr>
-                    <td><b>Invoice Date</b></td>
-                    <td>{{ date("d-m-Y", strtotime($so->dc_date)) }}</td>
+                    <td>Invoice Date</td>
+                    <td><b>{{ date("d-m-Y", strtotime($so->dc_date)) }}</b></td>
         
-                    <td><b>Supply Date</b></td>
-                    <td>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</td>
+                    <td>Supply Date</td>
+                    <td><b>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</b></td>
         
-                    <td><b>Due Date</b></td>
-                    <td>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</td>
+                    <td>Due Date<</td>
+                    <td><b>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</b></td>
                 </tr>
             </table>
         
             <table class="section-table">
                 <tr>
-                    <td><b>Tax Status</b></td>    
-                    <td><b>Shop Type</b></td>
-                    <td><b>Bus Type</b></td>
-                    <td><b>Terms</b></td>
+                    <td>Tax Status</td>    
+                    <td>Shop Type</td>
+                    <td>Bus Type</td>
+                    <td>Terms</td>
                 </tr>
                 <tr>
                     <td></td>
@@ -326,8 +327,9 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                     <td>WHOLESALE</td>
                     <td>Cash</td>
                 </tr>
-        
-        
+            </table>
+
+            <table class="section-table">
                 <tr>
                     <td>ASM</td>
                     <td>{{ $so->tso->name }}</td>
@@ -351,21 +353,21 @@ h2,h3,h4,p,table{margin:0;padding:0;}
     <table class="item-table">
 
         <tr>
-            <th>S#</th>
-            <th colspan="3">Item Name</th>
-            <th>Packing</th>
-            <th>Brand</th>
-            <th>Qty</th>
-            <th>T.P</th>
-            <th>Amount</th>
-            <th>SC/B</th>
-            <th>Eu</th>
-            <th>T/O</th>
-            <th>AMT</th>
-            <th>A&D AMT</th>
-            <th>%</th>
-            <th>Add/less</th>
-            <th>Final Amount</th>
+            <th><u>S#</u></th>
+            <th colspan="3"><u>Item Name</u></th>
+            <th><u>Packing</u></u></th>
+            <th><u>Brand</th>
+            <th><u>Qty</u></th>
+            <th><u>T.P</u></th>
+            <th><u>Amount</u></th>
+            <th><u>SC/B</u></th>
+            <th><u>Eu</u></th>
+            <th><u>T/O</u></th>
+            <th><u>AMT</u></th>
+            <th><u>A&D AMT</u></th>
+            <th><u>%</u></th>
+            <th><u>Add/less</u></th>
+            <th><u>Final Amount</u></th>
         </tr>
 
         @php
