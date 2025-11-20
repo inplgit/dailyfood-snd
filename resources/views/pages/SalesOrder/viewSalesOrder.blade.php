@@ -24,19 +24,15 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 .item-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;border:1px solid #000;}
 .item-table th,.item-table td{border:1px solid #000;padding:5px;text-align:center;color:#000;font-size:13px;}
 .item-table td{border:none;}
-.item-table2{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;border:1px solid #000;}
+.item-table2{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;border:none;margin-bottom:12px;}
 .item-table2 th,.item-table2 td{border:1px solid #000;padding:5px;text-align:center;color:#000;font-size:13px;}
 .item-table2 td{border:none;}
-.summary-box{width:100%;margin-top:20px;}
-.left-box{width:33%;height:120px;border:1px solid #000;display:inline-block;vertical-align:top;padding:10px;}
-.left-box p {
-    font-size: 13px;
-    color: #000;
-}
+.summary-box{width:100%;margin-top:10px;display:flex;justify-content:space-between;align-items:flex-start;}
+.left-box{width:33%;height:180px;border:1px solid #000;padding:10px;display:flex;align-items:flex-end;}
+.left-box p{font-size:13px;color:#000;}
 .right-summary{width:65%;float:right;text-align:right;color:#000;}
 .signature-area{width:100%;margin-top:40px;display:flex;justify-content:space-between;}
 .signature-box{border:1px solid #000;width:250px;height:30px;}
-
 
 
 </style>
@@ -445,17 +441,24 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                 </tr>
         
             </table>
-            <p><b>Targeted Discount in %:</b> {{ $so->discount_percent }}</p>
+            
             
             <table class="item-table" style=" width:55%;float:right;">
 
                 <tr>
-                    <td>
-                        <p><b>TOTAL NET AMOUNT</b></p>
+                    <td style=" text-align:left;">
+                        <p><b>Targeted Discount in %:</b>{ $so->discount_percent }</p>
+                    </td>
+                </tr>
+
+
+                <tr>
+                    <td style=" text-align:left;">
+                        <p><b><u>TOTAL NET AMOUNT</u></b></p>
                     </td>
 
-                    <td>
-                        <p><b>{{ number_format($grand_total - $so->discount_amount, 2) }}</b></p>
+                    <td  style=" text-align:right;">
+                        <p><b><u>{{ number_format($grand_total - $so->discount_amount, 2) }}</u></b></p>
                     </td>
                 </tr>
 
