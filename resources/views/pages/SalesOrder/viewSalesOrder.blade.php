@@ -370,7 +370,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
             <th><u>AMT</u></th>
             <th><u>A&D AMT</u></th>
             <th><u>%</u></th>
-            <th><u>Add/less</u></th>
+            <th><u>AddDisco</u></th>
             <th><u>Final Amount</u></th>
         </tr>
 
@@ -423,20 +423,19 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         <div class="right-summary">
             <table class="item-table2">
                 <tr style="border-bottom:5px solid #000;">
-                    <td style="text-align:right;"><u>7.00</u></td>
+                    <td style="text-align:left;"><u>7.00</u></td>
                     <td></td>
                     <td colspan="3"></td>
                     <td></td>
-                    <td></td>
-                    <td><u>1,080.00</u></td>
-                    <td></td>
                     <td><u>1,080.00</u></td>
                     <td></td>
                     <td></td>
                     <td></td>
+                    <td><u>1,080.00</u></td>
                     <td></td>
-                    <td><u>0.00</u></td>
                     <td></td>
+                    <td></td>
+                    <td colspan="2"><u>0.00</u></td>
                     <td style="text-align:right;"><u>1,080.00</u></td>
                 </tr>
         
