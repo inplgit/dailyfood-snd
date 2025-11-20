@@ -18,9 +18,9 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 .title{text-align:center;font-size:20px;font-weight:bold;text-decoration:underline;color:#000;}
 .right-title{text-align:right;font-size:18px;font-weight:bold;text-decoration:underline;color:#000;}
 .section-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px;}
-.section-table td{border:1px solid #000;padding:5px;color:#000;}
+.section-table td{border:1px solid #000;padding:5px;color:#000;    font-size: 13px;}
 .section-table td b{color:#000;}
-.section-table2 td{border:none !important;color:#000;}
+.section-table2 td{border:none !important;color:#000;    font-size: 13px;}
 .item-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;border:1px solid #000;}
 .item-table th,.item-table td{border:1px solid #000;padding:5px;text-align:center;color:#000;font-size:13px;}
 .item-table td{border:none;}
@@ -28,9 +28,9 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 .item-table2 th,.item-table2 td{border:1px solid #000;padding:5px;text-align:center;color:#000;font-size:13px;}
 .item-table2 td{border:none;}
 .summary-box{width:100%;margin-top:10px;display:flex;justify-content:space-between;align-items:flex-start;}
-.left-box{width:33%;height:180px;border:1px solid #000;padding:10px;display:flex;align-items:flex-end;}
-.left-box p{font-size:13px;color:#000;}
-.right-summary{width:65%;float:right;text-align:right;color:#000;}
+.left-box{width:28%;height:180px;border:1px solid #000;padding:10px;display:flex;align-items:flex-end;}
+.left-box p{font-size:11px;color:#000;}
+.right-summary{width:70%;float:right;text-align:right;color:#000;}
 .signature-area{width:100%;margin-top:40px;display:flex;justify-content:space-between;}
 .signature-box{border:1px solid #000;width:250px;height:30px;}
 
@@ -217,7 +217,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
 
 
- <div id="content" class="card ptb container print" style="page-break-before: always">
+ <div class="card ptb" style="page-break-before: always">
     <div class="invoice-container">
         {{-- ========== HEADER ========== --}}
         <div class="header">
