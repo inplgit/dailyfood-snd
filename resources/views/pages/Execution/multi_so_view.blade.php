@@ -217,7 +217,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
 
 
- <div class="card ptb" style="page-break-before: always">
+ <div id="content" class="card ptb container print" style="page-break-before: always">
     <div class="invoice-container">
         {{-- ========== HEADER ========== --}}
         <div class="header">
