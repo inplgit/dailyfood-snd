@@ -726,7 +726,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         @page{size:A4;margin:15mm 15mm 15mm 15mm !important;}
         
 .table-bordered{border:1px solid #ddd !important;}
-.logo.logo-flex-cont{display:flex;align-items:baseline;}
+.logo.logo-flex-cont{display:flex;align-items:baseline;gap:20px}
 .logo-text p{color:#000;font-weight:bold;font-size:18px;}
 body{font-family:Arial,sans-serif;margin:0;padding:0;background:#fff;}
 .invoice-container{width:900px;margin:auto;padding:20px 0px;}
