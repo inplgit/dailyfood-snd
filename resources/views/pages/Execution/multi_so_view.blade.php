@@ -13,7 +13,8 @@
         </div>
     </div>
 </div>
-
+<br>
+<br>
 <div id="content" class="container print">
     @foreach($sos as $key => $so)
     <div class="card ptb" style="page-break-before: always">
