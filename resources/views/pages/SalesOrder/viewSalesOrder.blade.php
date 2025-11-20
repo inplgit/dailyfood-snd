@@ -423,20 +423,20 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         <div class="right-summary">
             <table class="item-table2">
                 <tr style="border-bottom:5px solid #000;">
+                    <td style="text-align:right;"><u>7.00</u></td>
                     <td></td>
                     <td colspan="3"></td>
                     <td></td>
                     <td></td>
-                    <td style="text-align:right;"><u>7.00</u></td>
+                    <td><u>1,080.00</u></td>
                     <td></td>
                     <td><u>1,080.00</u></td>
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td></td>
-                    <td><u>1,080.00</u></td>
                     <td></td>
                     <td><u>0.00</u></td>
+                    <td></td>
                     <td style="text-align:right;"><u>1,080.00</u></td>
                 </tr>
         
