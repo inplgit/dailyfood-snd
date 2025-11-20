@@ -246,7 +246,8 @@ $master = new MasterFormsHelper();
                                                             </select>
                                                         </td>
                                                         <td>
-                                                            <input style="width:130px !important;"onkeyup="calc(this); get_scheme_product(this); get_total_caton_and_qty();" onblur="calc(this); get_scheme_product(this);"
+                                                            <input style="width:130px !important;"onkeyup="calc(this); get_scheme_product(this); 
+                                                            get_total_caton_and_qty();" onblur="calc(this); get_scheme_product(this); get_total_caton_and_qty(this)"
                                                                 class="form-control data-quantity" type="number"
                                                                 min="0" name="qty[]"
                                                                 value="{{ (int) $data->qty ?? 0 }}">
@@ -532,297 +533,262 @@ $master = new MasterFormsHelper();
 
 @endsection
 @section('script')
-    <script>
-        function calculation() {
-            var $total = 0;
-            $('.data-total').each(function(index) {
-                // console.log(this);
-                $total += parseFloat(this.value)
-            });
-            $('#products_subtotal').val($total);
-            var freight_charges = $('#freight_charges').val();
-            var discount_percent = $('#discount_percent').val();
-            var discount_amount = (parseFloat($total) / 100) * parseFloat(discount_percent)
-            var $net_total = $total + parseFloat(freight_charges) - parseFloat(discount_amount);
-            $('#total_amount').val($net_total);
-            $('#discount_amount').val(discount_amount);
-            $('#pending_amount').val($net_total);
-            $('#net_total').val($net_total);
-            console.log(discount_amount);
-        }
-        $(document).ready(function() {
-            $('.select2').select2();
-            // $('#searchbox').on('change',  function(){
-            //     console.log($(this).find(':selected').data('url'))
-            //     var product_id = $(this).val()
-            //     $.ajax({
-            //     type: "get",
-            //     url: $(this).find(':selected').data('url'),
-            //     data: {}, // serializes the form's elements.
-            //     cache: false,
-            //     success: function(data)
-            //     {
-            //         $('#appendRow').append(data);
-
-            //     }
-            // });
-            // });
-            calculation();
-
-            $(document).on('keyup', '#freight_charges', function() {
-                calculation();
-            });
-            $(document).on('keyup', '#discount_percent', function() {
-                calculation();
-            });
-
-            // $(document).on('change', '#tso_id', function(){
-            //     var options = '<option value="">Select a Shop </option>';
-            //     var id = $(this).val()
-            //     $.ajax({
-            //         type: "get",
-            //         url: "{{ route('shop.by.tso') }}",
-            //         data: {id:id},
-            //         cache: false,
-            //         success: function(data)
-            //         {
-            //             data.res.forEach(element => {
-            //                 options += `<option value="${element.id}">${element.company_name}</option>`
-            //             });
-            //             $('#shop_id').html(options);
-
-            //         }
-            //     });
-            // });
-
+   <script>
+    // Remove the alert and fix the function
+    function get_total_caton_and_qty() {
+        let total_carton = 0;
+        let total_qty = 0;
+        
+        console.log('get_total_caton_and_qty function called');
+        
+        $('.product_id').each(function(index) {
+            let $row = $(this).closest('tr');
+            let qty = parseFloat($row.find('.data-quantity').val()) || 0;
+            let sale_type = $row.find('.sale_type').val();
+            
+            console.log('Row:', index, 'Qty:', qty, 'Sale Type:', sale_type);
+            
+            // If sale_type is 7 (carton), add to carton count
+            if (sale_type == 7) {
+                total_carton += qty;
+            } else {
+                // For other sale types (pieces, packets), add to total quantity
+                total_qty += qty;
+            }
         });
-        let counter = {{ count($record->saleOrderData) }};
+        
+        console.log('Total Carton:', total_carton, 'Total Qty:', total_qty);
+        $('#total_carton').val(total_carton.toFixed(2));
+        $('#total_pcs').val(total_qty.toFixed(2));
+    }
 
-        function addMore() {
-            $('#appendRow').append(`
-            <tr id="removeRow${counter}">
-                <td style="width: 28%;">
-                    <select style="width:290px !important;" onchange="get_product_price(this); get_flavour(this); get_scheme_product(this); get_total_caton_and_qty();" name="product_id[]" tabindex="-1"
-                        required class="combobox form-control product_id" aria-hidden="true">
+    function calculation() {
+        var $total = 0;
+        $('.data-total').each(function(index) {
+            $total += parseFloat(this.value) || 0;
+        });
+        $('#products_subtotal').val($total);
+        var freight_charges = $('#freight_charges').val() || 0;
+        var discount_percent = $('#discount_percent').val() || 0;
+        var discount_amount = (parseFloat($total) / 100) * parseFloat(discount_percent);
+        var $net_total = $total + parseFloat(freight_charges) - parseFloat(discount_amount);
+        $('#total_amount').val($net_total);
+        $('#discount_amount').val(discount_amount);
+        $('#pending_amount').val($net_total);
+        $('#net_total').val($net_total);
+    }
+
+    $(document).ready(function() {
+        console.log('Document ready - initializing functions');
+        
+        $('.select2').select2();
+        calculation();
+        get_total_caton_and_qty(); // Initialize on page load
+
+        // Event delegation for dynamically added elements
+        $(document).on('keyup blur', '.data-quantity', function() {
+            console.log('Quantity changed - calling get_total_caton_and_qty');
+            get_total_caton_and_qty();
+        });
+        
+        $(document).on('change', '.sale_type', function() {
+            console.log('Sale type changed - calling get_total_caton_and_qty');
+            get_total_caton_and_qty();
+        });
+        
+        $(document).on('change', '.product_id', function() {
+            console.log('Product changed - calling get_total_caton_and_qty');
+            get_total_caton_and_qty();
+        });
+
+        $(document).on('keyup', '#freight_charges', function() {
+            calculation();
+        });
+        
+        $(document).on('keyup', '#discount_percent', function() {
+            calculation();
+        });
+    });
+
+    let counter = {{ count($record->saleOrderData) }};
+
+    function addMore() {
+        $('#appendRow').append(`
+        <tr id="removeRow${counter}">
+            <td style="width: 28%;">
+                <select style="width:290px !important;" onchange="get_product_price(this); get_flavour(this); get_scheme_product(this); get_total_caton_and_qty();" name="product_id[]" tabindex="-1"
+                    required class="combobox form-control product_id" aria-hidden="true">
+                    <option value="">Select a Product</option>
+                    @foreach ($products as $product)
+                        <option data-product_price="{{$master->get_product_price($product->id)}}" data-flavour="{{$product->product_flavour}}"  data-url="{{ route('sale-order.table-row', $product->id) }}" value="{{ $product->id }}">{{ $product->product_name }}</option>
+                    @endforeach
+                </select>
+            </td>
+            <td>
+                <select style="width:130px !important;" name="flavour_id[]" id="" class="form-control flavour">
+                </select>
+            </td>
+            <td>
+                <select name="sale_type[]" style="width:130px !important;" onchange="get_rate(this); get_total_caton_and_qty();" id="" class="form-control sale_type">
+                </select>
+            </td>
+            <td>
+                <input onkeyup="calc(this); get_scheme_product(this); get_total_caton_and_qty();" 
+                       onblur="calc(this); get_scheme_product(this); get_total_caton_and_qty();" 
+                       style="width:130px !important;" class="form-control data-quantity" type="number" min="0" name="qty[]" value="0">
+            </td>
+            <td>
+                <input step="any" style="width:130px !important;" onkeyup="calc(this)" onblur="calc(this)" class="form-control data-rate" type="number" min="0" name="rate[]" value="0">
+            </td>
+            <td>
+                <input onkeyup="calc(this)" style="width:130px !important;" onblur="calc(this)" class="form-control data-discount" type="text" name="data_discount[]" value="0">
+            </td>
+            <td class="hide">
+                <input style="width:130px !important;" class="form-control data-discount-amount" onkeyup="calc(this , true)" type="integer" name="data_discount_amount[]" value="0">
+            </td> 
+            <td class="hide">
+                <input style="width:130px !important;" onkeyup="calc(this)" onblur="calc(this)" class="form-control data-tax-percent" type="text" name="tax_percent[]" value="0">
+                <input style="width:130px !important;" class="data-tax-amount" type="hidden" name="tax_amount[]" value="0">
+            </td>
+            <td class="hide">
+                <input style="width:130px !important;" onkeyup="calc(this)" class="form-control trade_offer_amount" type="number" name="trade_offer_amount[]" value="0">
+            </td>
+            <td>
+                <select style="width:130px !important;" name="scheme_id[]" onchange="get_scheme_amount(this);" id="" class="form-control scheme_product">
+                    <option value="">Select</option>
+                </select>
+            </td>
+            <td>
+                <input style="width:130px !important;" readonly class="form-control scheme_amount" step="any" type="number" name="scheme_amount[]" value="0">
+            </td>
+            <td>
+                <input style="width:130px !important;" readonly class="form-control data-total" type="text" name="data_total[]" value="0">
+            </td>
+            <td class="hide">
+                <select style="width:130px !important;" name="shceme_product_id[]" tabindex="-1" id="searchbox"
+                        class="combobox form-control" aria-hidden="true">
                         <option value="">Select a Product</option>
-                        @foreach ($products as $product)
-                            <option data-product_price="{{$master->get_product_price($product->id)}}" data-flavour="{{$product->product_flavour}}"  data-url="{{ route('sale-order.table-row', $product->id) }}" value="{{ $product->id }}">{{ $product->product_name }}</option>
+                        @foreach ($shceme_products as $product)
+                        <option data-rate="" data-url="" value="{{ $product->id }}">{{ $product->product_name }}</option>
                         @endforeach
-                    </select>
-                </td>
-                <td>
-                    <select style="width:130px !important;" name="flavour_id[]"  id="" class="form-control flavour">
-                    </select>
-                </td>
-                <td>
-                    <select name="sale_type[]"style="width:130px !important;" onchange="get_rate(this)" id="" class="form-control sale_type">
-                    </select>
-                </td>
-                <td>
-                    <input onkeyup="calc(this);style="width:130px !important;"get_scheme_product(this);" onblur="calc(this); get_scheme_product(this); get_total_caton_and_qty();" class="form-control data-quantity" type="number" min="0" name="qty[]" value="0">
-                </td>
-                <td>
-                    <input step="any"style="width:130px !important;"onkeyup="calc(this)" onblur="calc(this)" class="form-control data-rate" type="number" min="0" name="rate[]" value="0">
-                </td>
-                <td>
-                    <input onkeyup="calc(this)"style="width:130px !important;" onblur="calc(this)" class="form-control data-discount" type="text" name="data_discount[]" value="0">
-                </td>
-                <td  class="hide">
-                    <input style="width:130px !important;" class="form-control data-discount-amount" onkeyup="calc(this , true)"   type="integer" name="data_discount_amount[]" value="0">
-                </td> 
+                </select>
+            </td>
+            <td class="hide">
+                <input style="width:130px !important;" class="form-control" type="text" name="offer[]" value="0">
+            </td>
+            <td>
+                <button type="button" onclick="removeRow(${counter}, this)" class="btn btn-danger btn-xs">-</button>
+            </td>
+        </tr>
+        `);
+        ++counter;
+        
+        // Re-initialize select2 for new elements
+        $('.select2').select2();
+    }
 
-                <td class="hide">
-                    <input style="width:130px !important;" onkeyup="calc(this)" onblur="calc(this)" class="form-control data-tax-percent" type="text" name="tax_percent[]" value="0">
-                    <input style="width:130px !important;" class="data-tax-amount" type="hidden" name="tax_amount[]" value="0">
-                </td>
+    var removed_id = [];
 
-                <td  class="hide">
-                    <input style="width:130px !important;" onkeyup="calc(this)" class="form-control trade_offer_amount" type="number" name="trade_offer_amount[]" value="0">
-                </td>
-                <td>
-                    <select style="width:130px !important;" name="scheme_id[]" onchange="get_scheme_amount(this);" id="" class="form-control scheme_product">
-                        <option value="">Select</option>
-                    </select>
-                </td>
-                <td>
-                    <input style="width:130px !important;" readonly class="form-control scheme_amount" step="any" type="number" name="scheme_amount[]" value="0">
-                </td>
-
-                <td>
-                    <input style="width:130px !important;" readonly class="form-control data-total" type="text" name="data_total[]" value="0">
-                </td>
-
-
-                <td class="hide">
-                    <select  style="width:130px !important;" name="shceme_product_id[]" tabindex="-1" id="searchbox"
-                            class="combobox form-control" aria-hidden="true">
-                            <option value="">Select a Product</option>
-                            @foreach ($shceme_products as $product)
-                            <option data-rate="" data-url="" value="{{ $product->id }}">{{ $product->product_name }}</option>
-                            @endforeach
-                    </select>
-                </td>
-
-                  <td class="hide">
-                    <input  style="width:130px !important;" class="form-control" type="text" name="offer[]" value="0">
-                </td>
-        <td>
-            <button type="button" onclick="removeRow(${counter})" class="btn btn-danger btn-xs">-</button>
-                </td>
-            </tr>
-            `)
-                ++counter;
-        }
-
-        var removed_id = [];
-
-        function removeRow(params, val) {
-            var $this = $(val)
-            $('#removeRow' + params).remove();
-            var id = $this.closest('tr').find('.data_id').val();
+    function removeRow(params, val) {
+        var $this = $(val);
+        $('#removeRow' + params).remove();
+        var id = $this.closest('tr').find('.data_id').val();
+        if (id) {
             removed_id.push(id);
             $('.remove_id').val(removed_id);
-            calculation();
         }
+        calculation();
+        get_total_caton_and_qty(); // Update totals after removal
+    }
 
+    function calc(val, discount_amount_type) {
+        var $this = $(val);
+        
+        var rate = Number($this.closest('tr').find('.data-rate').val()) || 0;
+        var qty = Number($this.closest('tr').find('.data-quantity').val()) || 0;
+        var scheme_pcs_total = Number($this.closest('tr').find('.scheme_pcs_total').val()) || 0;
+        var scheme_qty = Number($this.closest('tr').find('.scheme_qty').val()) || 1;
+        var tax = Number($this.closest('tr').find('.data-tax-percent').val()) || 0;
+        var trade_offer_amount = Number($this.closest('tr').find('.trade_offer_amount').val()) || 0;
+        var scheme_amount = Number($this.closest('tr').find('.scheme_amount').val()) || 0;
 
-         function calc(val, discount_amount_type) {
-                var $this = $(val);
+        var scheme_amount1 = (scheme_amount * qty) / scheme_qty;
 
-              
-                var rate = Number($this.closest('tr').find('.data-rate').val()) || 0;
-                var qty = Number($this.closest('tr').find('.data-quantity').val()) || 0;
-                var scheme_pcs_total = Number($this.closest('tr').find('.scheme_pcs_total').val()) || 0;
-                var scheme_qty = Number($this.closest('tr').find('.scheme_qty').val()) || 1; // Avoid division by zero
-                var tax = Number($this.closest('tr').find('.data-tax-percent').val()) || 0;
-                var trade_offer_amount = Number($this.closest('tr').find('.trade_offer_amount').val()) || 0;
-                var scheme_amount = Number($this.closest('tr').find('.scheme_amount').val()) || 0;
-
-             
-
-               
-                var scheme_amount1 = (scheme_amount * qty) / scheme_qty;
-
-               
-                        var applicableSchemes =Math.floor(qty / scheme_pcs_total);
+        var applicableSchemes = Math.floor(qty / scheme_pcs_total);
         var totalApplicableSchemes = scheme_qty * applicableSchemes;  
-
 
         $this.closest('tr').find('.scheme_pcs').val(totalApplicableSchemes);
         $this.closest('tr').find('.scheme_amount_final').val(scheme_amount1);
 
+        var total = qty * rate;
+        var tax_amount = (total / 100) * tax;
 
-             
-                var total = qty * rate;
-                var tax_amount = (total / 100) * tax;
+        $this.closest('tr').find('.data-tax-amount').val(tax_amount);
 
-                $this.closest('tr').find('.data-tax-amount').val(tax_amount);
+        var discount_total, discount_percent;
 
-                var discount_total, discount_percent;
-
-                if (discount_amount_type) {
-                    discount_total = Number($this.closest('tr').find('.data-discount-amount').val()) || 0;
-                    discount_percent = (discount_total * 100) / total;
-                    $this.closest('tr').find('.data-discount').val(discount_percent);
-                } else {
-                    discount_percent = Number($this.closest('tr').find('.data-discount').val()) || 0;
-                    discount_total = (total / 100) * discount_percent;
-                    $this.closest('tr').find('.data-discount-amount').val(discount_total);
-                }
-
-                console.log("Total:", total, "Discount Total:", discount_total, "Discount Percent:", discount_percent);
-
-                // Calculate final total
-                var data_total = total - discount_total + tax_amount - trade_offer_amount - scheme_amount1;
-               $this.closest('tr').find('.data-total').val(parseInt(data_total));
-
-                // Call calculation function
-                calculation();
-            }
-
-
-
-       function get_rate(val)
-       {
-
-        sale_type = $(val).closest('tr').find('.sale_type').val();
-        console.log(sale_type , 'sale_type' , $(val).closest('tr').find('.sale_type option:selected').data('rate'));
-
-        // if (sale_type == 1) {
-        //     rate = $(val).closest('tr').find('.searchbox option:selected').data('rate');
-        // }
-        // else if(sale_type == 2)
-        // {
-        //     rate = $(val).closest('tr').find('.searchbox option:selected').data('packet_rate');
-        // }
-        // else
-        // {
-        //     rate = $(val).closest('tr').find('.searchbox option:selected').data('carton_rate');
-        // }
-        rate = $(val).closest('tr').find('.sale_type option:selected').data('rate');
-
-        $(val).closest('tr').find('.data-rate').val(rate);
-        calc(val);
-
-
-
-
-       }
-
-        function get_product_price(val)
-        {
-            let product_price = $(val).find(':selected').data('product_price');
-            console.log(product_price);
-
-            $(val).closest('tr').find('.sale_type').empty();
-            product_price.forEach(price => {
-                if (price.status === 1) {
-                // Create an option element
-                const option = document.createElement('option');
-                option.value = price.uom_id;   // Set the value attribute to the price ID
-                option.textContent = price.uom.uom_name; // Set the visible text
-                $(option).attr('data-rate', price.trade_price);
-
-                $(val).closest('tr').find('.sale_type').append(option);
-            }
-            });
-
-            get_rate(val);
-
+        if (discount_amount_type) {
+            discount_total = Number($this.closest('tr').find('.data-discount-amount').val()) || 0;
+            discount_percent = (discount_total * 100) / total;
+            $this.closest('tr').find('.data-discount').val(discount_percent);
+        } else {
+            discount_percent = Number($this.closest('tr').find('.data-discount').val()) || 0;
+            discount_total = (total / 100) * discount_percent;
+            $this.closest('tr').find('.data-discount-amount').val(discount_total);
         }
 
-       function get_flavour(val)
-       {
+        var data_total = total - discount_total + tax_amount - trade_offer_amount - scheme_amount1;
+        $this.closest('tr').find('.data-total').val(parseInt(data_total));
+
+        calculation();
+        get_total_caton_and_qty(); // Update totals after calculation
+    }
+
+    function get_rate(val) {
+        var sale_type = $(val).closest('tr').find('.sale_type').val();
+        var rate = $(val).closest('tr').find('.sale_type option:selected').data('rate');
+        $(val).closest('tr').find('.data-rate').val(rate);
+        calc(val);
+    }
+
+    function get_product_price(val) {
+        let product_price = $(val).find(':selected').data('product_price');
+        $(val).closest('tr').find('.sale_type').empty();
+        if (product_price) {
+            product_price.forEach(price => {
+                if (price.status === 1) {
+                    const option = document.createElement('option');
+                    option.value = price.uom_id;
+                    option.textContent = price.uom.uom_name;
+                    $(option).attr('data-rate', price.trade_price);
+                    $(val).closest('tr').find('.sale_type').append(option);
+                }
+            });
+            get_rate(val);
+        }
+    }
+
+    function get_flavour(val) {
         let flavours = $(val).find(':selected').data('flavour');
-
-        console.log(flavours);
-
         $(val).closest('tr').find('.flavour').empty();
+        if (flavours) {
+            flavours.forEach(flavour => {
+                if (flavour.status === 1) {
+                    const option = document.createElement('option');
+                    option.value = flavour.id;
+                    option.textContent = flavour.flavour_name;
+                    $(val).closest('tr').find('.flavour').append(option);
+                }
+            });
+        }
+    }
 
-        // Loop through the flavours array
-        flavours.forEach(flavour => {
-            // Only add the option if status is 1
-            if (flavour.status === 1) {
-                // Create an option element
-                const option = document.createElement('option');
-                option.value = flavour.id;   // Set the value attribute to the flavour ID
-                option.textContent = flavour.flavour_name; // Set the visible text
+    function get_scheme_product(val) {
+        var $row = $(val).closest('tr');
+        var qty = $row.find('.data-quantity').val() || 0;
+        var product_id = $row.find('.product_id').val();
 
-                $(val).closest('tr').find('.flavour').append(option);
-            }
-        });
-
-       }
-
-       function get_scheme_product(val)
-       {
-        var qty = $this.closest('tr').find('.data-quantity').val();
-        var product_id = $this.closest('tr').find('.product_id').val();
-        // $this.closest('tr').find('.scheme_product').empty();
-        // $this.closest('tr').find('.scheme_amount').val(0);
-
-
-        console.log(qty , product_id);
+        if (!product_id) return;
 
         $.ajax({
             type: "get",
@@ -833,53 +799,37 @@ $master = new MasterFormsHelper();
             },
             dataType: 'json',
             success: function(data) {
+                $row.find('.scheme_product').empty();
+                $row.find('.scheme_amount').val(0);
 
-                $this.closest('tr').find('.scheme_product').empty();
-                $this.closest('tr').find('.scheme_amount').val(0);
-
-                console.log(data);
                 const option = document.createElement('option');
-                option.value = '';   // Set the value attribute to the flavour ID
-                option.textContent = 'Select'; // Set the visible text
+                option.value = '';
+                option.textContent = 'Select';
+                $row.find('.scheme_product').append(option);
 
-                $(val).closest('tr').find('.scheme_product').append(option);
-
-                $.each(data.scheme_product, function(key, value) {
-
-                    const option = document.createElement('option');
-                    option.value = value.scheme_id+','+value.scheme_data_id;   // Set the value attribute to the flavour ID
-                    option.textContent = value.scheme_name + '--qty' + value.qty; // Set the visible text
-                    $(option).attr('data-scheme_amount', value.scheme_amount);
-
-                    $(val).closest('tr').find('.scheme_product').append(option);
-                });
+                if (data.scheme_product) {
+                    $.each(data.scheme_product, function(key, value) {
+                        const option = document.createElement('option');
+                        option.value = value.scheme_id+','+value.scheme_data_id;
+                        option.textContent = value.scheme_name + '--qty' + value.qty;
+                        $(option).attr('data-scheme_amount', value.scheme_amount);
+                        $row.find('.scheme_product').append(option);
+                    });
+                }
             }
         });
-       }
-       function get_scheme_amount(val)
-       {
-            var scheme_amount = $(val).closest('tr').find('.scheme_product option:selected').data('scheme_amount');
-            console.log(scheme_amount);
+    }
 
-            $(val).closest('tr').find('.scheme_amount').val(scheme_amount ?? 0);
-            calc(val);
-       }
+    function get_scheme_amount(val) {
+        var scheme_amount = $(val).closest('tr').find('.scheme_product option:selected').data('scheme_amount') || 0;
+        $(val).closest('tr').find('.scheme_amount').val(scheme_amount);
+        calc(val);
+    }
 
-
-       function get_total_caton_and_qty()
-       {
-            let total_carton = 0;
-            $('.product_id').each(function( index ) {
-                carton_size = $(this).find('option:selected').data('carton_size');
-                qty = $(this).closest('tr').find('.data-quantity').val();
-                carton_qty = parseFloat(qty / carton_size);
-                total_carton += carton_qty;
-                console.log(carton_size , qty , carton_qty , 'carton_size ');
-
-            });
-            $('#total_carton').val(total_carton.toFixed(2) ?? 0);
-
-       }
-
-    </script>
+    // Also add a manual test function to check if it works
+    function testFunction() {
+        console.log('Testing get_total_caton_and_qty function...');
+        get_total_caton_and_qty();
+    }
+</script>
 @endsection
