@@ -37,12 +37,19 @@ public function tsos()
     );
 }
 
-    function scopeUniqueNo($query)
-    {
-     $id = $query->max('id')+1;
-    return  $number = sprintf('%03d',$id);
+    // function scopeUniqueNo($query)
+    // {
+    //  $id = $query->max('id')+1;
+    // return  $number = sprintf('%03d',$id);
 
-    }
+    // }
+
+
+    public function scopeUniqueNo($query)
+{
+    $id = $query->max('id') + 1;
+    return sprintf('%05d', $id); // 5 digits
+}
 
      function scopeStatus($query)
       {
