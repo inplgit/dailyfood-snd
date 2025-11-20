@@ -15,7 +15,7 @@
 </div>
 <br>
 <br>
-<!-- <div id="content" class="container print">
+<div id="content" class="container print">
     @foreach($sos as $key => $so)
     <div class="card ptb" style="page-break-before: always">
         <div class="logo_snd">
@@ -181,7 +181,7 @@
         @endif
     </div>
     @endforeach
-</div> -->
+</div>
 
 
 <style>
