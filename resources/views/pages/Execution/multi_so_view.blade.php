@@ -6,6 +6,26 @@
 @section('title', 'SND || Create New Sale Order')
 
 @section('content')
+<style>
+ body{font-family:Arial,sans-serif;font-size:13px;}
+.invoice-box{width:100%;padding:20px 30px;border:2px solid #000;}
+table{width:100%;border-collapse:collapse;}
+table th,table td{border:1px solid #000;padding:4px 6px;font-size:13px;}
+.no-border td,.no-border th{border:none !important;}
+.header-logo img{width:130px;}
+.bold{font-weight:bold;}
+.center{text-align:center;}
+.right{text-align:right;}
+.underline{text-decoration:underline;}
+.big{font-size:18px;}
+.bigger{font-size:22px;}
+
+</style>
+
+
+
+
+
 <div class="row mb">
     <div class="col-md-12">
         <div class="right" style="float: right">
@@ -184,224 +204,171 @@
 </div>
 
 
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        font-size: 13px;
-    }
 
-    .invoice-box {
-        width: 100%;
-        padding: 20px 30px;
-        border: 2px solid #000;
-    }
+<div id="content" class="container print">
+@foreach($sos as $key => $so)
+<div class="invoice-container" style="page-break-before: always">
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
+    <div class="header">
+        <div class="logo">
+            <img src="https://i.postimg.cc/mrL6bW3L/daily.png">
+        </div>
+        <div class="title">Sale Invoice</div>
+        <div class="right-title">
+            {{ $so->distributor->distributor_name ?? 'Farwa Traders' }}
+        </div>
+    </div>
 
-    table th, table td {
-        border: 1px solid #000;
-        padding: 4px 6px;
-        font-size: 13px;
-    }
-
-    .no-border td, .no-border th {
-        border: none !important;
-    }
-
-    .header-logo img {
-        width: 130px;
-    }
-
-    .bold { font-weight: bold; }
-    .center { text-align: center; }
-    .right { text-align: right; }
-    .underline { text-decoration: underline; }
-    .big { font-size: 18px; }
-    .bigger { font-size: 22px; }
-</style>
-
-<div class="invoice-box">
-
-    <!-- HEADER AREA -->
-    <table class="no-border">
+    <!-- Row 1 -->
+    <table class="section-table">
         <tr>
-            <td width="33%" class="header-logo">
-                <img src="https://i.postimg.cc/mrL6bW3L/daily.png">
-            </td>
+            <td><b>Sale/Inv#</b></td>
+            <td>{{ $so->invoice_no }}</td>
 
-            <td width="33%" class="center bigger bold">
-                Sale Invoice
-            </td>
+            <td><b>Invoice Date</b></td>
+            <td>{{ date('d-m-Y', strtotime($so->dc_date)) }}</td>
+        </tr>
 
-            <td width="33%" class="right underline bold">
-                Farwa Traders
-            </td>
+        <tr>
+            <td><b>Cust Name</b></td>
+            <td>{{ $so->shop->company_name ?? '--' }}</td>
+
+            <td><b>Supply Date</b></td>
+            <td>{{ date('d-m-Y', strtotime($so->dc_date)) }}</td>
+        </tr>
+
+        <tr>
+            <td><b>Address</b></td>
+            <td>{{ $so->distributor->address ?? 'ghost market' }}</td>
+
+            <td><b>Due Date</b></td>
+            <td>{{ date('d-m-Y', strtotime($so->dc_date)) }}</td>
+        </tr>
+
+        <tr>
+            <td><b>Contact</b></td>
+            <td>{{ $so->shop->mobile ?? '--' }}</td>
+
+            <td><b>Tax Status</b></td>
+            <td>GENERAL STORE</td> <!-- static -->
+        </tr>
+
+        <tr>
+            <td><b>Main Area</b></td>
+            <td>{{ $so->shop->route->route_name ?? 'MALIR' }}</td>
+
+            <td><b>Shop Type</b></td>
+            <td>{{ $so->shop->type ?? 'WHOLESALE' }}</td>
+        </tr>
+
+        <tr>
+            <td><b>Sub Area</b></td>
+            <td>{{ $so->shop->route->sub_route->name ?? 'Ghanchi Market (Retail)' }}</td>
+
+            <td><b>Terms</b></td>
+            <td>Cash</td> <!-- static -->
+        </tr>
+
+        <tr>
+            <td><b>Block</b></td>
+            <td>{{ $so->shop->block ?? '--' }}</td>
+
+            <td><b>Bus Type</b></td>
+            <td>ASM / TSO / SE / SM</td> <!-- static -->
         </tr>
     </table>
 
-    <br>
-
-    <!-- LEFT SIDE INFO -->
-    <table class="no-border">
+    <!-- ITEMS TABLE -->
+    <table class="item-table">
         <tr>
-            <td width="33%">
-                <table class="no-border">
-                    <tr><td class="bold">SaleInv#</td></tr>
-                    <tr>
-                        <td style="border:1px solid #000; width:150px; padding:8px; font-size:16px;">
-                            MO-006716
-                        </td>
-                    </tr>
+            <th>S#</th>
+            <th>Item Name</th>
+            <th>Packing</th>
+            <th>Brand</th>
+            <th>Qty</th>
+            <th>T.P</th>
+            <th>Amount</th>
+            <th>SC/B</th>
+            <th>Eu</th>
+            <th>T/O</th>
+            <th>AMT</th>
+            <th>A&D AMT</th>
+            <th>%</th>
+            <th>Add/less</th>
+            <th>Final Amount</th>
+        </tr>
 
-                    <tr><td class="bold">Cust Name</td></tr>
-                    <tr><td>Khan. Massalih</td></tr>
+        @php 
+            $total_amount = 0; 
+            $c = 1;
+        @endphp
 
-                    <tr><td class="bold">Address</td></tr>
-                    <tr><td>ghost market</td></tr>
+        @foreach($so->saleOrderData as $row)
+        @php 
+            $total_amount += $row->total; 
+        @endphp
 
-                    <tr><td class="bold">Contact</td></tr>
-                    <tr><td>---</td></tr>
+        <tr>
+            <td>{{ $c++ }}</td>
+            <td>{{ $row->product->product_name ?? '--' }}</td>
+            <td>{{ $row->product->packing ?? 'X24' }}</td>
+            <td>{{ $row->product->brand->name ?? '--' }}</td>
+            <td>{{ $row->qty }}</td>
+            <td>{{ number_format($row->rate,2) }}</td>
 
-                    <tr><td class="bold">Main Area</td></tr>
-                    <tr><td><b>MALIR</b></td></tr>
+            <td>{{ number_format($row->rate * $row->qty,2) }}</td>
 
-                    <tr><td class="bold">Sub Area</td></tr>
-                    <tr><td>Ghanchi Market (Retail)</td></tr>
+            <td>0</td> <!-- static -->
+            <td>0</td> <!-- static -->
+            <td>{{ number_format($row->trade_offer_amount ?? 0,2) }}</td>
+            <td>{{ number_format($row->discount_amount ?? 0,2) }}</td>
+            <td>{{ number_format($row->scheme_amount ?? 0,2) }}</td>
 
-                    <tr><td class="bold">Block</td></tr>
-                    <tr><td>---</td></tr>
-                </table>
-            </td>
+            <td>{{ number_format($row->discount ?? 0,2) }}</td>
 
-            <!-- RIGHT SIDE -->
-            <td width="67%">
-                <table>
-                    <tr>
-                        <th>Invoice Date</th>
-                        <td>14-11-2025</td>
+            <td>0</td> <!-- static Add/Less -->
 
-                        <th>Supply Date</th>
-                        <td>15-11-2025</td>
+            <td>{{ number_format($row->total,2) }}</td>
+        </tr>
+        @endforeach
 
-                        <th>Due Date</th>
-                        <td>15-11-2025</td>
-                    </tr>
-
-                    <tr>
-                        <th>Tax Status</th>
-                        <td>GENERAL STORE</td>
-                        <th>Shop Type</th>
-                        <td>WHOLESALE</td>
-                        <th>Terms</th>
-                        <td>Cash</td>
-                    </tr>
-
-                    <tr>
-                        <th>ASM</th>
-                        <td></td>
-                        <th>TSO</th>
-                        <td></td>
-                        <th>Bus Type</th>
-                        <td></td>
-                    </tr>
-
-                    <tr>
-                        <th>SE</th>
-                        <td></td>
-                        <th>SM</th>
-                        <td colspan="3">Syed Manzar Akbar Zaidi</td>
-                    </tr>
-
-                </table>
-            </td>
+        <tr>
+            <td colspan="14" style="text-align:right;"><b>Total:</b></td>
+            <td><b>{{ number_format($total_amount,2) }}</b></td>
         </tr>
     </table>
 
-    <br>
 
-    <!-- PRODUCT TABLE -->
-    <table>
-        <thead>
-            <tr class="bold center">
-                <th>SR#</th>
-                <th>Item Name</th>
-                <th>Packing</th>
-                <th>Brand</th>
-                <th>Qty</th>
-                <th>T.P</th>
-                <th>Amount</th>
-                <th>SCH D</th>
-                <th>Fu</th>
-                <th>T/O</th>
-                <th>AMT</th>
-                <th>ASD AMT</th>
-                <th>%</th>
-                <th>AddDisco</th>
-                <th>Final Amount</th>
-            </tr>
-        </thead>
+    <!-- SUMMARY BOX -->
+    <div class="summary-box">
+        <div class="left-box">
+            <p><b>For Inquiry/Complaint:</b><br>
+            Contact/WhatsApp: 0300-0813906<br>
+            Email us at: support@dailyfoodindustries.com
+            </p>
+        </div>
 
-        <tbody>
-            <tr>
-                <td>1</td><td>MUSTARD POWDER 100g</td><td>X72</td><td>Cooking Club</td><td>3</td>
-                <td>120.00</td><td>360.00</td><td>0</td><td>0</td><td>0</td><td>0</td>
-                <td>360.00</td><td>0</td><td>0</td><td>360.00</td>
-            </tr>
+        <div class="right-summary">
+            <p><b>Targeted Discount in %:</b> {{ $so->discount_percent ?? 0 }}</p>
+            <p><b>TOTAL NET AMOUNT</b></p>
 
-            <tr>
-                <td>2</td><td>APPLE VINEGAR 315 ML</td><td>X24</td><td>Chifo</td><td>2</td>
-                <td>180.00</td><td>360.00</td><td>0</td><td>0</td><td>0</td><td>0</td>
-                <td>360.00</td><td>0</td><td>0</td><td>360.00</td>
-            </tr>
+            <p style="font-size:20px; border:1px solid #000; padding:5px; display:inline-block;">
+                <b>{{ number_format($total_amount - ($so->discount_amount ?? 0),2) }}</b>
+            </p>
+        </div>
+    </div>
 
-            <tr>
-                <td>3</td><td>NATURAL JAMUN VINEGAR 31</td><td>X24</td><td>Chifo</td><td>2</td>
-                <td>180.00</td><td>360.00</td><td>0</td><td>0</td><td>0</td><td>0</td>
-                <td>360.00</td><td>0</td><td>0</td><td>360.00</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <br>
-
-    <!-- SUMMARY AND NOTE -->
-    <table class="no-border">
-        <tr>
-            <td width="50%" style="border:1px solid #000; height:120px; vertical-align:top; padding:10px;">
-                <b>For Inquiry/Complaint,</b><br>
-                Contact/WhatsApp: 0300-0813906<br>
-                Email us at: support@dailyfoodindustries.com
-            </td>
-
-            <td width="50%" style="text-align:right; padding-right:20px;">
-                <b>Targeted Discount in %</b> : 0
-                <br><br>
-
-                <table style="width:60%; float:right;">
-                    <tr>
-                        <th>Total Net Amount</th>
-                        <td><b>1,080.00</b></td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
-
-    <br><br><br>
-
-    <!-- SIGNATURE BOXES -->
-    <table class="no-border">
-        <tr>
-            <td width="33%" style="border:1px solid #000; height:40px;"></td>
-            <td width="33%"></td>
-            <td width="33%" style="border:1px solid #000; height:40px;"></td>
-        </tr>
-    </table>
+    <!-- SIGNATURES -->
+    <div class="signature-area">
+        <div class="signature-box"></div>
+        <div class="signature-box"></div>
+        <div class="signature-box"></div>
+    </div>
 
 </div>
+@endforeach
+</div>
+
 
 
 
