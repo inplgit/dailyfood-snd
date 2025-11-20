@@ -24,13 +24,16 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 .item-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;border:1px solid #000;}
 .item-table th,.item-table td{border:1px solid #000;padding:5px;text-align:center;color:#000;font-size:13px;}
 .item-table td{border:none;}
-
 .item-table2{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;border:1px solid #000;}
 .item-table2 th,.item-table2 td{border:1px solid #000;padding:5px;text-align:center;color:#000;font-size:13px;}
 .item-table2 td{border:none;}
 .summary-box{width:100%;margin-top:20px;}
-.left-box{width:45%;height:120px;border:1px solid #000;display:inline-block;vertical-align:top;padding:10px;}
-.right-summary{width:50%;float:right;text-align:right;color:#000;}
+.left-box{width:33%;height:120px;border:1px solid #000;display:inline-block;vertical-align:top;padding:10px;}
+.left-box p {
+    font-size: 13px;
+    color: #000;
+}
+.right-summary{width:65%;float:right;text-align:right;color:#000;}
 .signature-area{width:100%;margin-top:40px;display:flex;justify-content:space-between;}
 .signature-box{border:1px solid #000;width:250px;height:30px;}
 
@@ -421,7 +424,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         </p>
     </div>
     
-    <div class="right-summary">
+        <div class="right-summary">
             <table class="item-table2">
                 <tr style="border-bottom:5px solid #000;">
                     <td></td>
