@@ -135,6 +135,35 @@ class ShopController extends BaseController
 }
 
 
+
+    public function update_location(Request $request)
+    {
+
+      
+        $request->validate([
+            'shop_id' => 'required|exists:shops,id',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+        ]);
+    
+        $shop = Shop::find($request->shop_id);
+    
+        if (!$shop) {
+            return response()->json([
+                'message' => 'Shop not found.',
+            ], 404);
+        }
+    
+        $shop->latitude = $request->latitude;
+        $shop->longitude = $request->longitude;
+        $shop->save();
+    
+        return response()->json([
+            'message' => 'location updated successfully.',
+            'success' => true
+        ]);
+    }
+
 public function order_booker_daily_activity_location_report_new(Request $request)
 {
     $from           = $request->from;
