@@ -7,21 +7,35 @@
 
 @section('content')
 <style>
- body{font-family:Arial,sans-serif;font-size:13px;}
-.invoice-box{width:100%;padding:20px 30px;border:2px solid #000;}
-table{width:100%;border-collapse:collapse;}
-table th,table td{border:1px solid #000;padding:4px 6px;font-size:13px;}
-.no-border td,.no-border th{border:none !important;}
-.header-logo img{width:130px;}
-.bold{font-weight:bold;}
-.center{text-align:center;}
-.right{text-align:right;}
-.underline{text-decoration:underline;}
-.big{font-size:18px;}
-.bigger{font-size:22px;}
+.table-bordered{border:1px solid #ddd !important;}
+.logo.logo-flex-cont{display:flex;align-items:baseline;}
+.logo-text p{color:#000;font-weight:bold;font-size:18px;}
+body{font-family:Arial,sans-serif;margin:0;padding:0;background:#fff;}
+.invoice-container{width:900px;margin:auto;padding:20px 0px;}
+h2,h3,h4,p,table{margin:0;padding:0;}
+.header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
+.logo img{width:80px;}
+.title{text-align:center;font-size:20px;font-weight:bold;text-decoration:underline;color:#000;}
+.right-title{text-align:right;font-size:18px;font-weight:bold;text-decoration:underline;color:#000;}
+.section-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px;}
+.section-table td{border:1px solid #000;padding:5px;color:#000;}
+.section-table td b{color:#000;}
+.section-table2 td{border:none !important;color:#000;}
+.item-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;border:1px solid #000;}
+.item-table th,.item-table td{border:1px solid #000;padding:5px;text-align:center;color:#000;font-size:13px;}
+.item-table td{border:none;}
+.item-table2{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;border:none;margin-bottom:12px;}
+.item-table2 th,.item-table2 td{border:1px solid #000;padding:5px;text-align:center;color:#000;font-size:13px;}
+.item-table2 td{border:none;}
+.summary-box{width:100%;margin-top:10px;display:flex;justify-content:space-between;align-items:flex-start;}
+.left-box{width:33%;height:180px;border:1px solid #000;padding:10px;display:flex;align-items:flex-end;}
+.left-box p{font-size:13px;color:#000;}
+.right-summary{width:65%;float:right;text-align:right;color:#000;}
+.signature-area{width:100%;margin-top:40px;display:flex;justify-content:space-between;}
+.signature-box{border:1px solid #000;width:250px;height:30px;}
+
 
 </style>
-
 
 
 
@@ -205,160 +219,255 @@ table th,table td{border:1px solid #000;padding:4px 6px;font-size:13px;}
 
 
 
-<div id="content" class="container print">
-@foreach($sos as $key => $so)
-<div class="invoice-container" style="page-break-before: always">
+<div class="invoice-container">
 
+    {{-- ========== HEADER ========== --}}
     <div class="header">
-        <div class="logo">
-            <img src="https://i.postimg.cc/mrL6bW3L/daily.png">
+        <div class="logo logo-flex-cont">
+            <div class="logo_wrp">
+                <a class="navbar-brand" href="{{ url('dashboard') }}">
+                    <span class="brand-logo">
+                        <!-- <img style="width: 175px;" src="{{ url('/public/assets/images/logo.png') }}"> -->
+                        <img class="logo_m" src="{{ url('/public/assets/images/dailyfood_logo.jpeg') }}" onerror="this.onerror=null;this.src='{{ asset('logoo.png') }}'" />
+                        <img class="logo_m hide" src="{{ asset('logo.png') }}">
+                    </span>
+                </a>
+            </div>
+            <div class="logo-text">
+                <p>Daily Food Industries</p>
+            </div>
         </div>
+
         <div class="title">Sale Invoice</div>
+
         <div class="right-title">
-            {{ $so->distributor->distributor_name ?? 'Farwa Traders' }}
+            {{ $so->distributor->distributor_name }}
         </div>
     </div>
 
-    <!-- Row 1 -->
-    <table class="section-table">
-        <tr>
-            <td><b>Sale/Inv#</b></td>
-            <td>{{ $so->invoice_no }}</td>
 
-            <td><b>Invoice Date</b></td>
-            <td>{{ date('d-m-Y', strtotime($so->dc_date)) }}</td>
-        </tr>
+    <div class="row">
 
-        <tr>
-            <td><b>Cust Name</b></td>
-            <td>{{ $so->shop->company_name ?? '--' }}</td>
+        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
 
-            <td><b>Supply Date</b></td>
-            <td>{{ date('d-m-Y', strtotime($so->dc_date)) }}</td>
-        </tr>
+            <!-- Row 1 -->
+            <table class="section-table section-table2">
+                <tr>
+                     <td style=" text-decoration:underline;font-style:italic;color:#000;" width="20%"><b>Sale/Inv#</b></td>
+                    <td style=" border:2px solid #000 !important;" width="30%"><b>{{$so->invoice_no}}</b></td>
+        
+                
+                </tr>
+        
+                <tr>
+                    <td><u>Cust Name</u></td>
+                    <td><b>{{ $so->shop->company_name }}</b></td>
+        
+        
+                </tr>
+        
+                <tr>
+                    <td><u>Address</u></td>
+                    <td><b>{{ $so->distributor->address ?? '--' }}</b></td>
+        
+        
+                </tr>
+        
+                <tr>
+                    <td><u>Contact</u></td>
+                    <td><b>{{ $so->shop->mobile ?? '--' }}</b></td>
+        
+        
+                </tr>
+        
+                <tr>
+                    <td><u>Main Area</u></td>
+                    <td><b>{{ $so->shop->main_area ?? '--' }}</b></td>
+        
+        
+                </tr>
+        
+                <tr>
+                    <td><u>Sub Area</u></td>
+                    <td><b>{{ $so->shop->sub_area ?? '--' }}</b></td>
+        
+        
+                </tr>
+        
+                <tr>
+                    <td><u>Block</u></td>
+                    <td><b>{{ $so->shop->block ?? '--' }}</b></td>
+                </tr>
+            </table>
 
-        <tr>
-            <td><b>Address</b></td>
-            <td>{{ $so->distributor->address ?? 'ghost market' }}</td>
+        </div>
 
-            <td><b>Due Date</b></td>
-            <td>{{ date('d-m-Y', strtotime($so->dc_date)) }}</td>
-        </tr>
+        <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
 
-        <tr>
-            <td><b>Contact</b></td>
-            <td>{{ $so->shop->mobile ?? '--' }}</td>
+            <table class="section-table section-table2">
+                <tr>
+                    <td><u>Invoice Date</u></td>
+                    <td><b>{{ date("d-m-Y", strtotime($so->dc_date)) }}</b></td>
+        
+                    <td><u>Supply Date</u></td>
+                    <td><b>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</b></td>
+        
+                    <td><u>Due Date</u></td>
+                    <td><b>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</b></td>
+                </tr>
+            </table>
+        
+            <table class="section-table">
+                <tr>
+                    <td style=" text-align:center;"><u>Tax Status</u></td>   
+                    <td style=" text-align:center;"><u>Shop Type</u></td>
+                    <td style=" text-align:center;"><u>Bus Type</u></u></td>
+                    <td style=" text-align:center;"><u>Terms</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>GENERAL STORE</td>
+                    <td>WHOLESALE</td>
+                    <td>Cash</td>
+                </tr>
+            </table>
 
-            <td><b>Tax Status</b></td>
-            <td>GENERAL STORE</td> <!-- static -->
-        </tr>
+            <table class="section-table">
+                <tr>
+                    <td style=" text-align:center;"><u>ASM</u></td>
+                    <td style=" text-align:center;"><u>{{ $so->tso->name }}</u></td>
+                    <td style=" text-align:center;"><u>SE</u></td>
+                    <td style=" text-align:center;"><u>SM</u></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td style=" text-align:center;">Syed Manzar Akbar Zaidi</td>
+                    <td></td>
+                </tr>
+            </table>
 
-        <tr>
-            <td><b>Main Area</b></td>
-            <td>{{ $so->shop->route->route_name ?? 'MALIR' }}</td>
+        </div>
 
-            <td><b>Shop Type</b></td>
-            <td>{{ $so->shop->type ?? 'WHOLESALE' }}</td>
-        </tr>
+    </div>
 
-        <tr>
-            <td><b>Sub Area</b></td>
-            <td>{{ $so->shop->route->sub_route->name ?? 'Ghanchi Market (Retail)' }}</td>
-
-            <td><b>Terms</b></td>
-            <td>Cash</td> <!-- static -->
-        </tr>
-
-        <tr>
-            <td><b>Block</b></td>
-            <td>{{ $so->shop->block ?? '--' }}</td>
-
-            <td><b>Bus Type</b></td>
-            <td>ASM / TSO / SE / SM</td> <!-- static -->
-        </tr>
-    </table>
 
     <!-- ITEMS TABLE -->
     <table class="item-table">
+
         <tr>
-            <th>S#</th>
-            <th>Item Name</th>
-            <th>Packing</th>
-            <th>Brand</th>
-            <th>Qty</th>
-            <th>T.P</th>
-            <th>Amount</th>
-            <th>SC/B</th>
-            <th>Eu</th>
-            <th>T/O</th>
-            <th>AMT</th>
-            <th>A&D AMT</th>
-            <th>%</th>
-            <th>Add/less</th>
-            <th>Final Amount</th>
+            <th><u>S#</u></th>
+            <th colspan="3"><u>Item Name</u></th>
+            <th><u>Packing</u></u></th>
+            <th><u>Brand</th>
+            <th><u>Qty</u></th>
+            <th><u>T.P</u></th>
+            <th><u>Amount</u></th>
+            <th><u>SC/B</u></th>
+            <th><u>Eu</u></th>
+            <th><u>T/O</u></th>
+            <th><u>AMT</u></th>
+            <th><u>A&D AMT</u></th>
+            <th><u>%</u></th>
+            <th><u>AddDisco</u></th>
+            <th><u>Final Amount</u></th>
         </tr>
 
-        @php 
-            $total_amount = 0; 
-            $c = 1;
+        @php
+            $s = 1;
+            $grand_total = 0;
         @endphp
 
         @foreach($so->saleOrderData as $row)
-        @php 
-            $total_amount += $row->total; 
-        @endphp
+            @php
+                $grand_total += $row->total;
+            @endphp
 
-        <tr>
-            <td>{{ $c++ }}</td>
-            <td>{{ $row->product->product_name ?? '--' }}</td>
-            <td>{{ $row->product->packing ?? 'X24' }}</td>
-            <td>{{ $row->product->brand->name ?? '--' }}</td>
-            <td>{{ $row->qty }}</td>
-            <td>{{ number_format($row->rate,2) }}</td>
+            <tr>
+                <td>{{ $s++ }}</td>
+                <td colspan="3">{{ $row->product->product_name ?? '' }}</td>
+          
+                <td>{{ $row->product_flavour->flavour_name ?? '' }}</td>
+                <td>{{ $row->product->brand ?? '' }}</td>
+                <td>{{ number_format($row->qty) }}</td>
+                <td>{{ number_format($row->rate, 2) }}</td>
+                <td>{{ number_format($row->total, 2) }}</td>
 
-            <td>{{ number_format($row->rate * $row->qty,2) }}</td>
+                <td>{{ number_format($row->discount, 2) }}</td>
+                <td>{{ number_format($row->scheme_amount, 2) }}</td>
+                <td>{{ number_format($row->trade_offer_amount, 2) }}</td>
+                <td>{{ number_format($row->discount_amount, 2) }}</td>
+                <td>{{ number_format($row->discount_amount, 2) }}</td>
+                <td>{{ $so->discount_percent }}</td>
 
-            <td>0</td> <!-- static -->
-            <td>0</td> <!-- static -->
-            <td>{{ number_format($row->trade_offer_amount ?? 0,2) }}</td>
-            <td>{{ number_format($row->discount_amount ?? 0,2) }}</td>
-            <td>{{ number_format($row->scheme_amount ?? 0,2) }}</td>
+                <td>0</td> {{-- Static: Add/Less --}}
 
-            <td>{{ number_format($row->discount ?? 0,2) }}</td>
+                <td>{{ number_format($row->total, 2) }}</td>
+            </tr>
 
-            <td>0</td> <!-- static Add/Less -->
-
-            <td>{{ number_format($row->total,2) }}</td>
-        </tr>
         @endforeach
-
-        <tr>
-            <td colspan="14" style="text-align:right;"><b>Total:</b></td>
-            <td><b>{{ number_format($total_amount,2) }}</b></td>
-        </tr>
     </table>
 
-
-    <!-- SUMMARY BOX -->
+    
+    <!-- SUMMARY -->
     <div class="summary-box">
+        
         <div class="left-box">
             <p><b>For Inquiry/Complaint:</b><br>
             Contact/WhatsApp: 0300-0813906<br>
             Email us at: support@dailyfoodindustries.com
-            </p>
-        </div>
-
+        </p>
+    </div>
+    
         <div class="right-summary">
-            <p><b>Targeted Discount in %:</b> {{ $so->discount_percent ?? 0 }}</p>
-            <p><b>TOTAL NET AMOUNT</b></p>
+            <table class="item-table2">
+                <tr style="border-bottom:5px solid #000;">
+                    <td style="text-align:left;"><u>7.00</u></td>
+                    <td></td>
+                    <td colspan="3"></td>
+                    <td></td>
+                    <td><u>1,080.00</u></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td><u>1,080.00</u></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td colspan="2"><u>0.00</u></td>
+                    <td style="text-align:right;"><u>1,080.00</u></td>
+                </tr>
+        
+            </table>
+            
+            
+            <table class="item-table" style="width:55%;float:right;border: none !important;">
 
-            <p style="font-size:20px; border:1px solid #000; padding:5px; display:inline-block;">
-                <b>{{ number_format($total_amount - ($so->discount_amount ?? 0),2) }}</b>
-            </p>
+                <tr>
+                    <td style=" text-align:left;">
+                         <p><b>Targeted Discount in %:</b> {{ $so->discount_percent }}</p>
+                    </td>
+                </tr>
+
+
+                <tr style=" border:1px solid #000;">
+                    <td style=" text-align:left;">
+                        <p><b><u>TOTAL NET AMOUNT</u></b></p>
+                    </td>
+
+                    <td  style=" text-align:right;">
+                        <p><b><u>{{ number_format($grand_total - $so->discount_amount, 2) }}</u></b></p>
+                    </td>
+                </tr>
+
+            </table>
+
+
         </div>
+
     </div>
 
-    <!-- SIGNATURES -->
+    <!-- SIGNATURE BOXES -->
     <div class="signature-area">
         <div class="signature-box"></div>
         <div class="signature-box"></div>
@@ -366,10 +475,6 @@ table th,table td{border:1px solid #000;padding:4px 6px;font-size:13px;}
     </div>
 
 </div>
-@endforeach
-</div>
-
-
 
 
 
