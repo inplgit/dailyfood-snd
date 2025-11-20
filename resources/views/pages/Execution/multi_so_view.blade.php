@@ -213,268 +213,268 @@ h2,h3,h4,p,table{margin:0;padding:0;}
             </div>
         </div>
         @endif
+        <div class="invoice-container">
+        
+            {{-- ========== HEADER ========== --}}
+            <div class="header">
+                <div class="logo logo-flex-cont">
+                    <div class="logo_wrp">
+                        <a class="navbar-brand" href="{{ url('dashboard') }}">
+                            <span class="brand-logo">
+                                <!-- <img style="width: 175px;" src="{{ url('/public/assets/images/logo.png') }}"> -->
+                                <img class="logo_m" src="{{ url('/public/assets/images/dailyfood_logo.jpeg') }}" onerror="this.onerror=null;this.src='{{ asset('logoo.png') }}'" />
+                                <img class="logo_m hide" src="{{ asset('logo.png') }}">
+                            </span>
+                        </a>
+                    </div>
+                    <div class="logo-text">
+                        <p>Daily Food Industries</p>
+                    </div>
+                </div>
+        
+                <div class="title">Sale Invoice</div>
+        
+                <div class="right-title">
+                    {{ $so->distributor->distributor_name }}
+                </div>
+            </div>
+        
+        
+            <div class="row">
+        
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+        
+                    <!-- Row 1 -->
+                    <table class="section-table section-table2">
+                        <tr>
+                             <td style=" text-decoration:underline;font-style:italic;color:#000;" width="20%"><b>Sale/Inv#</b></td>
+                            <td style=" border:2px solid #000 !important;" width="30%"><b>{{$so->invoice_no}}</b></td>
+                
+                        
+                        </tr>
+                
+                        <tr>
+                            <td><u>Cust Name</u></td>
+                            <td><b>{{ $so->shop->company_name }}</b></td>
+                
+                
+                        </tr>
+                
+                        <tr>
+                            <td><u>Address</u></td>
+                            <td><b>{{ $so->distributor->address ?? '--' }}</b></td>
+                
+                
+                        </tr>
+                
+                        <tr>
+                            <td><u>Contact</u></td>
+                            <td><b>{{ $so->shop->mobile ?? '--' }}</b></td>
+                
+                
+                        </tr>
+                
+                        <tr>
+                            <td><u>Main Area</u></td>
+                            <td><b>{{ $so->shop->main_area ?? '--' }}</b></td>
+                
+                
+                        </tr>
+                
+                        <tr>
+                            <td><u>Sub Area</u></td>
+                            <td><b>{{ $so->shop->sub_area ?? '--' }}</b></td>
+                
+                
+                        </tr>
+                
+                        <tr>
+                            <td><u>Block</u></td>
+                            <td><b>{{ $so->shop->block ?? '--' }}</b></td>
+                        </tr>
+                    </table>
+        
+                </div>
+        
+                <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+        
+                    <table class="section-table section-table2">
+                        <tr>
+                            <td><u>Invoice Date</u></td>
+                            <td><b>{{ date("d-m-Y", strtotime($so->dc_date)) }}</b></td>
+                
+                            <td><u>Supply Date</u></td>
+                            <td><b>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</b></td>
+                
+                            <td><u>Due Date</u></td>
+                            <td><b>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</b></td>
+                        </tr>
+                    </table>
+                
+                    <table class="section-table">
+                        <tr>
+                            <td style=" text-align:center;"><u>Tax Status</u></td>   
+                            <td style=" text-align:center;"><u>Shop Type</u></td>
+                            <td style=" text-align:center;"><u>Bus Type</u></u></td>
+                            <td style=" text-align:center;"><u>Terms</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>GENERAL STORE</td>
+                            <td>WHOLESALE</td>
+                            <td>Cash</td>
+                        </tr>
+                    </table>
+        
+                    <table class="section-table">
+                        <tr>
+                            <td style=" text-align:center;"><u>ASM</u></td>
+                            <td style=" text-align:center;"><u>{{ $so->tso->name }}</u></td>
+                            <td style=" text-align:center;"><u>SE</u></td>
+                            <td style=" text-align:center;"><u>SM</u></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td style=" text-align:center;">Syed Manzar Akbar Zaidi</td>
+                            <td></td>
+                        </tr>
+                    </table>
+        
+                </div>
+        
+            </div>
+        
+        
+            <!-- ITEMS TABLE -->
+            <table class="item-table">
+        
+                <tr>
+                    <th><u>S#</u></th>
+                    <th colspan="3"><u>Item Name</u></th>
+                    <th><u>Packing</u></u></th>
+                    <th><u>Brand</th>
+                    <th><u>Qty</u></th>
+                    <th><u>T.P</u></th>
+                    <th><u>Amount</u></th>
+                    <th><u>SC/B</u></th>
+                    <th><u>Eu</u></th>
+                    <th><u>T/O</u></th>
+                    <th><u>AMT</u></th>
+                    <th><u>A&D AMT</u></th>
+                    <th><u>%</u></th>
+                    <th><u>AddDisco</u></th>
+                    <th><u>Final Amount</u></th>
+                </tr>
+        
+                @php
+                    $s = 1;
+                    $grand_total = 0;
+                @endphp
+        
+                @foreach($so->saleOrderData as $row)
+                    @php
+                        $grand_total += $row->total;
+                    @endphp
+        
+                    <tr>
+                        <td>{{ $s++ }}</td>
+                        <td colspan="3">{{ $row->product->product_name ?? '' }}</td>
+                  
+                        <td>{{ $row->product_flavour->flavour_name ?? '' }}</td>
+                        <td>{{ $row->product->brand ?? '' }}</td>
+                        <td>{{ number_format($row->qty) }}</td>
+                        <td>{{ number_format($row->rate, 2) }}</td>
+                        <td>{{ number_format($row->total, 2) }}</td>
+        
+                        <td>{{ number_format($row->discount, 2) }}</td>
+                        <td>{{ number_format($row->scheme_amount, 2) }}</td>
+                        <td>{{ number_format($row->trade_offer_amount, 2) }}</td>
+                        <td>{{ number_format($row->discount_amount, 2) }}</td>
+                        <td>{{ number_format($row->discount_amount, 2) }}</td>
+                        <td>{{ $so->discount_percent }}</td>
+        
+                        <td>0</td> {{-- Static: Add/Less --}}
+        
+                        <td>{{ number_format($row->total, 2) }}</td>
+                    </tr>
+        
+                @endforeach
+            </table>
+        
+            
+            <!-- SUMMARY -->
+            <div class="summary-box">
+                
+                <div class="left-box">
+                    <p><b>For Inquiry/Complaint:</b><br>
+                    Contact/WhatsApp: 0300-0813906<br>
+                    Email us at: support@dailyfoodindustries.com
+                </p>
+            </div>
+            
+                <div class="right-summary">
+                    <table class="item-table2">
+                        <tr style="border-bottom:5px solid #000;">
+                            <td style="text-align:left;"><u>7.00</u></td>
+                            <td></td>
+                            <td colspan="3"></td>
+                            <td></td>
+                            <td><u>1,080.00</u></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><u>1,080.00</u></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td colspan="2"><u>0.00</u></td>
+                            <td style="text-align:right;"><u>1,080.00</u></td>
+                        </tr>
+                
+                    </table>
+                    
+                    
+                    <table class="item-table" style="width:55%;float:right;border: none !important;">
+        
+                        <tr>
+                            <td style=" text-align:left;">
+                                 <p><b>Targeted Discount in %:</b> {{ $so->discount_percent }}</p>
+                            </td>
+                        </tr>
+        
+        
+                        <tr style=" border:1px solid #000;">
+                            <td style=" text-align:left;">
+                                <p><b><u>TOTAL NET AMOUNT</u></b></p>
+                            </td>
+        
+                            <td  style=" text-align:right;">
+                                <p><b><u>{{ number_format($grand_total - $so->discount_amount, 2) }}</u></b></p>
+                            </td>
+                        </tr>
+        
+                    </table>
+        
+        
+                </div>
+        
+            </div>
+        
+            <!-- SIGNATURE BOXES -->
+            <div class="signature-area">
+                <div class="signature-box"></div>
+                <div class="signature-box"></div>
+                <div class="signature-box"></div>
+            </div>
+        
+        </div>
     </div>
     @endforeach
 </div>
 
 
 
-<div class="invoice-container">
-
-    {{-- ========== HEADER ========== --}}
-    <div class="header">
-        <div class="logo logo-flex-cont">
-            <div class="logo_wrp">
-                <a class="navbar-brand" href="{{ url('dashboard') }}">
-                    <span class="brand-logo">
-                        <!-- <img style="width: 175px;" src="{{ url('/public/assets/images/logo.png') }}"> -->
-                        <img class="logo_m" src="{{ url('/public/assets/images/dailyfood_logo.jpeg') }}" onerror="this.onerror=null;this.src='{{ asset('logoo.png') }}'" />
-                        <img class="logo_m hide" src="{{ asset('logo.png') }}">
-                    </span>
-                </a>
-            </div>
-            <div class="logo-text">
-                <p>Daily Food Industries</p>
-            </div>
-        </div>
-
-        <div class="title">Sale Invoice</div>
-
-        <div class="right-title">
-            {{ $so->distributor->distributor_name }}
-        </div>
-    </div>
-
-
-    <div class="row">
-
-        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-
-            <!-- Row 1 -->
-            <table class="section-table section-table2">
-                <tr>
-                     <td style=" text-decoration:underline;font-style:italic;color:#000;" width="20%"><b>Sale/Inv#</b></td>
-                    <td style=" border:2px solid #000 !important;" width="30%"><b>{{$so->invoice_no}}</b></td>
-        
-                
-                </tr>
-        
-                <tr>
-                    <td><u>Cust Name</u></td>
-                    <td><b>{{ $so->shop->company_name }}</b></td>
-        
-        
-                </tr>
-        
-                <tr>
-                    <td><u>Address</u></td>
-                    <td><b>{{ $so->distributor->address ?? '--' }}</b></td>
-        
-        
-                </tr>
-        
-                <tr>
-                    <td><u>Contact</u></td>
-                    <td><b>{{ $so->shop->mobile ?? '--' }}</b></td>
-        
-        
-                </tr>
-        
-                <tr>
-                    <td><u>Main Area</u></td>
-                    <td><b>{{ $so->shop->main_area ?? '--' }}</b></td>
-        
-        
-                </tr>
-        
-                <tr>
-                    <td><u>Sub Area</u></td>
-                    <td><b>{{ $so->shop->sub_area ?? '--' }}</b></td>
-        
-        
-                </tr>
-        
-                <tr>
-                    <td><u>Block</u></td>
-                    <td><b>{{ $so->shop->block ?? '--' }}</b></td>
-                </tr>
-            </table>
-
-        </div>
-
-        <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
-
-            <table class="section-table section-table2">
-                <tr>
-                    <td><u>Invoice Date</u></td>
-                    <td><b>{{ date("d-m-Y", strtotime($so->dc_date)) }}</b></td>
-        
-                    <td><u>Supply Date</u></td>
-                    <td><b>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</b></td>
-        
-                    <td><u>Due Date</u></td>
-                    <td><b>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</b></td>
-                </tr>
-            </table>
-        
-            <table class="section-table">
-                <tr>
-                    <td style=" text-align:center;"><u>Tax Status</u></td>   
-                    <td style=" text-align:center;"><u>Shop Type</u></td>
-                    <td style=" text-align:center;"><u>Bus Type</u></u></td>
-                    <td style=" text-align:center;"><u>Terms</td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td>GENERAL STORE</td>
-                    <td>WHOLESALE</td>
-                    <td>Cash</td>
-                </tr>
-            </table>
-
-            <table class="section-table">
-                <tr>
-                    <td style=" text-align:center;"><u>ASM</u></td>
-                    <td style=" text-align:center;"><u>{{ $so->tso->name }}</u></td>
-                    <td style=" text-align:center;"><u>SE</u></td>
-                    <td style=" text-align:center;"><u>SM</u></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td style=" text-align:center;">Syed Manzar Akbar Zaidi</td>
-                    <td></td>
-                </tr>
-            </table>
-
-        </div>
-
-    </div>
-
-
-    <!-- ITEMS TABLE -->
-    <table class="item-table">
-
-        <tr>
-            <th><u>S#</u></th>
-            <th colspan="3"><u>Item Name</u></th>
-            <th><u>Packing</u></u></th>
-            <th><u>Brand</th>
-            <th><u>Qty</u></th>
-            <th><u>T.P</u></th>
-            <th><u>Amount</u></th>
-            <th><u>SC/B</u></th>
-            <th><u>Eu</u></th>
-            <th><u>T/O</u></th>
-            <th><u>AMT</u></th>
-            <th><u>A&D AMT</u></th>
-            <th><u>%</u></th>
-            <th><u>AddDisco</u></th>
-            <th><u>Final Amount</u></th>
-        </tr>
-
-        @php
-            $s = 1;
-            $grand_total = 0;
-        @endphp
-
-        @foreach($so->saleOrderData as $row)
-            @php
-                $grand_total += $row->total;
-            @endphp
-
-            <tr>
-                <td>{{ $s++ }}</td>
-                <td colspan="3">{{ $row->product->product_name ?? '' }}</td>
-          
-                <td>{{ $row->product_flavour->flavour_name ?? '' }}</td>
-                <td>{{ $row->product->brand ?? '' }}</td>
-                <td>{{ number_format($row->qty) }}</td>
-                <td>{{ number_format($row->rate, 2) }}</td>
-                <td>{{ number_format($row->total, 2) }}</td>
-
-                <td>{{ number_format($row->discount, 2) }}</td>
-                <td>{{ number_format($row->scheme_amount, 2) }}</td>
-                <td>{{ number_format($row->trade_offer_amount, 2) }}</td>
-                <td>{{ number_format($row->discount_amount, 2) }}</td>
-                <td>{{ number_format($row->discount_amount, 2) }}</td>
-                <td>{{ $so->discount_percent }}</td>
-
-                <td>0</td> {{-- Static: Add/Less --}}
-
-                <td>{{ number_format($row->total, 2) }}</td>
-            </tr>
-
-        @endforeach
-    </table>
-
-    
-    <!-- SUMMARY -->
-    <div class="summary-box">
-        
-        <div class="left-box">
-            <p><b>For Inquiry/Complaint:</b><br>
-            Contact/WhatsApp: 0300-0813906<br>
-            Email us at: support@dailyfoodindustries.com
-        </p>
-    </div>
-    
-        <div class="right-summary">
-            <table class="item-table2">
-                <tr style="border-bottom:5px solid #000;">
-                    <td style="text-align:left;"><u>7.00</u></td>
-                    <td></td>
-                    <td colspan="3"></td>
-                    <td></td>
-                    <td><u>1,080.00</u></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td><u>1,080.00</u></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td colspan="2"><u>0.00</u></td>
-                    <td style="text-align:right;"><u>1,080.00</u></td>
-                </tr>
-        
-            </table>
-            
-            
-            <table class="item-table" style="width:55%;float:right;border: none !important;">
-
-                <tr>
-                    <td style=" text-align:left;">
-                         <p><b>Targeted Discount in %:</b> {{ $so->discount_percent }}</p>
-                    </td>
-                </tr>
-
-
-                <tr style=" border:1px solid #000;">
-                    <td style=" text-align:left;">
-                        <p><b><u>TOTAL NET AMOUNT</u></b></p>
-                    </td>
-
-                    <td  style=" text-align:right;">
-                        <p><b><u>{{ number_format($grand_total - $so->discount_amount, 2) }}</u></b></p>
-                    </td>
-                </tr>
-
-            </table>
-
-
-        </div>
-
-    </div>
-
-    <!-- SIGNATURE BOXES -->
-    <div class="signature-area">
-        <div class="signature-box"></div>
-        <div class="signature-box"></div>
-        <div class="signature-box"></div>
-    </div>
-
-</div>
 
 
 
