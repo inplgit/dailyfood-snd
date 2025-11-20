@@ -222,6 +222,15 @@
 
             win.document.write('<html><head><title>Print</title>');
 
+
+            // ✅ Bootstrap CDN added
+            win.document.write(`
+                <link 
+                    rel="stylesheet" 
+                    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+                >
+            `);
+
             win.document.write('<link rel="stylesheet" href="/css/app.css">');
 
             win.document.write(`
