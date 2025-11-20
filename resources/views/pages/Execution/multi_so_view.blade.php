@@ -756,7 +756,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
     `;
 
     // ✅ Select element to print
-    const printContent = document.getElementById('print').innerHTML;
+    const printContent = document.getElementById('content').innerHTML;
     // ✅ Open new window for print
     const printWindow = window.open('', '', 'width=900,height=700');
     // ✅ Bootstrap 5 CSS link
