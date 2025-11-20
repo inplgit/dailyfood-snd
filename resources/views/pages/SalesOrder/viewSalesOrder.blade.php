@@ -19,7 +19,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 .right-title{text-align:right;font-size:18px;font-weight:bold;text-decoration:underline;color:#000;}
 .section-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px;}
 .section-table td{border:1px solid #000;padding:5px;color:#000;}
-.section-table td b{color:#000;text-decoration:underline;}
+.section-table td b{color:#000;}
 .section-table2 td{border:none !important;color:#000;}
 .item-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;}
 .item-table th,.item-table td{border:1px solid #000;padding:5px;text-align:center;color:#000;}
@@ -303,23 +303,23 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
             <table class="section-table section-table2">
                 <tr>
-                    <td>Invoice Date</td>
+                    <td><u>Invoice Date</u></td>
                     <td><b>{{ date("d-m-Y", strtotime($so->dc_date)) }}</b></td>
         
-                    <td>Supply Date</td>
+                    <td><u>Supply Date</u></td>
                     <td><b>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</b></td>
         
-                    <td>Due Date<</td>
+                    <td><u>Due Date</u></td>
                     <td><b>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</b></td>
                 </tr>
             </table>
         
             <table class="section-table">
                 <tr>
-                    <td>Tax Status</td>    
-                    <td>Shop Type</td>
-                    <td>Bus Type</td>
-                    <td>Terms</td>
+                    <td style=" text-align:center;"><u>Tax Status</u></td>   
+                    <td style=" text-align:center;"><u>Shop Type</u></td>
+                    <td style=" text-align:center;"><u>Bus Type</u></u></td>
+                    <td style=" text-align:center;"><u>Terms</td>
                 </tr>
                 <tr>
                     <td></td>
@@ -331,15 +331,15 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
             <table class="section-table">
                 <tr>
-                    <td>ASM</td>
-                    <td>{{ $so->tso->name }}</td>
-                    <td>SE</td>
-                    <td>SM</td>
+                    <td style=" text-align:center;"><u>ASM</u></td>
+                    <td style=" text-align:center;"><u>{{ $so->tso->name }}</u></td>
+                    <td style=" text-align:center;"><u>SE</u></td>
+                    <td style=" text-align:center;"><u>SM</u></td>
                 </tr>
                 <tr>
                     <td></td>
                     <td></td>
-                    <td>Syed Manzar Akbar Zaidi</td>
+                    <td style=" text-align:center;">Syed Manzar Akbar Zaidi</td>
                     <td></td>
                 </tr>
             </table>
