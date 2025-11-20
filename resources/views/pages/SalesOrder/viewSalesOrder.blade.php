@@ -23,7 +23,9 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 .title{text-align:center;font-size:20px;font-weight:bold;text-decoration:underline;}
 .right-title{text-align:right;font-size:18px;font-weight:bold;text-decoration:underline;}
 .section-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px;}
-.section-table td{border:1px solid #000;padding:5px;}
+.section-table td{border:1px solid #000;padding:5px;color:#000;}
+.section-table td b{color:#000;text-decoration:underline;}
+.section-table2 td{border:none !important;color:#000;}
 .item-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;}
 .item-table th,.item-table td{border:1px solid #000;padding:5px;text-align:center;}
 .summary-box{width:100%;margin-top:20px;}
@@ -223,7 +225,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
     {{-- ========== HEADER ========== --}}
     <div class="header">
-        <div class="logo">
+        <div class="logo logo-flex-cont">
             <div class="logo_wrp">
                 <a class="navbar-brand" href="{{ url('dashboard') }}">
                     <span class="brand-logo">
@@ -232,6 +234,9 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                         <img class="logo_m hide" src="{{ asset('logo.png') }}">
                     </span>
                 </a>
+            </div>
+            <div class="logo-text">
+                <p>Daily Food Industries</p>
             </div>
         </div>
 
@@ -248,9 +253,9 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
 
             <!-- Row 1 -->
-            <table class="section-table">
+            <table class="section-table section-table2">
                 <tr>
-                    <td width="20%"><b>Sale/Inv#</b></td>
+                     <td style=" text-decoration:underline;font-style:italic;color:#000;" width="20%"><b>Sale/Inv#</b></td>
                     <td width="30%">{{ $so->invoice_no }}</td>
         
                 
@@ -301,7 +306,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
         <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
 
-            <table class="section-table">
+            <table class="section-table section-table2">
                 <tr>
                     <td><b>Invoice Date</b></td>
                     <td>{{ date("d-m-Y", strtotime($so->dc_date)) }}</td>
