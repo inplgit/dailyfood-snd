@@ -8,20 +8,15 @@
 
 <style>
 .table-bordered{border:1px solid #ddd !important;}
-
-
-
-
-
-
-
+.logo.logo-flex-cont{display:flex;align-items:baseline;}
+.logo-text p{color:#000;font-weight:bold;font-size:18px;}
 body{font-family:Arial,sans-serif;margin:0;padding:0;background:#fff;}
 .invoice-container{width:900px;margin:auto;padding:20px 30px;border:1px solid #000;}
 h2,h3,h4,p,table{margin:0;padding:0;}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
 .logo img{width:80px;}
-.title{text-align:center;font-size:20px;font-weight:bold;text-decoration:underline;}
-.right-title{text-align:right;font-size:18px;font-weight:bold;text-decoration:underline;}
+.title{text-align:center;font-size:20px;font-weight:bold;text-decoration:underline;color:#000;}
+.right-title{text-align:right;font-size:18px;font-weight:bold;text-decoration:underline;color:#000;}
 .section-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px;}
 .section-table td{border:1px solid #000;padding:5px;color:#000;}
 .section-table td b{color:#000;text-decoration:underline;}
@@ -33,7 +28,6 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 .right-summary{width:50%;float:right;text-align:right;}
 .signature-area{width:100%;margin-top:40px;display:flex;justify-content:space-between;}
 .signature-box{border:1px solid #000;width:250px;height:30px;}
-
 
 
 </style>
@@ -262,42 +256,42 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                 </tr>
         
                 <tr>
-                    <td><b>Cust Name</b></td>
+                    <td><u>Cust Name</u></td>
                     <td>{{ $so->shop->company_name }}</td>
         
         
                 </tr>
         
                 <tr>
-                    <td><b>Address</b></td>
+                    <td><u>Address</u></td>
                     <td>{{ $so->distributor->address ?? '--' }}</td>
         
         
                 </tr>
         
                 <tr>
-                    <td><b>Contact</b></td>
+                    <td><u>Contact</u></td>
                     <td>{{ $so->shop->mobile ?? '--' }}</td>
         
         
                 </tr>
         
                 <tr>
-                    <td><b>Main Area</b></td>
+                    <td><u>Main Area</u></td>
                     <td>{{ $so->shop->main_area ?? '--' }}</td>
         
         
                 </tr>
         
                 <tr>
-                    <td><b>Sub Area</b></td>
+                    <td><u>Sub Area</u></td>
                     <td>{{ $so->shop->sub_area ?? '--' }}</td>
         
         
                 </tr>
         
                 <tr>
-                    <td><b>Block</b></td>
+                    <td><u>Block</u></td>
                     <td>{{ $so->shop->block ?? '--' }}</td>
                 </tr>
             </table>
