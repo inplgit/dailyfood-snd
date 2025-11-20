@@ -24,9 +24,13 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 .item-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;border:1px solid #000;}
 .item-table th,.item-table td{border:1px solid #000;padding:5px;text-align:center;color:#000;font-size:13px;}
 .item-table td{border:none;}
+
+.item-table2{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;border:1px solid #000;}
+.item-table2 th,.item-table2 td{border:1px solid #000;padding:5px;text-align:center;color:#000;font-size:13px;}
+.item-table2 td{border:none;}
 .summary-box{width:100%;margin-top:20px;}
 .left-box{width:45%;height:120px;border:1px solid #000;display:inline-block;vertical-align:top;padding:10px;}
-.right-summary{width:50%;float:right;text-align:right;}
+.right-summary{width:50%;float:right;text-align:right;color:#000;}
 .signature-area{width:100%;margin-top:40px;display:flex;justify-content:space-between;}
 .signature-box{border:1px solid #000;width:250px;height:30px;}
 
@@ -404,39 +408,40 @@ h2,h3,h4,p,table{margin:0;padding:0;}
             </tr>
 
         @endforeach
-
-        <tr  style="border-bottom:5px solid #000;">
-             <td></td>
-              <td colspan="3"></td>
-              
-                <td></td>
-                <td></td>
-            <td  style="text-align:right;"><u>7.00</u></td>
-            <td></td>
-            <td><u>1,080.00</u></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td><u>1,080.00</u></td>
-            <td></td>
-            <td><u>0.00</u></td>
-            <td style="text-align:right;"><u>1,080.00</u></td>
-        </tr>
-
     </table>
 
+    
     <!-- SUMMARY -->
     <div class="summary-box">
-
+        
         <div class="left-box">
             <p><b>For Inquiry/Complaint:</b><br>
             Contact/WhatsApp: 0300-0813906<br>
             Email us at: support@dailyfoodindustries.com
-            </p>
-        </div>
-
-        <div class="right-summary">
+        </p>
+    </div>
+    
+    <div class="right-summary">
+            <table class="item-table2">
+                <tr style="border-bottom:5px solid #000;">
+                    <td></td>
+                    <td colspan="3"></td>
+                    <td></td>
+                    <td></td>
+                    <td style="text-align:right;"><u>7.00</u></td>
+                    <td></td>
+                    <td><u>1,080.00</u></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td><u>1,080.00</u></td>
+                    <td></td>
+                    <td><u>0.00</u></td>
+                    <td style="text-align:right;"><u>1,080.00</u></td>
+                </tr>
+        
+            </table>
             <p><b>Targeted Discount in %:</b> {{ $so->discount_percent }}</p>
             
             <table class="item-table" style=" width:55%;float:right;">
