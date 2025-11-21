@@ -290,7 +290,9 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                 <a class="navbar-brand" href="{{ url('dashboard') }}">
                     <span class="brand-logo">
                         <img class="logo_m" src="{{ url('/public/assets/images/dailyfood_logo.jpeg') }}" onerror="this.onerror=null;this.src='{{ asset('logoo.png') }}'" />
-                        <img class="logo_m hide" src="{{ asset('logo.png') }}">
+                        <div class="logo-hide">
+                            <img class="logo_m hide" src="{{ asset('logo.png') }}">
+                        </div>
                     </span>
                 </a>
             </div>
@@ -836,8 +838,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 /* Prevent automatic cutting */
  table,tr,td,div{page-break-inside:avoid;}
 
-
-
+.logo-hide{display:none;}
 
 .table-bordered{border:1px solid #ddd !important;}
 .logo.logo-flex-cont{display:flex;align-items:baseline;gap:20px}
