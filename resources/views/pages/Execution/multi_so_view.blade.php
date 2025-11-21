@@ -420,8 +420,8 @@ h2,h3,h4,p,table{margin:0;padding:0;}
             <tr>
                 <td>{{ $s++ }}</td>
                 <td colspan="3">{{ $row->product->product_name ?? '' }}</td>
-          
-                <td>{{ $row->product_flavour->flavour_name ?? '' }}</td>
+                <td>{{ $row->product->packing_size ?? '' }}</td>
+                <!-- <td>{{ $row->product_flavour->flavour_name ?? '' }}</td> -->
                 <td>{{ $row->product->brand ?? '' }}</td>
                 <td>{{ number_format($row->qty) }}</td>
                 <td>{{ number_format($row->rate, 2) }}</td>
@@ -500,7 +500,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         </div>
 
     </div>
-
+  @if($so->payment_type == 'credit')
     <!-- SIGNATURE BOXES -->
    <div class="signature-area">
     <div class="signature-item">
@@ -519,7 +519,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
     </div>
 </div>
 
-
+   @endif
 </div>
 
 <!-- new OLd copy design -->
