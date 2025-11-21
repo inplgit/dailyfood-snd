@@ -457,16 +457,16 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                 <table class="item-table2">
                     {{-- Totals Row --}}
                     <tr style="border-bottom:5px solid #000;">
-                        <td style="text-align:left;"><u>{{ number_format($total_qty) }}</u></td>
                         <td></td>
+                        <td style="text-align:left;"><u>{{ number_format($total_qty) }}</u></td>
                         <td colspan="3"></td>
                         <td></td>
                         <td><u>{{number_format($grand_total, 2)}}</u></td>
                         <td></td>
                         <td></td>
                         <td></td>
-                        <td>00</td>
                         <td></td>
+                        <td>00</td>
                         <td></td>
                         <td></td>
                         <td colspan="2"><u>0.00</u></td>
