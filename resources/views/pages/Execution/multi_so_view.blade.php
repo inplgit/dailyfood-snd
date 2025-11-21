@@ -793,7 +793,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
     // ✅ Print CSS dynamically add karna
     const printStyle = `
       @media print {
-        @page{size:A4;margin:15mm 15mm 15mm 15mm !important;}
+        @page{size:A4;margin:6mm 6mm 6mm 6mm !important;}
         
 .table-bordered{border:1px solid #ddd !important;}
 .logo.logo-flex-cont{display:flex;align-items:baseline;gap:20px}
