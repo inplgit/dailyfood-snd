@@ -442,40 +442,38 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         @endforeach
     </table>
 
-    
-    <!-- SUMMARY -->
-    <div class="summary-box">
         
-        <div class="left-box">
-            <p><b>For Inquiry/Complaint:</b><br>
-            Contact/WhatsApp: 0300-0813906<br>
-            Email us at: support@dailyfoodindustries.com
-        </p>
-    </div>
-    
-        <div class="right-summary">
-            <table class="item-table2">
-                <tr style="border-bottom:5px solid #000;">
-                    <td style="text-align:left;"><u>{{$total_qty}}</u></td>
-                    <td></td>
-                    <td colspan="3"></td>
-                    <td></td>
-                    <td><u>{{number_format($grand_total, 2)}}</u></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td><u>00</u></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td colspan="2"><u>0.00</u></td>
-                    <td style="text-align:right;"><u>{{number_format($grand_total, 2)}}</u></td>
-                </tr>
+        <!-- SUMMARY -->
+        <div class="summary-box">
+            
+            <div class="left-box">
+                <p><b>For Inquiry/Complaint:</b><br>
+                Contact/WhatsApp: 0300-0813906<br>
+                Email us at: support@dailyfoodindustries.com
+                </p>
+            </div>
         
-            </table>
-            
-            
-            <table class="item-table" style="width:55%;float:right;border: none !important;">
+            <div class="right-summary">
+                <table class="item-table2">
+                    {{-- Totals Row --}}
+                    <tr style="border-bottom:5px solid #000;">
+                        <td style="text-align:left;"><u>{{ number_format($total_qty) }}</u></td>
+                        <td></td>
+                        <td colspan="3"></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td colspan="2"></td>
+                        <td style="text-align:right;"><u>{{ number_format($total_amount, 2) }}</u></td>
+                    </tr>
+                </table>
+                <table class="item-table" style="width:55%;float:right;border: none !important;">
 
                 <tr>
                     <td style=" text-align:left;">
