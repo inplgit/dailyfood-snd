@@ -364,7 +364,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                 </tr>
                 <tr>
                     <td></td>
-                      <td style=" text-align:center;">{{$so->tso->name }}</td>
+                      <td style=" text-align:center;"></td>
                     <td style=" text-align:center;">{{$so->tso->name }}</td>
                     <td></td>
                 </tr>
