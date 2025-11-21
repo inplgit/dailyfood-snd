@@ -7,6 +7,27 @@
 @endphp
 
 <style>
+
+
+
+.signature-area {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+}
+
+.signature-item {
+    text-align: center;
+    width: 30%;
+}
+
+.signature-box {
+    border-bottom: 1px solid #000;
+    height: 40px;
+    margin-bottom: 5px;
+}
+
+
 .table-bordered{border:1px solid #ddd !important;}
 .logo.logo-flex-cont{display:flex;align-items:baseline;}
 .logo-text p{color:#000;font-weight:bold;font-size:18px;}
@@ -276,7 +297,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         
                 <tr>
                     <td><u>Contact</u></td>
-                    <td><b>{{ $so->shop->mobile ?? '--' }}</b></td>
+                    <td><b>{{ $so->shop->phone ?? '--' }}</b></td>
         
         
                 </tr>
@@ -290,7 +311,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         
                 <tr>
                     <td><u>Sub Area</u></td>
-                    <td><b>{{ $so->shop->sub_area ?? '--' }}</b></td>
+                    <td><b>{{ $so->shop->route->route_name }}</b></td>
         
         
                 </tr>
@@ -311,10 +332,11 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                     <td><b>{{ date("d-m-Y", strtotime($so->dc_date)) }}</b></td>
         
                     <td><u>Supply Date</u></td>
-                    <td><b>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</b></td>
-        
+                     <td><b>{{ \Carbon\Carbon::parse($so->dc_date)->addDay()->format('d-m-Y') }}</b></td>
+
                     <td><u>Due Date</u></td>
-                    <td><b>{{ date("d-m-Y", strtotime($so->delivery_date)) }}</b></td>
+                  <td><b>{{ \Carbon\Carbon::parse($so->dc_date)->addDay()->format('d-m-Y') }}</b></td>
+
                 </tr>
             </table>
         
@@ -327,23 +349,23 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                 </tr>
                 <tr>
                     <td></td>
-                    <td>GENERAL STORE</td>
-                    <td>WHOLESALE</td>
-                    <td>Cash</td>
+                    <td>{{ $so->shop->shopType->shop_type_name ?? '--' }}</td>
+                    <td>{{ $so->shop->shopType->shop_type_name ?? '--' }}</td>
+                    <td>{{ $so->payment_type ?? '--'}}</td>
                 </tr>
             </table>
 
             <table class="section-table">
                 <tr>
                     <td style=" text-align:center;"><u>ASM</u></td>
-                    <td style=" text-align:center;"><u>{{ $so->tso->name }}</u></td>
+                    <td style=" text-align:center;"><u>TSO </u></td>
                     <td style=" text-align:center;"><u>SE</u></td>
                     <td style=" text-align:center;"><u>SM</u></td>
                 </tr>
                 <tr>
                     <td></td>
-                    <td></td>
-                    <td style=" text-align:center;">Syed Manzar Akbar Zaidi</td>
+                      <td style=" text-align:center;">{{$so->tso->name }}</td>
+                    <td style=" text-align:center;">{{$so->tso->name }}</td>
                     <td></td>
                 </tr>
             </table>
@@ -423,20 +445,20 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         <div class="right-summary">
             <table class="item-table2">
                 <tr style="border-bottom:5px solid #000;">
-                    <td style="text-align:left;"><u>7.00</u></td>
+                    <td style="text-align:left;"><u>{{$total_qty}}</u></td>
                     <td></td>
                     <td colspan="3"></td>
                     <td></td>
-                    <td><u>1,080.00</u></td>
+                    <td><u>{{number_format($grand_total, 2)}}</u></td>
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td><u>1,080.00</u></td>
+                    <td><u>00</u></td>
                     <td></td>
                     <td></td>
                     <td></td>
                     <td colspan="2"><u>0.00</u></td>
-                    <td style="text-align:right;"><u>1,080.00</u></td>
+                    <td style="text-align:right;"><u>{{number_format($grand_total, 2)}}</u></td>
                 </tr>
         
             </table>
@@ -469,11 +491,23 @@ h2,h3,h4,p,table{margin:0;padding:0;}
     </div>
 
     <!-- SIGNATURE BOXES -->
-    <div class="signature-area">
+   <div class="signature-area">
+    <div class="signature-item">
         <div class="signature-box"></div>
-        <div class="signature-box"></div>
-        <div class="signature-box"></div>
+        <span>Order Booker</span>
     </div>
+
+    <div class="signature-item">
+        <div class="signature-box"></div>
+        <span>Sale Person</span>
+    </div>
+
+    <div class="signature-item">
+        <div class="signature-box"></div>
+        <span>Shop Keeper</span>
+    </div>
+</div>
+
 
 </div>
 
