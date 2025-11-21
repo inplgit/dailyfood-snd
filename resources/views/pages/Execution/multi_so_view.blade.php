@@ -34,8 +34,12 @@
 body{font-family:Arial,sans-serif;margin:0;padding:0;background:#fff;}
 .invoice-container{width:900px;margin:auto;padding:20px 0px;}
 h2,h3,h4,p,table{margin:0;padding:0;}
-.header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
-.logo img{width:80px;}
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: -30px;
+}.logo img{width:80px;}
 .title{text-align:center;font-size:20px;font-weight:bold;text-decoration:underline;color:#000;}
 .right-title{text-align:right;font-size:18px;font-weight:bold;text-decoration:underline;color:#000;}
 .section-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px;}
@@ -49,7 +53,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 .item-table2 th,.item-table2 td{border:1px solid #000;padding:5px;text-align:center;color:#000;font-size:13px;}
 .item-table2 td{border:none;}
 .summary-box{width:100%;margin-top:10px;display:flex;justify-content:space-between;align-items:flex-start;}
-.left-box{width:28%;height:180px;border:1px solid #000;padding:10px;display:flex;align-items:flex-end;}
+.left-box{width:28%;height:130px;border:1px solid #000;padding:10px;display:flex;align-items:flex-end;}
 .left-box p{font-size:11px;color:#000;}
 .right-summary{width:70%;float:right;text-align:right;color:#000;}
 .signature-area{width:100%;margin-top:40px;display:flex;justify-content:space-between;}
@@ -285,7 +289,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                 <a class="navbar-brand" href="{{ url('dashboard') }}">
                     <span class="brand-logo">
                         <img class="logo_m" src="{{ url('/public/assets/images/dailyfood_logo.jpeg') }}" onerror="this.onerror=null;this.src='{{ asset('logoo.png') }}'" />
-                        <img class="logo_m hide" src="{{ asset('logo.png') }}">
+                        <!-- <img class="logo_m hide" src="{{ asset('logo.png') }}"> -->
                     </span>
                 </a>
             </div>
@@ -445,10 +449,8 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         @endforeach
     </table>
 
-    
-    <!-- SUMMARY -->
-    <div class="summary-box">
         
+<<<<<<< HEAD
         <div class="left-box">
             <p><b>For Inquiry/Complaint:</b><br>
             Contact/WhatsApp: 0300-0813906<br>
@@ -477,6 +479,35 @@ h2,h3,h4,p,table{margin:0;padding:0;}
             </table>
             
             <table class="item-table" style="width:55%;float:right;border: none !important;">
+=======
+        <!-- SUMMARY -->
+        <div class="summary-box">
+            
+            <div class="left-box">
+                <p><b>For Inquiry/Complaint:</b><br>
+                Contact/WhatsApp: 0300-0813906<br>
+                Email us at: support@dailyfoodindustries.com
+                </p>
+            </div>
+        
+            <div class="right-summary">
+                <table class="item-table2">
+                    {{-- Totals Row --}}
+                    <tr style="border-bottom:5px solid #000;">
+                        <td></td>
+                        <td style="text-align:center;"><u>{{ number_format($total_qty) }}</u></td>
+                        <td style=" width:76px;text-align:right;"><u>{{number_format($grand_total,2)}}</u></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td style=" text-align:right;width: 103px;">00</td>
+                        <td style="text-align:right;"><u>0.00</u></td>
+                        <td style="text-align:right;width: 124px;"><u>{{ number_format($total_amount, 2) }}</u></td>
+                    </tr>
+                </table>
+                <table class="item-table" style="width:55%;float:right;border: none !important;">
+
+>>>>>>> 5013d1be9a26f499ee68f4df4be15b866af11012
                 <tr>
                     <td style=" text-align:left;">
                          <p><b>Targeted Discount in %:</b> {{ $so->discount_percent }}</p>
@@ -808,7 +839,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
     // ✅ Print CSS dynamically add karna
     const printStyle = `
       @media print {
-        @page{size:A4;margin:15mm 15mm 15mm 15mm !important;}
+        @page{size:A4;margin:6mm 6mm 6mm 6mm !important;}
         
 .table-bordered{border:1px solid #ddd !important;}
 .logo.logo-flex-cont{display:flex;align-items:baseline;gap:20px}
@@ -816,7 +847,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 body{font-family:Arial,sans-serif;margin:0;padding:0;background:#fff;}
 .invoice-container{width:900px;margin:auto;padding:20px 0px;}
 h2,h3,h4,p,table{margin:0;padding:0;}
-.header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
+.header{display:flex;justify-content:space-between;align-items:baseline; margin-bottom: 0px;}
 .logo img{width:80px;}
 .title{text-align:center;font-size:20px;font-weight:bold;text-decoration:underline;color:#000;}
 .right-title{text-align:right;font-size:18px;font-weight:bold;text-decoration:underline;color:#000;}
@@ -831,7 +862,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 .item-table2 th,.item-table2 td{border:1px solid #000;padding:5px;text-align:center;color:#000;font-size:13px;}
 .item-table2 td{border:none;}
 .summary-box{width:100%;margin-top:10px;display:flex;justify-content:space-between;align-items:flex-start;}
-.left-box{width:28%;height:180px;border:1px solid #000;padding:10px;display:flex;align-items:flex-end;}
+.left-box{width:28%;height:130px;border:1px solid #000;padding:10px;display:flex;align-items:flex-end;}
 .left-box p{font-size:11px;color:#000;}
 .right-summary{width:70%;float:right;text-align:right;color:#000;}
 .signature-area{width:100%;margin-top:40px;display:flex;justify-content:space-between;}
