@@ -81,6 +81,10 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
 
 <!-- old code -->
+
+
+
+
 <!-- <div id="content" class="container print">
     @foreach($sos as $key => $so)
     <div class="card ptb" style="page-break-before: always">
@@ -244,13 +248,33 @@ h2,h3,h4,p,table{margin:0;padding:0;}
     @endforeach
 </div> -->
 
+<div id="content" class="container print">
+    @php
+        // OVERALL TOTALS OUTSIDE LOOP
+        $overall_grand_total = 0;
+        $overall_total_qty = 0;
+        
+        // Calculate overall totals first
+        foreach($sos as $so) {
+            foreach($so->saleOrderData as $row) {
+                $overall_total_qty += $row->qty;
+                $overall_grand_total += $row->total;
+            }
+        }
+    @endphp
 
-
- <div id="content" class="card ptb container print" style="page-break-before: always">
-   
-
-
-
+    @foreach($sos as $key => $so)
+    
+    @php
+        // INDIVIDUAL VOUCHER TOTALS
+        $voucher_grand_total = 0;
+        $voucher_total_qty = 0;
+        
+        foreach($so->saleOrderData as $row) {
+            $voucher_total_qty += $row->qty;
+            $voucher_grand_total += $row->total;
+        }
+    @endphp
 
 <div class="invoice-container">
 
@@ -260,7 +284,6 @@ h2,h3,h4,p,table{margin:0;padding:0;}
             <div class="logo_wrp">
                 <a class="navbar-brand" href="{{ url('dashboard') }}">
                     <span class="brand-logo">
-                        <!-- <img style="width: 175px;" src="{{ url('/public/assets/images/logo.png') }}"> -->
                         <img class="logo_m" src="{{ url('/public/assets/images/dailyfood_logo.jpeg') }}" onerror="this.onerror=null;this.src='{{ asset('logoo.png') }}'" />
                         <img class="logo_m hide" src="{{ asset('logo.png') }}">
                     </span>
@@ -288,43 +311,31 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                 <tr>
                      <td style=" text-decoration:underline;font-style:italic;color:#000;" width="20%"><b>Sale/Inv#</b></td>
                     <td style=" border:2px solid #000 !important;" width="30%"><b>{{$so->invoice_no}}</b></td>
-        
-                
                 </tr>
         
                 <tr>
                     <td><u>Cust Name</u></td>
                     <td><b>{{ $so->shop->company_name }}</b></td>
-        
-        
                 </tr>
         
                 <tr>
                     <td><u>Address</u></td>
                     <td><b>{{ $so->distributor->address ?? '--' }}</b></td>
-        
-        
                 </tr>
         
                 <tr>
                     <td><u>Contact</u></td>
                     <td><b>{{ $so->shop->phone ?? '--' }}</b></td>
-        
-        
                 </tr>
         
                 <tr>
                     <td><u>Main Area</u></td>
                     <td><b>{{ $so->shop->main_area ?? '--' }}</b></td>
-        
-        
                 </tr>
         
                 <tr>
                     <td><u>Sub Area</u></td>
                     <td><b>{{ $so->shop->route->route_name }}</b></td>
-        
-        
                 </tr>
         
                 <tr>
@@ -347,7 +358,6 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
                     <td><u>Due Date</u></td>
                   <td><b>{{ \Carbon\Carbon::parse($so->dc_date)->addDay()->format('d-m-Y') }}</b></td>
-
                 </tr>
             </table>
         
@@ -409,19 +419,13 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
         @php
             $s = 1;
-            $grand_total = 0;
         @endphp
 
         @foreach($so->saleOrderData as $row)
-            @php
-                $grand_total += $row->total;
-            @endphp
-
             <tr>
                 <td>{{ $s++ }}</td>
                 <td colspan="3">{{ $row->product->product_name ?? '' }}</td>
                 <td>{{ $row->product->packing_size ?? '' }}</td>
-                <!-- <td>{{ $row->product_flavour->flavour_name ?? '' }}</td> -->
                 <td>{{ $row->product->brand ?? '' }}</td>
                 <td>{{ number_format($row->qty) }}</td>
                 <td>{{ number_format($row->rate, 2) }}</td>
@@ -438,7 +442,6 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
                 <td>{{ number_format($row->total, 2) }}</td>
             </tr>
-
         @endforeach
     </table>
 
@@ -456,11 +459,11 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         <div class="right-summary">
             <table class="item-table2">
                 <tr style="border-bottom:5px solid #000;">
-                    <td style="text-align:left;"><u>{{$total_qty}}</u></td>
+                    <td style="text-align:left;"><u>{{number_format($voucher_total_qty)}}</u></td>
                     <td></td>
                     <td colspan="3"></td>
                     <td></td>
-                    <td><u>{{number_format($grand_total, 2)}}</u></td>
+                    <td><u>{{number_format($voucher_grand_total, 2)}}</u></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -469,20 +472,16 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                     <td></td>
                     <td></td>
                     <td colspan="2"><u>0.00</u></td>
-                    <td style="text-align:right;"><u>{{number_format($grand_total, 2)}}</u></td>
+                    <td style="text-align:right;"><u>{{number_format($voucher_grand_total, 2)}}</u></td>
                 </tr>
-        
             </table>
             
-            
             <table class="item-table" style="width:55%;float:right;border: none !important;">
-
                 <tr>
                     <td style=" text-align:left;">
                          <p><b>Targeted Discount in %:</b> {{ $so->discount_percent }}</p>
                     </td>
                 </tr>
-
 
                 <tr style=" border:1px solid #000;">
                     <td style=" text-align:left;">
@@ -490,17 +489,14 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                     </td>
 
                     <td  style=" text-align:right;">
-                        <p><b><u>{{ number_format($grand_total - $so->discount_amount, 2) }}</u></b></p>
+                        <p><b><u>{{ number_format($voucher_grand_total - $so->discount_amount, 2) }}</u></b></p>
                     </td>
                 </tr>
-
             </table>
-
-
         </div>
-
     </div>
-  @if($so->payment_type == 'credit')
+
+    @if($so->payment_type == 'credit')
     <!-- SIGNATURE BOXES -->
    <div class="signature-area">
     <div class="signature-item">
@@ -518,10 +514,26 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         <span>Shop Keeper</span>
     </div>
 </div>
-
    @endif
-</div>
 
+</div>
+    @endforeach
+
+    <!-- {{-- OVERALL SUMMARY (OPTIONAL) --}}
+    @if(count($sos) > 1)
+    <div class="overall-summary" style="margin-top: 20px; padding: 15px; border: 2px solid #000;">
+        <h3>Overall Summary - All Vouchers</h3>
+        <table style="width: 100%;">
+            <tr>
+                <td><strong>Total Quantity:</strong></td>
+                <td>{{ number_format($overall_total_qty) }}</td>
+                <td><strong>Total Amount:</strong></td>
+                <td>{{ number_format($overall_grand_total, 2) }}</td>
+            </tr>
+        </table>
+    </div>
+    @endif -->
+</div>
 <!-- new OLd copy design -->
 
  <!-- <div class="card ptb" style="page-break-before: always">
