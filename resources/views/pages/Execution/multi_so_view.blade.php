@@ -463,7 +463,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                     <tr style="border-bottom:5px solid #000;">
                         <td></td>
                         <td style="text-align:center;"><u>{{ number_format($total_qty) }}</u></td>
-                        <td style=" width:108px;"><u>{{number_format($grand_total,2)}}</u></td>
+                        <td style=" width:105px;text-align:right;"><u>{{number_format($grand_total,2)}}</u></td>
                         <td></td>
                         <td></td>
                         <td></td>
