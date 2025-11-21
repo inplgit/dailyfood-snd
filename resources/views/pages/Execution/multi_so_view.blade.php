@@ -463,13 +463,13 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                     <tr style="border-bottom:5px solid #000;">
                         <td></td>
                         <td style="text-align:center;"><u>{{ number_format($total_qty) }}</u></td>
-                        <td style=" width:105px;text-align:right;"><u>{{number_format($grand_total,2)}}</u></td>
+                        <td style=" width:76px;text-align:right;"><u>{{number_format($grand_total,2)}}</u></td>
                         <td></td>
                         <td></td>
                         <td></td>
-                        <td style=" text-align:right;">00</td>
+                        <td style=" text-align:right;width: 103px;">00</td>
                         <td style="text-align:right;"><u>0.00</u></td>
-                        <td style="text-align:right;"><u>{{ number_format($total_amount, 2) }}</u></td>
+                        <td style="text-align:right;width: 124px;"><u>{{ number_format($total_amount, 2) }}</u></td>
                     </tr>
                 </table>
                 <table class="item-table" style="width:55%;float:right;border: none !important;">
@@ -486,7 +486,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                         <p><b><u>TOTAL NET AMOUNT</u></b></p>
                     </td>
 
-                    <td  style=" text-align:right;width: 112px;">
+                    <td  style=" text-align:right;">
                         <p><b><u>{{ number_format($grand_total - $so->discount_amount, 2) }}</u></b></p>
                     </td>
                 </tr>
