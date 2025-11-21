@@ -815,7 +815,20 @@ h2,h3,h4,p,table{margin:0;padding:0;}
     const printStyle = `
       @media print {
         @page{size:A4;margin:6mm 6mm 6mm 6mm !important;}
-        
+
+
+
+
+
+
+    .invoice-container{page-break-before:always;}
+.invoice-container:first-child{page-break-before:auto !important;}
+/* Prevent automatic cutting */
+ table,tr,td,div{page-break-inside:avoid;}
+
+
+
+
 .table-bordered{border:1px solid #ddd !important;}
 .logo.logo-flex-cont{display:flex;align-items:baseline;gap:20px}
 .logo-text p{color:#000;font-weight:bold;font-size:18px;}
