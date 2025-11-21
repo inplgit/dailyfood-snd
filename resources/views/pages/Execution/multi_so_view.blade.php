@@ -252,6 +252,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
     @endforeach
 </div> -->
 
+
 <div id="content" class="container print">
     @php
         // OVERALL TOTALS OUTSIDE LOOP
@@ -289,7 +290,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                 <a class="navbar-brand" href="{{ url('dashboard') }}">
                     <span class="brand-logo">
                         <img class="logo_m" src="{{ url('/public/assets/images/dailyfood_logo.jpeg') }}" onerror="this.onerror=null;this.src='{{ asset('logoo.png') }}'" />
-                        <!-- <img class="logo_m hide" src="{{ asset('logo.png') }}"> -->
+                        <img class="logo_m hide" src="{{ asset('logo.png') }}">
                     </span>
                 </a>
             </div>
@@ -449,8 +450,10 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         @endforeach
     </table>
 
+    
+    <!-- SUMMARY -->
+    <div class="summary-box">
         
-<<<<<<< HEAD
         <div class="left-box">
             <p><b>For Inquiry/Complaint:</b><br>
             Contact/WhatsApp: 0300-0813906<br>
@@ -479,35 +482,6 @@ h2,h3,h4,p,table{margin:0;padding:0;}
             </table>
             
             <table class="item-table" style="width:55%;float:right;border: none !important;">
-=======
-        <!-- SUMMARY -->
-        <div class="summary-box">
-            
-            <div class="left-box">
-                <p><b>For Inquiry/Complaint:</b><br>
-                Contact/WhatsApp: 0300-0813906<br>
-                Email us at: support@dailyfoodindustries.com
-                </p>
-            </div>
-        
-            <div class="right-summary">
-                <table class="item-table2">
-                    {{-- Totals Row --}}
-                    <tr style="border-bottom:5px solid #000;">
-                        <td></td>
-                        <td style="text-align:center;"><u>{{ number_format($total_qty) }}</u></td>
-                        <td style=" width:76px;text-align:right;"><u>{{number_format($grand_total,2)}}</u></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td style=" text-align:right;width: 103px;">00</td>
-                        <td style="text-align:right;"><u>0.00</u></td>
-                        <td style="text-align:right;width: 124px;"><u>{{ number_format($total_amount, 2) }}</u></td>
-                    </tr>
-                </table>
-                <table class="item-table" style="width:55%;float:right;border: none !important;">
-
->>>>>>> 5013d1be9a26f499ee68f4df4be15b866af11012
                 <tr>
                     <td style=" text-align:left;">
                          <p><b>Targeted Discount in %:</b> {{ $so->discount_percent }}</p>
@@ -550,8 +524,8 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 </div>
     @endforeach
 
-    <!-- {{-- OVERALL SUMMARY (OPTIONAL) --}}
-    @if(count($sos) > 1)
+    {{-- OVERALL SUMMARY (OPTIONAL) --}}
+    <!-- @if(count($sos) > 1)
     <div class="overall-summary" style="margin-top: 20px; padding: 15px; border: 2px solid #000;">
         <h3>Overall Summary - All Vouchers</h3>
         <table style="width: 100%;">
@@ -565,6 +539,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
     </div>
     @endif -->
 </div>
+
 <!-- new OLd copy design -->
 
  <!-- <div class="card ptb" style="page-break-before: always">
