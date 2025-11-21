@@ -70,6 +70,11 @@ public function tsos()
       {
           return $this->belongsTo(TSO::class,'tso_id');
       }
+public function shopType()
+{
+    return $this->belongsTo(ShopType::class, 'shop_type_id');
+}
+
 
 
       public function Route()

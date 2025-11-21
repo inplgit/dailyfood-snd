@@ -48,7 +48,7 @@ class SaleOrderData extends Model
 
     public function getProductAttribute()
     {
-        return $this->belongsTo(Product::class,'product_id')->with(['product_flavour'])->select('product_name','retail_price','retail_price_packing','retail_price_carton','trade_price','trade_price_packing','trade_price_carton','id')->first();
+        return $this->belongsTo(Product::class,'product_id')->with(['product_flavour'])->select('product_name','retail_price','packing_size','retail_price_packing','retail_price_carton','trade_price','trade_price_packing','trade_price_carton','id')->first();
     }
     public function getProductFlavourAttribute()
     {
