@@ -801,7 +801,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 body{font-family:Arial,sans-serif;margin:0;padding:0;background:#fff;}
 .invoice-container{width:900px;margin:auto;padding:20px 0px;}
 h2,h3,h4,p,table{margin:0;padding:0;}
-.header{display:flex;justify-content:space-between;align-items:baseline; margin-bottom: -30px;}
+.header{display:flex;justify-content:space-between;align-items:baseline; margin-bottom: -20px;}
 .logo img{width:80px;}
 .title{text-align:center;font-size:20px;font-weight:bold;text-decoration:underline;color:#000;}
 .right-title{text-align:right;font-size:18px;font-weight:bold;text-decoration:underline;color:#000;}
