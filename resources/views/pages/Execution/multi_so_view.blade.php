@@ -819,9 +819,19 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
 
 
+    /* Avoid breaking inside invoice content */
 
 
-    .invoice-container{page-break-before:always;}
+  .invoice-container{page-break-inside:avoid;margin-bottom:20px;}
+
+/* Only force new page AFTER every 2 invoices */
+
+ .invoice-container:nth-of-type(2n+1){page-break-before:auto;}
+.invoice-container:nth-of-type(2n){page-break-after:always;}
+
+
+
+
 .invoice-container:first-child{page-break-before:auto !important;}
 /* Prevent automatic cutting */
  table,tr,td,div{page-break-inside:avoid;}
