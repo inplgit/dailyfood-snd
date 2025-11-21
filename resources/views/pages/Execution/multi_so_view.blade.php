@@ -461,15 +461,15 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                         <td></td>
                         <td colspan="3"></td>
                         <td></td>
+                        <td><u>{{number_format($grand_total, 2)}}</u></td>
                         <td></td>
                         <td></td>
                         <td></td>
+                        <td>00</td>
                         <td></td>
                         <td></td>
                         <td></td>
-                        <td></td>
-                        <td></td>
-                        <td colspan="2"></td>
+                        <td colspan="2"><u>0.00</u></td>
                         <td style="text-align:right;"><u>{{ number_format($total_amount, 2) }}</u></td>
                     </tr>
                 </table>
