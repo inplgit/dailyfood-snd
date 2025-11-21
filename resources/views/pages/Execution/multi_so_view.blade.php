@@ -266,7 +266,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                     <span class="brand-logo">
                         <!-- <img style="width: 175px;" src="{{ url('/public/assets/images/logo.png') }}"> -->
                         <img class="logo_m" src="{{ url('/public/assets/images/dailyfood_logo.jpeg') }}" onerror="this.onerror=null;this.src='{{ asset('logoo.png') }}'" />
-                        <img class="logo_m hide" src="{{ asset('logo.png') }}">
+                        <!-- <img class="logo_m hide" src="{{ asset('logo.png') }}"> -->
                     </span>
                 </a>
             </div>
@@ -468,7 +468,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                         <td></td>
                         <td>00</td>
                         <td></td>
-                        <td style="text-align:right;" colspan="2"><u>0.00</u></td>
+                        <td style="text-align:right;"><u>0.00</u></td>
                         <td style="text-align:right;"><u>{{ number_format($total_amount, 2) }}</u></td>
                     </tr>
                 </table>
