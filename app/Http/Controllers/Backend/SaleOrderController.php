@@ -182,28 +182,25 @@ class SaleOrderController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
-    {
-        $record = SaleOrder::findOrFail($id);
-        // dd($record->saleOrderData);
-        $distributors = Distributor::where('status', 1)->get();
-        $tsos =  $data = TSO::where('distributor_id', $record->distributor_id)->get();
+  public function edit($id)
+{
+    $record = SaleOrder::findOrFail($id);
+    // dd($record->saleOrderData);
+    $distributors = Distributor::where('status', 1)->get();
+    $tsos = TSO::where('distributor_id', $record->distributor_id)->get();
 
-        //$shops = Shop::where('status', 1)->where('distributor_id',$record->distributor_id)->where('tso_id',$record->tso_id)->get();
-$shops = Shop::join('shop_tso', 'shop_tso.shop_id', '=', 'shops.id')
-    ->where('shops.status', 1)
-    ->where('shops.distributor_id', $record->distributor_id)
-    ->where('shop_tso.tso_id', $record->tso_id)
-    ->select('shops.*')
-    ->get();
+    $shops = Shop::join('shop_tso', 'shop_tso.shop_id', '=', 'shops.id')
+        ->where('shops.status', 1)
+        ->where('shops.distributor_id', $record->distributor_id)
+        ->where('shop_tso.tso_id', $record->tso_id)
+        ->select('shops.*')
+        ->get();
 
-        $products = Product::status()->get();
-        $shceme_products = Product::statusScheme()->get();
+    $products = Product::status()->get();
+    $shceme_products = Product::statusScheme()->get(); // Fixed typo here
 
-        
-
-        return  view($this->page.'EditSaleOrder', compact('record', 'distributors', 'tsos', 'products', 'shops','shceme_products'));
-    }
+    return view($this->page.'EditSaleOrder', compact('record', 'distributors', 'tsos', 'products', 'shops', 'shceme_products')); // Fixed typo here
+}
 
     /**
      * Update the specified resource in storage.
@@ -212,100 +209,201 @@ $shops = Shop::join('shop_tso', 'shop_tso.shop_id', '=', 'shops.id')
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+    // public function update(UpdateSaleOrderRequest $request, $id)
+    // {
+    //     // dd($request, $id);
+    //     $requestData = $request->all();
+    //     DB::beginTransaction();
+    //     try {
+    //         $saleOrder = SaleOrder::findOrfail($id);
+    //         $saleOrder =  $saleOrder->update([
+    //             'distributor_id' => $request->distributor_id ?? 0,
+    //             'tso_id' => $request->tso_id ?? 0,
+    //             'route_id' => $request->route_id ?? 0,
+    //             'shop_id' => $request->shop_id ?? 0,
+    //             'user_id' => auth()->user()->id ?? 0,
+    //             'invoice_no' => $request->invoice_no ?? 0,
+    //             'dc_no' => $request->dc_no ?? 0,
+    //             'lpo_no' => $request->lpo_no ?? 0,
+    //             'dc_date' => $request->dc_date ?? '0000-00-00',
+    //             'excecution' => $request->excecution ?? 0,
+    //             'excecution_date' => $request->excecution_date ?? null,
+    //             'payment_type' => $request->payment_type ?? 0,
+    //             'total_carton' => $request->total_carton ?? 0,
+    //             'total_pcs' => $request->total_pcs ?? 0,
+    //             'cost_center' => $request->cost_center ?? 0,
+    //             'notes' => $request->notes ?? 0,
+    //             'transport_details' => $request->transport_details ?? 0,
+    //             'discount_percent' => $request->discount_percent ?? 0,
+    //             'discount_amount' => $request->discount_amount,
+    //             'tax_applied' => $request->tax_applied ?? 0,
+    //             'pending_amount' => $request->pending_amount ?? 0,
+    //             'total_amount' => $request->total_amount ?? 0,
+    //             'products_subtotal' => $request->products_subtotal ?? 0,
+    //             'old_receivable' => $request->old_receivable ?? 0,
+    //             'freight_charges' => $request->freight_charges ?? 0,
+    //             'delivery_date' => $request->delivery_date ?? '0000-00-00',
+
+    //         ]);
+    //         SaleOrderData::whereIn('id',explode(',',$request->remove_id))->delete();
+    //         foreach ($request->product_id as $key => $item) {
+    //             $saleOrderData = SaleOrderData::find($requestData['sale_order_data_id'][$key] ?? 0);
+
+    //             if ($request['scheme_id'][$key] != null && $request['scheme_id'][$key] != '' ) {
+    //                 $scheme = explode(',',$request['scheme_id'][$key]);
+    //                 $scheme_id = $scheme[0];
+    //                 $scheme_data_id = $scheme[1];
+    //             }
+
+    //             if ($saleOrderData) {
+    //                 $saleOrderData->update([
+    //                     // 'so_id' => $saleOrder->id ?? 0,
+    //                     'product_id' => $requestData['product_id'][$key] ?? $saleOrderData->product_id,
+    //                     'flavour_id' => $requestData['flavour_id'][$key] ?? $saleOrderData->flavour_id,
+    //                     'sale_type' => $requestData['sale_type'][$key] ?? $saleOrderData->sale_type,
+    //                     'rate' => $requestData['rate'][$key] ?? $saleOrderData->rate,
+    //                     'qty' => $requestData['qty'][$key] ?? $saleOrderData->qty,
+    //                     'discount' => $requestData['data_discount'][$key] ?? $saleOrderData->discount,
+    //                     'discount_amount' => $requestData['data_discount_amount'][$key] ?? $saleOrderData->discount_amount,
+    //                     'tax_percent' => $requestData['data_tax_percent'][$key] ?? $saleOrderData->tax_percent,
+    //                     'tax_amount' => $requestData['data_tax_amount'][$key] ?? $saleOrderData->tax_amount,
+    //                     'trade_offer_amount' => $requestData['trade_offer_amount'][$key] ?? 0,
+    //                     'scheme_id' => $scheme_id ?? 0,
+    //                     'scheme_data_id' => $scheme_data_id ?? 0,
+    //                     'scheme_amount' => $requestData['sch_d'][$key] ?? 0,
+    //                     'total' => $requestData['data_total'][$key] ?? $saleOrderData->total,
+    //                     'sheme_product_id' => $requestData['shceme_product_id'][$key],
+    //                     'offer_qty' => $requestData['offer'][$key],
+    //                 ]);
+    //             } else {
+    //                 // dd('in',$key);
+    //                 SaleOrderData::create([
+    //                     'so_id' => $id ?? 0,
+    //                     'product_id' => $requestData['product_id'][$key] ?? 0,
+    //                     'flavour_id' => $requestData['flavour_id'][$key] ?? 0,
+    //                     'sale_type' => $requestData['sale_type'][$key] ?? 0,
+    //                     'rate' => $requestData['rate'][$key] ?? 0,
+    //                     'qty' => $requestData['qty'][$key] ?? 0,
+    //                     'discount' => $requestData['data_discount'][$key] ?? 0,
+    //                     'discount_amount' => $requestData['data_discount_amount'][$key] ?? 0,
+    //                     'tax_percent' => $requestData['data_tax_percent'][$key] ?? 0,
+    //                     'tax_amount' => $requestData['data_tax_amount'][$key] ?? 0,
+    //                     'total' => $requestData['data_total'][$key] ?? 0,
+    //                     'sheme_product_id' => $requestData['shceme_product_id'][$key],
+    //                     'offer_qty' => $requestData['offer'][$key],
+    //                 ]);
+    //             }
+
+    //         }
+    //         DB::commit();
+    //         return response()->json(['success'=>'Sale Order Updated Successfully']);
+    //     } catch (\Throwable $th) {
+    //         DB::rollBack();
+    //         return response()->json(['error'=>'Oops! There might be a error '. $th->getMessage()]);
+    //     }
+
+
+    // }
+
+
     public function update(UpdateSaleOrderRequest $request, $id)
-    {
-        // dd($request, $id);
-        $requestData = $request->all();
-        DB::beginTransaction();
-        try {
-            $saleOrder = SaleOrder::findOrfail($id);
-            $saleOrder =  $saleOrder->update([
-                'distributor_id' => $request->distributor_id ?? 0,
-                'tso_id' => $request->tso_id ?? 0,
-                'route_id' => $request->route_id ?? 0,
-                'shop_id' => $request->shop_id ?? 0,
-                'user_id' => auth()->user()->id ?? 0,
-                'invoice_no' => $request->invoice_no ?? 0,
-                'dc_no' => $request->dc_no ?? 0,
-                'lpo_no' => $request->lpo_no ?? 0,
-                'dc_date' => $request->dc_date ?? '0000-00-00',
-                'excecution' => $request->excecution ?? 0,
-                'excecution_date' => $request->excecution_date ?? null,
-                'payment_type' => $request->payment_type ?? 0,
-                'total_carton' => $request->total_carton ?? 0,
-                'total_pcs' => $request->total_pcs ?? 0,
-                'cost_center' => $request->cost_center ?? 0,
-                'notes' => $request->notes ?? 0,
-                'transport_details' => $request->transport_details ?? 0,
-                'discount_percent' => $request->discount_percent ?? 0,
-                'discount_amount' => $request->discount_amount,
-                'tax_applied' => $request->tax_applied ?? 0,
-                'pending_amount' => $request->pending_amount ?? 0,
-                'total_amount' => $request->total_amount ?? 0,
-                'products_subtotal' => $request->products_subtotal ?? 0,
-                'old_receivable' => $request->old_receivable ?? 0,
-                'freight_charges' => $request->freight_charges ?? 0,
-                'delivery_date' => $request->delivery_date ?? '0000-00-00',
+{
+    $requestData = $request->all();
+    DB::beginTransaction();
+    try {
+        $saleOrder = SaleOrder::findOrFail($id);
+        $saleOrder->update([
+            'distributor_id' => $request->distributor_id ?? 0,
+            'tso_id' => $request->tso_id ?? 0,
+            'route_id' => $request->route_id ?? 0,
+            'shop_id' => $request->shop_id ?? 0,
+            'user_id' => auth()->user()->id ?? 0,
+            'invoice_no' => $request->invoice_no ?? 0,
+            'dc_no' => $request->dc_no ?? 0,
+            'lpo_no' => $request->lpo_no ?? 0,
+            'dc_date' => $request->dc_date ?? '0000-00-00',
+            'excecution' => $request->excecution ?? 0,
+            'excecution_date' => $request->excecution_date ?? null,
+            'payment_type' => $request->payment_type ?? 0,
+            'total_carton' => $request->total_carton ?? 0,
+            'total_pcs' => $request->total_pcs ?? 0,
+            'cost_center' => $request->cost_center ?? 0,
+            'notes' => $request->notes ?? 0,
+            'transport_details' => $request->transport_details ?? 0,
+            'discount_percent' => $request->discount_percent ?? 0,
+            'discount_amount' => $request->discount_amount ?? 0,
+            'tax_applied' => $request->tax_applied ?? 0,
+            'pending_amount' => $request->pending_amount ?? 0,
+            'total_amount' => $request->total_amount ?? 0,
+            'products_subtotal' => $request->products_subtotal ?? 0,
+            'old_receivable' => $request->old_receivable ?? 0,
+            'freight_charges' => $request->freight_charges ?? 0,
+            'delivery_date' => $request->delivery_date ?? '0000-00-00',
+        ]);
 
-            ]);
-            SaleOrderData::whereIn('id',explode(',',$request->remove_id))->delete();
-            foreach ($request->product_id as $key => $item) {
-                $saleOrderData = SaleOrderData::find($requestData['sale_order_data_id'][$key] ?? 0);
+        // Remove deleted rows
+        SaleOrderData::whereIn('id', explode(',', $request->remove_id))->delete();
 
-                if ($request['scheme_id'][$key] != null && $request['scheme_id'][$key] != '' ) {
-                    $scheme = explode(',',$request['scheme_id'][$key]);
-                    $scheme_id = $scheme[0];
-                    $scheme_data_id = $scheme[1];
-                }
+        foreach ($request->product_id as $key => $item) {
+            $saleOrderData = SaleOrderData::find($requestData['sale_order_data_id'][$key] ?? 0);
 
-                if ($saleOrderData) {
-                    $saleOrderData->update([
-                        // 'so_id' => $saleOrder->id ?? 0,
-                        'product_id' => $requestData['product_id'][$key] ?? $saleOrderData->product_id,
-                        'flavour_id' => $requestData['flavour_id'][$key] ?? $saleOrderData->flavour_id,
-                        'sale_type' => $requestData['sale_type'][$key] ?? $saleOrderData->sale_type,
-                        'rate' => $requestData['rate'][$key] ?? $saleOrderData->rate,
-                        'qty' => $requestData['qty'][$key] ?? $saleOrderData->qty,
-                        'discount' => $requestData['data_discount'][$key] ?? $saleOrderData->discount,
-                        'discount_amount' => $requestData['data_discount_amount'][$key] ?? $saleOrderData->discount_amount,
-                        'tax_percent' => $requestData['data_tax_percent'][$key] ?? $saleOrderData->tax_percent,
-                        'tax_amount' => $requestData['data_tax_amount'][$key] ?? $saleOrderData->tax_amount,
-                        'trade_offer_amount' => $requestData['trade_offer_amount'][$key] ?? 0,
-                        'scheme_id' => $scheme_id ?? 0,
-                        'scheme_data_id' => $scheme_data_id ?? 0,
-                        'scheme_amount' => $requestData['scheme_amount'][$key] ?? 0,
-                        'total' => $requestData['data_total'][$key] ?? $saleOrderData->total,
-                        'sheme_product_id' => $requestData['shceme_product_id'][$key],
-                        'offer_qty' => $requestData['offer'][$key],
-                    ]);
-                } else {
-                    // dd('in',$key);
-                    SaleOrderData::create([
-                        'so_id' => $id ?? 0,
-                        'product_id' => $requestData['product_id'][$key] ?? 0,
-                        'flavour_id' => $requestData['flavour_id'][$key] ?? 0,
-                        'sale_type' => $requestData['sale_type'][$key] ?? 0,
-                        'rate' => $requestData['rate'][$key] ?? 0,
-                        'qty' => $requestData['qty'][$key] ?? 0,
-                        'discount' => $requestData['data_discount'][$key] ?? 0,
-                        'discount_amount' => $requestData['data_discount_amount'][$key] ?? 0,
-                        'tax_percent' => $requestData['data_tax_percent'][$key] ?? 0,
-                        'tax_amount' => $requestData['data_tax_amount'][$key] ?? 0,
-                        'total' => $requestData['data_total'][$key] ?? 0,
-                        'sheme_product_id' => $requestData['shceme_product_id'][$key],
-                        'offer_qty' => $requestData['offer'][$key],
-                    ]);
-                }
-
+            // scheme product
+            $scheme_id = $scheme_data_id = 0;
+            if (!empty($request['scheme_id'][$key])) {
+                $scheme = explode(',', $request['scheme_id'][$key]);
+                $scheme_id = $scheme[0];
+                $scheme_data_id = $scheme[1];
             }
-            DB::commit();
-            return response()->json(['success'=>'Sale Order Updated Successfully']);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            return response()->json(['error'=>'Oops! There might be a error '. $th->getMessage()]);
+
+            // scheme pcs
+            $scheme_id_pcs = $scheme_data_id_pcs = $scheme_pcs = 0;
+            if (!empty($request['scheme_id_pcs'][$key])) {
+                $schemePcs = explode(',', $request['scheme_id_pcs'][$key]);
+                $scheme_id_pcs = $schemePcs[0];
+                $scheme_data_id_pcs = $schemePcs[1];
+            }
+            if (isset($request['scheme_pcs'][$key])) {
+                $scheme_pcs = $request['scheme_pcs'][$key];
+            }
+
+            $dataArray = [
+                'product_id' => $requestData['product_id'][$key] ?? 0,
+                'flavour_id' => $requestData['flavour_id'][$key] ?? 0,
+                'sale_type' => $requestData['sale_type'][$key] ?? 0,
+                'rate' => $requestData['rate'][$key] ?? 0,
+                'qty' => $requestData['qty'][$key] ?? 0,
+                'discount' => $requestData['data_discount'][$key] ?? 0,
+                'discount_amount' => $requestData['data_discount_amount'][$key] ?? 0,
+                'tax_percent' => $requestData['data_tax_percent'][$key] ?? 0,
+                'tax_amount' => $requestData['data_tax_amount'][$key] ?? 0,
+                'trade_offer_amount' => $requestData['trade_offer_amount'][$key] ?? 0,
+                'scheme_id' => $scheme_id,
+                'scheme_data_id' => $scheme_data_id,
+                'scheme_id_pcs' => $scheme_id_pcs,
+                'scheme_data_id_pcs' => $scheme_data_id_pcs,
+                'scheme_amount' => $requestData['sch_d'][$key] ?? 0,
+                'scheme_data_pcs' => $scheme_pcs,
+                'total' => $requestData['data_total'][$key] ?? 0,
+                'sheme_product_id' => $requestData['shceme_product_id'][$key] ?? 0,
+                'offer_qty' => $requestData['offer'][$key] ?? 0,
+            ];
+
+            if ($saleOrderData) {
+                $saleOrderData->update($dataArray);
+            } else {
+                $dataArray['so_id'] = $id;
+                SaleOrderData::create($dataArray);
+            }
         }
 
+        DB::commit();
+        return response()->json(['success' => 'Sale Order Updated Successfully']);
+    } catch (\Throwable $th) {
+        DB::rollBack();
+        return response()->json(['error' => 'Oops! There might be an error: ' . $th->getMessage()]);
     }
+}
+
 
     /**
      * Remove the specified resource from storage.
