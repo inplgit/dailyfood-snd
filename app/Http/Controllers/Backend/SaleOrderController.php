@@ -133,7 +133,7 @@ class SaleOrderController extends Controller
                     'scheme_data_id' => $scheme_data_id ?? 0,
                     'scheme_id_pcs' => $scheme_id_pcs ?? 0,
                     'scheme_data_id_pcs' => $scheme_data_id_pcs ?? 0,
-                    'scheme_amount' => $requestData['scheme_amount'][$key] ?? 0,
+                    'scheme_amount' => $requestData['sch_d'][$key] ?? 0,
                     'scheme_data_pcs' => $scheme_pcs ?? 0,
                     'total' => $requestData['data_total'][$key] ?? 0,
                 ]);
@@ -151,24 +151,29 @@ class SaleOrderController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-       public function show($id)
-    {
-       $so= SaleOrder::find($id);
-      
-       $scheme_Pcs = DB::table('sale_orders as so')
-       ->leftJoin('sale_order_data as sod', 'sod.so_id', '=', 'so.id')
-       ->leftJoin('scheme_product_pcs as sp', 'sp.id', '=', 'sod.scheme_id_pcs')
-       ->leftJoin('scheme_product_data_pcs as spd', 'spd.scheme_id', '=', 'sp.id') 
-       ->leftJoin('products as p', 'p.id', '=', 'spd.product_id') 
-       ->where('so.id', $id)
-       ->select('p.product_name', 'spd.scheme_Pcs','sod.scheme_data_pcs')
-       ->get();
-   
-     
-      
-   
-       return  view($this->page.'viewSalesOrder',compact('so','scheme_Pcs'));
-    }
+    public function show($id)
+{
+    $so = SaleOrder::find($id);
+
+    // Fetch scheme pcs product based
+    $scheme_Pcs = DB::table('sale_orders as so')
+        ->leftJoin('sale_order_data as sod', 'sod.so_id', '=', 'so.id')
+        ->leftJoin('scheme_product_pcs as sp', 'sp.id', '=', 'sod.scheme_id_pcs')
+        ->leftJoin('scheme_product_data_pcs as spd', 'spd.scheme_id', '=', 'sp.id')
+        ->leftJoin('products as p', 'p.id', '=', 'spd.product_id')
+        ->where('so.id', $id)
+        ->select(
+            'p.id as product_id',
+            'p.product_name',
+            'spd.scheme_Pcs',
+            'sod.scheme_data_pcs'
+        )
+        ->get()
+        ->keyBy('product_id');  // ⭐ important
+
+    return view($this->page.'viewSalesOrder', compact('so', 'scheme_Pcs'));
+}
+
 
 
     /**

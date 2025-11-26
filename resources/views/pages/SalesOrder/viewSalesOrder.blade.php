@@ -375,121 +375,134 @@ h2,h3,h4,p,table{margin:0;padding:0;}
     </div>
 
 
-    <!-- ITEMS TABLE -->
-    <table class="item-table">
+ <!-- ITEMS TABLE -->
+<table class="item-table">
+    <tr>
+        <th><u>S#</u></th>
+        <th colspan="3"><u>Item Name</u></th>
+        <th><u>Packing</u></th>
+        <th><u>Brand</u></th>
+        <th><u>Qty</u></th>
+        <th><u>T.P</u></th>
+        <th><u>Amount</u></th>
+        <th><u>SCH D</u></th>
+        <th><u>Fu</u></th>
+        <th><u>T/O</u></th>
+        <th><u>AMT</u></th>
+        <th><u>A&D AMT</u></th>
+        <th><u>%</u></th>
+        <th><u>AddDisco</u></th>
+        <th><u>Final Amount</u></th>
+    </tr>
 
-        <tr>
-            <th><u>S#</u></th>
-            <th colspan="3"><u>Item Name</u></th>
-            <th><u>Packing</u></u></th>
-            <th><u>Brand</th>
-            <th><u>Qty</u></th>
-            <th><u>T.P</u></th>
-            <th><u>Amount</u></th>
-            <th><u>SC/B</u></th>
-            <th><u>Eu</u></th>
-            <th><u>T/O</u></th>
-            <th><u>AMT</u></th>
-            <th><u>A&D AMT</u></th>
-            <th><u>%</u></th>
-            <th><u>AddDisco</u></th>
-            <th><u>Final Amount</u></th>
-        </tr>
+    @php
+        $s = 1;
+        $grand_total = 0;
+        $total_qty = 0; // ADD THIS
+        $total_scheme_pcs = 0; // ADD THIS
+    @endphp
 
+    @foreach($so->saleOrderData as $row)
         @php
-            $s = 1;
-            $grand_total = 0;
+
+         $total_item_amount = $row->qty * $row->rate;
+            $amt = ($row->trade_offer_amount > 0)
+                ? ($row->trade_offer_amount * $row->qty)
+                : 0;
+            
+            $grand_total += ($total_item_amount) - ($row->scheme_amount) - ($amt);
+            $a_d_amt = ($total_item_amount) - ($row->scheme_amount) - ($amt);
+            $toal_amount = ($total_item_amount) - ($row->scheme_amount) - ($amt);
+            $pid = $row->product_id;
+            
+            // Calculate totals
+            $total_qty += $row->qty;
+            
+            // Get scheme pcs value - FIXED: Use scheme_data_pcs instead of scheme_Pcs
+            $scheme_pcs_value = 0;
+            if(isset($scheme_Pcs[$pid]) && $scheme_Pcs[$pid]->scheme_data_pcs > 0) {
+                $scheme_pcs_value = $scheme_Pcs[$pid]->scheme_data_pcs;
+                $total_scheme_pcs += $scheme_pcs_value;
+            }
+
+           
         @endphp
 
-        @foreach($so->saleOrderData as $row)
-            @php
-                $grand_total += $row->total;
-            @endphp
+        <tr>
+            <td>{{ $s++ }}</td>
+            <td colspan="3">{{ $row->product->product_name ?? '' }}</td>
+            <td>{{ $row->product->packing_size ?? '' }}</td>
+            <td>{{ $row->product->brand ?? '' }}</td>
+            <td>{{ number_format($row->qty) }}</td>
+            <td>{{ number_format($row->rate, 2) }}</td>
+            <td>{{ number_format($total_item_amount , 2) }}</td>
+            <td>{{ number_format($row->scheme_amount, 2) }}</td>
 
-            <tr>
-                <td>{{ $s++ }}</td>
-                <td colspan="3">{{ $row->product->product_name ?? '' }}</td>
-          
-                <td>{{ $row->product->packing_size ?? '' }}</td>
-                <!-- <td>{{ $row->product_flavour->flavour_name ?? '' }}</td> -->
-                <td>{{ $row->product->brand ?? '' }}</td>
-                <td>{{ number_format($row->qty) }}</td>
-                <td>{{ number_format($row->rate, 2) }}</td>
-                <td>{{ number_format($row->total, 2) }}</td>
+            <!-- ⭐ FU (Scheme PCS for each product) - FIXED -->
+            <td>
+                @if($scheme_pcs_value > 0)
+                    {{ number_format($scheme_pcs_value, 2) }}
+                @else
+                    0.00
+                @endif
+            </td>
 
-                <td>{{ number_format($row->discount, 2) }}</td>
-                <td>{{ number_format($row->scheme_amount, 2) }}</td>
-                <td>{{ number_format($row->trade_offer_amount, 2) }}</td>
-                <td>{{ number_format($row->discount_amount, 2) }}</td>
-                <td>{{ number_format($row->discount_amount, 2) }}</td>
-                <td>{{ $so->discount_percent }}</td>
+            <td>{{ number_format($row->trade_offer_amount, 2) }}</td>
+            <td>{{ number_format($amt, 2) }}</td>
+            <td>{{ number_format($a_d_amt, 2) }}</td>
+            <td>{{ $so->discount_percent }}</td>
+            <td>0</td>
+            <td>{{ number_format($toal_amount, 2) }}</td>
+        </tr>
+    @endforeach
+</table>
 
-                <td>0</td> {{-- Static: Add/Less --}}
-
-                <td>{{ number_format($row->total, 2) }}</td>
-            </tr>
-
-        @endforeach
-    </table>
-
-    
-    <!-- SUMMARY -->
-    <div class="summary-box">
-        
-        <div class="left-box">
-            <p><b>For Inquiry/Complaint:</b><br>
-            Contact/WhatsApp: 0300-0813906<br>
-            Email us at: support@dailyfoodindustries.com
+<!-- SUMMARY -->
+<div class="summary-box">
+    <div class="left-box">
+        <p><b>For Inquiry/Complaint:</b><br>
+        Contact/WhatsApp: 0300-0813906<br>
+        Email us at: support@dailyfoodindustries.com
         </p>
     </div>
     
-        <div class="right-summary">
-            <table class="item-table2">
-                <tr style="border-bottom:5px solid #000;">
-                    <td style="text-align:left;"><u>{{$total_qty}}</u></td>
-                    <td></td>
-                    <td colspan="3"></td>
-                    <td></td>
-                    <td><u>{{number_format($grand_total, 2)}}</u></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td><u>00</u></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td colspan="2"><u>0.00</u></td>
-                    <td style="text-align:right;"><u>{{number_format($grand_total, 2)}}</u></td>
-                </tr>
+    <div class="right-summary">
+        <table class="item-table2">
+            <tr style="border-bottom:5px solid #000;">
+                <td style="text-align:left;"><u>{{ number_format($total_qty) }}</u></td> <!-- FIXED -->
+                <td></td>
+                <td colspan="3"></td>
+                <td></td>
+                <td><u>{{ number_format($grand_total, 2) }}</u></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><u>{{ number_format($total_scheme_pcs, 2) }}</u></td> <!-- Fu Total - FIXED -->
+                <td></td>
+                <td></td>
+                <td></td>
+                <td colspan="2"><u>0.00</u></td>
+                <td style="text-align:right;"><u>{{ number_format($grand_total, 2) }}</u></td>
+            </tr>
+        </table>
         
-            </table>
-            
-            
-            <table class="item-table" style="width:55%;float:right;border: none !important;">
-
-                <tr>
-                    <td style=" text-align:left;">
-                         <p><b>Targeted Discount in %:</b> {{ $so->discount_percent }}</p>
-                    </td>
-                </tr>
-
-
-                <tr style=" border:1px solid #000;">
-                    <td style=" text-align:left;">
-                        <p><b><u>TOTAL NET AMOUNT</u></b></p>
-                    </td>
-
-                    <td  style=" text-align:right;">
-                        <p><b><u>{{ number_format($grand_total - $so->discount_amount, 2) }}</u></b></p>
-                    </td>
-                </tr>
-
-            </table>
-
-
-        </div>
-
+        <table class="item-table" style="width:55%;float:right;border: none !important;">
+            <tr>
+                <td style=" text-align:left;">
+                    <p><b>Targeted Discount in %:</b> {{ $so->discount_percent }}</p>
+                </td>
+            </tr>
+            <tr style=" border:1px solid #000;">
+                <td style=" text-align:left;">
+                    <p><b><u>TOTAL NET AMOUNT</u></b></p>
+                </td>
+                <td style=" text-align:right;">
+                    <p><b><u>{{ number_format($grand_total - $so->discount_amount, 2) }}</u></b></p>
+                </td>
+            </tr>
+        </table>
     </div>
+</div>
 
     @if($so->payment_type == 'credit')
 

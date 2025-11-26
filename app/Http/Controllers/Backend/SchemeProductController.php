@@ -306,6 +306,11 @@ public function destroy_pcs($id)
         $product_id = $request->product_id;
         $qty = $request->qty;
  	$dcdate = $request->dcdate;
+ 	$rate = $request->rate;
+
+
+
+
 
         $scheme_product = SchemeProduct::Status()->Active()
         ->join('scheme_product_data' , 'scheme_product_data.scheme_id' , 'scheme_product.id')
@@ -324,6 +329,62 @@ public function destroy_pcs($id)
         ->select('scheme_product_pcs.scheme_name','scheme_product_pcs.id as scheme_id_pcs', 'scheme_product_data_pcs.id as scheme_data_id_pcs' , 'scheme_product_data_pcs.qty' , 'scheme_product_data_pcs.scheme_Pcs')
         ->get();
       
+
+  $scheme_product_pcs_sch = SchemeProductPcs::Status()->Active()
+        ->join('scheme_product_data_pcs', 'scheme_product_data_pcs.scheme_id', 'scheme_product_pcs.id')
+        ->whereRaw("FIND_IN_SET(?, scheme_product_data_pcs.product_id)", [$product_id])
+        ->whereDate('scheme_product_pcs.start_date', '<=', $dcdate)
+        ->whereDate('scheme_product_pcs.end_date', '>=', $dcdate)
+    
+        ->select(
+            'scheme_product_pcs.scheme_name',
+            'scheme_product_pcs.id as scheme_id_pcs',
+            'scheme_product_data_pcs.id as scheme_data_id_pcs',
+            'scheme_product_data_pcs.qty',
+            'scheme_product_data_pcs.scheme_Pcs'
+        )
+        ->orderByDesc('scheme_product_data_pcs.qty') // pick highest threshold first
+        ->first();
+
+    if (!$scheme_product_pcs_sch) {
+       $schemeAmount = 0;
+    }
+
+    $schemeQty = $scheme_product_pcs_sch->qty;             
+    $freePcs   = floatval($scheme_product_pcs_sch->scheme_Pcs); 
+    $enteredQty = $qty;                                    
+    $productRate = $rate;
+
+    // Calculate number of free PCS based on multiples of schemeQty
+    $applicableSchemes = floor($enteredQty / $schemeQty);
+    $totalFreePcs = $freePcs * $applicableSchemes;
+
+    // Total units = schemeQty + free units (for per unit calculation)
+    $totalUnits = $schemeQty + $freePcs;
+
+    // Single unit value
+    $sch_single_value = $productRate / $totalUnits;
+
+    // Calculate scheme amount (without free units)
+    $remainder = $enteredQty % $schemeQty;
+    if ($remainder == 0 || $enteredQty < $schemeQty) {
+        $schemeAmount = ($enteredQty < $schemeQty) ? $sch_single_value * $enteredQty : 0;
+    } else {
+        $schemeAmount = $sch_single_value * $remainder;
+    }
+
+    // return response()->json([
+    //     'success' => true,
+    //     'scheme_name' => $scheme_product_pcs_sch->scheme_name,
+    //     'scheme_qty' => $schemeQty,
+    //     'free_pcs_per_scheme' => $freePcs,
+    //     'total_free_pcs' => $totalFreePcs,
+    //     'entered_qty' => $enteredQty,
+    //     'total_units' => $totalUnits,
+    //     'sch_single_value' => round($sch_single_value, 2),
+    //     'scheme_amount' => round($schemeAmount, 2)
+    // ]);
+  
       
 
         // return $this->sendResponse($scheme_product,'Products retrieved successfully.');
@@ -331,6 +392,7 @@ public function destroy_pcs($id)
             'success' => true,
             'scheme_product'    => $scheme_product,
             'scheme_product_pcs'    => $scheme_product_pcs,
+             'scheme_amount_pcs' => round($schemeAmount, 2)
         ];
         return response()->json($response, 200);
 

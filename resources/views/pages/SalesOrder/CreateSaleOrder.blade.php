@@ -11,6 +11,8 @@ $master = new MasterFormsHelper();
     height: auto !important;
 
 }
+
+
 </style>
 
     <section id="multiple-column-form">
@@ -192,10 +194,10 @@ $master = new MasterFormsHelper();
                                                     <th class="hide">
                                                         <div>Tax (%)</div>
                                                     </th>
-                                                    <th>
+                                                    <th class="hide">
                                                         <div>Scheme Product </div>
                                                     </th>
-                                                    <th>
+                                                    <th class="hide">
                                                         <div>Scheme Amount </div>
                                                     </th>
                                                     <th>
@@ -203,6 +205,9 @@ $master = new MasterFormsHelper();
                                                     </th>
                                                     <th>
                                                         <div>Scheme Pcs </div>
+                                                    </th>
+                                                    <th>
+                                                        <div>SCH D</div>
                                                     </th>
                                                     <th>
                                                         <div>Total </div>
@@ -250,12 +255,12 @@ $master = new MasterFormsHelper();
                                                     <td>
                                                         <input style="width: 130px !important;"  onkeyup="calc(this)" class="form-control trade_offer_amount" type="number" name="trade_offer_amount[]" value="0">
                                                     </td> -->
-                                                    <td>
+                                                    <td class="hide">
                                                         <select style="width: 130px !important;"  name="scheme_id[]" onchange="get_scheme_amount(this);" id="" class="form-control scheme_product">
                                                             <option value="">Select</option>
                                                         </select>
                                                     </td>
-                                                    <td>
+                                                    <td class="hide">
                                                         <input style="width: 130px !important;"  readonly class="form-control scheme_amount" step="any" type="number" name="scheme_amount[]" value="0">
                                                     </td>
                                                     <td class="hide">
@@ -269,6 +274,10 @@ $master = new MasterFormsHelper();
                                                     <td>
                                                         <input style="width: 130px !important;"  readonly class="form-control scheme_pcs" step="any" type="number" name="scheme_pcs[]" value="0">
                                                     </td>
+
+                                                    <td>
+        <input style="width: 130px !important;" readonly class="form-control sch_d" type="number" name="sch_d[]" value="0">
+    </td>
                                                     <td class="hide">
                                                         <input style="width: 130px !important;"  readonly class="form-control scheme_pcs_total" step="any" type="number" name="scheme_product_pcs_total[]" value="0">
                                                     </td>
@@ -565,12 +574,12 @@ $master = new MasterFormsHelper();
                 <td>
                     <input onkeyup="calc(this)" class="form-control trade_offer_amount" type="text" name="trade_offer_amount[]" value="0">
                 </td>-->
-                <td>
+                <td class="hide">
                     <select name="scheme_id[]" onchange="get_scheme_amount(this);" id="" class="form-control scheme_product">
                         <option value="">Select</option>
                     </select>
                 </td>
-                <td>
+                <td class="hide">
                     <input readonly class="form-control scheme_amount" step="any" type="number" name="scheme_amount[]" value="0">
                 </td>
                 <td class="hide">
@@ -584,6 +593,10 @@ $master = new MasterFormsHelper();
                 <td>
                     <input readonly class="form-control scheme_pcs" step="any" type="number" name="scheme_pcs[]" value="0">
                 </td>
+
+                 <td>
+        <input style="width: 130px !important;" readonly class="form-control sch_d" type="number" name="sch_d[]" value="0">
+    </td>
                 <td class="hide">
                     <input readonly class="form-control scheme_pcs_total" step="any" type="number" name="scheme_product_pcs_total[]" value="0">
                 </td>
@@ -649,6 +662,7 @@ $master = new MasterFormsHelper();
                 // Get values and ensure they are numbers
                 var rate = Number($this.closest('tr').find('.data-rate').val()) || 0;
                 var qty = Number($this.closest('tr').find('.data-quantity').val()) || 0;
+                var sch_d = Number($this.closest('tr').find('.sch_d').val()) || 0;
                 var scheme_pcs_total = Number($this.closest('tr').find('.scheme_pcs_total').val()) || 0;
                 var scheme_qty = Number($this.closest('tr').find('.scheme_qty').val()) || 1; // Avoid division by zero
                 var tax = Number($this.closest('tr').find('.data-tax-percent').val()) || 0;
@@ -689,9 +703,8 @@ $this.closest('tr').find('.scheme_pcs').val(totalApplicableSchemes);
                 console.log("Total:", total, "Discount Total:", discount_total, "Discount Percent:", discount_percent);
 
                 // Calculate final total
-                var data_total = total - discount_total + tax_amount - trade_offer_amount - scheme_amount1;
-               // $this.closest('tr').find('.data-total').val(data_total);
-			$this.closest('tr').find('.data-total').val(parseInt(data_total));
+             var data_total = total - discount_total + tax_amount - trade_offer_amount - sch_d;
+$this.closest('tr').find('.data-total').val(parseInt(data_total));
 
                 // Call calculation function
                 calculation();
@@ -871,38 +884,96 @@ $this.closest('tr').find('.scheme_pcs').val(totalApplicableSchemes);
 //             });
 //         }
 //     });
-// }
+// // }
 
+// function get_scheme_product(val) {
+//     var row = $(val).closest('tr');
+//     var qty = row.find('.data-quantity').val();
+//     var product_id = row.find('.product_id').val();
+//   	var dcdate = $('#dcdate').val();
+
+//     // Store previously selected values
+//     var previousSelectedScheme = row.find('.scheme_product').val();
+//     var previousSelectedSchemePcs = row.find('.scheme_product_pcs').val();
+
+//     console.log("Previous Selected Scheme:", previousSelectedScheme);
+//     console.log("Previous Selected Scheme PCS:", previousSelectedSchemePcs);
+    
+//     $.ajax({
+//         type: "get",
+//         url: '{{ route('get_scheme_product') }}',
+//         data: {
+//             product_id: product_id,
+//             qty: qty,
+//  	dcdate: dcdate,
+//         },
+//         dataType: 'json',
+//         success: function(data) {
+//             console.log(data);
+
+//             // Clear old options but keep previous value temporarily
+//             let $schemeDropdown = row.find('.scheme_product');
+//             let $schemePcsDropdown = row.find('.scheme_product_pcs');
+
+//             // Empty existing options and add a placeholder option
+//             $schemeDropdown.empty().append('<option value="">Select</option>');
+//             $schemePcsDropdown.empty().append('<option value="">Select</option>');
+
+//             let schemeOptions = [];
+//             let schemePcsOptions = [];
+
+//             // Populate scheme_product dropdown
+//             $.each(data.scheme_product, function(key, value) {
+//                 let optionValue = value.scheme_id + ',' + value.scheme_data_id;
+//                 let optionText = value.scheme_name + '--qty ' + value.qty;
+                
+//                 let option = `<option value="${optionValue}" data-scheme_amount="${value.scheme_amount}" data-qty="${value.qty}">${optionText}</option>`;
+//                 schemeOptions.push(option);
+//             });
+
+//             // Populate scheme_product_pcs dropdown
+//             $.each(data.scheme_product_pcs, function(key, value) {
+//                 let optionValue = value.scheme_id_pcs + ',' + value.scheme_data_id_pcs;
+//                 let optionText = value.scheme_name + '--qty ' + value.qty;
+                
+//                 let option = `<option value="${optionValue}" data-scheme_pcs_get="${value.qty}" data-scheme_pcs="${value.scheme_Pcs}">${optionText}</option>`;
+//                 schemePcsOptions.push(option);
+//             });
+
+//             // Append all options at once (better performance)
+    
+//         }
+//     });
+// }
 function get_scheme_product(val) {
+
     var row = $(val).closest('tr');
     var qty = row.find('.data-quantity').val();
+    var rate = row.find('.data-rate').val();
     var product_id = row.find('.product_id').val();
-  	var dcdate = $('#dcdate').val();
+    var dcdate = $('#dcdate').val();
 
-    // Store previously selected values
-    var previousSelectedScheme = row.find('.scheme_product').val();
-    var previousSelectedSchemePcs = row.find('.scheme_product_pcs').val();
+    // Store previous selections BEFORE clearing dropdown
+    var previousSelectedScheme = row.find('.scheme_product').val() || "";
+    var previousSelectedSchemePcs = row.find('.scheme_product_pcs').val() || "";
 
-    console.log("Previous Selected Scheme:", previousSelectedScheme);
-    console.log("Previous Selected Scheme PCS:", previousSelectedSchemePcs);
-    
     $.ajax({
         type: "get",
         url: '{{ route('get_scheme_product') }}',
         data: {
             product_id: product_id,
             qty: qty,
- 	dcdate: dcdate,
+            dcdate: dcdate,
+            rate: rate,
         },
         dataType: 'json',
-        success: function(data) {
-            console.log(data);
+        success: function (data) {
 
-            // Clear old options but keep previous value temporarily
             let $schemeDropdown = row.find('.scheme_product');
             let $schemePcsDropdown = row.find('.scheme_product_pcs');
+            let $schDInput = row.find('.sch_d'); // SCH D input
 
-            // Empty existing options and add a placeholder option
+            // Reset old options
             $schemeDropdown.empty().append('<option value="">Select</option>');
             $schemePcsDropdown.empty().append('<option value="">Select</option>');
 
@@ -910,43 +981,165 @@ function get_scheme_product(val) {
             let schemePcsOptions = [];
 
             // Populate scheme_product dropdown
-            $.each(data.scheme_product, function(key, value) {
-                let optionValue = value.scheme_id + ',' + value.scheme_data_id;
-                let optionText = value.scheme_name + '--qty ' + value.qty;
-                
-                let option = `<option value="${optionValue}" data-scheme_amount="${value.scheme_amount}" data-qty="${value.qty}">${optionText}</option>`;
+            $.each(data.scheme_product, function (key, value) {
+                let option =
+                    `<option value="${value.scheme_id},${value.scheme_data_id}"
+                        data-scheme_amount="${value.scheme_amount}"
+                        data-qty="${value.qty}">
+                        ${value.scheme_name} -- qty ${value.qty}
+                    </option>`;
                 schemeOptions.push(option);
             });
 
             // Populate scheme_product_pcs dropdown
-            $.each(data.scheme_product_pcs, function(key, value) {
-                let optionValue = value.scheme_id_pcs + ',' + value.scheme_data_id_pcs;
-                let optionText = value.scheme_name + '--qty ' + value.qty;
-                
-                let option = `<option value="${optionValue}" data-scheme_pcs_get="${value.qty}" data-scheme_pcs="${value.scheme_Pcs}">${optionText}</option>`;
+            $.each(data.scheme_product_pcs, function (key, value) {
+                let option =
+                    `<option value="${value.scheme_id_pcs},${value.scheme_data_id_pcs}"
+                        data-scheme_pcs_get="${value.qty}"
+                        data-scheme_pcs="${value.scheme_Pcs}">
+                        ${value.scheme_name} -- qty ${value.qty}
+                    </option>`;
                 schemePcsOptions.push(option);
             });
 
-            // Append all options at once (better performance)
+            // Append options
             $schemeDropdown.append(schemeOptions.join(''));
             $schemePcsDropdown.append(schemePcsOptions.join(''));
 
-            // Re-select previous values if they still exist in new options
-            // First, check if the previous selected option is available in the new list
-            if ($schemeDropdown.find(`option[value="${previousSelectedScheme}"]`).length > 0) {
+            // ------------------------------
+            // Auto Restore OR Auto Select First
+            // ------------------------------
+
+            // SCHEME PRODUCT
+            if (previousSelectedScheme &&
+                $schemeDropdown.find(`option[value="${previousSelectedScheme}"]`).length > 0) {
                 $schemeDropdown.val(previousSelectedScheme);
+            } else if ($schemeDropdown.find("option:eq(1)").length > 0) {
+                $schemeDropdown.find("option:eq(1)").prop("selected", true);
             }
 
-            if ($schemePcsDropdown.find(`option[value="${previousSelectedSchemePcs}"]`).length > 0) {
+            // SCHEME PRODUCT PCS
+            if (previousSelectedSchemePcs &&
+                $schemePcsDropdown.find(`option[value="${previousSelectedSchemePcs}"]`).length > 0) {
                 $schemePcsDropdown.val(previousSelectedSchemePcs);
+            } else if ($schemePcsDropdown.find("option:eq(1)").length > 0) {
+                $schemePcsDropdown.find("option:eq(1)").prop("selected", true);
             }
 
-            // Trigger change event in case there are any event listeners attached
+            // ------------------------------
+            // Update SCH D column
+            // ------------------------------
+            if(data.scheme_amount_pcs !== undefined){
+                $schDInput.val(parseFloat(data.scheme_amount_pcs).toFixed(2));
+            } else {
+                $schDInput.val(0);
+            }
+
+            // Trigger change events
             $schemeDropdown.trigger('change');
             $schemePcsDropdown.trigger('change');
         }
     });
 }
+
+// function get_scheme_product(val) {
+
+//     var row = $(val).closest('tr');
+//     var qty = row.find('.data-quantity').val();
+//     var rate = row.find('.data-rate').val();
+//     var product_id = row.find('.product_id').val();
+//     var dcdate = $('#dcdate').val();
+
+//     // Store previous selections BEFORE clearing dropdown
+//     var previousSelectedScheme = row.find('.scheme_product').val() || "";
+//     var previousSelectedSchemePcs = row.find('.scheme_product_pcs').val() || "";
+
+//     $.ajax({
+//         type: "get",
+//         url: '{{ route('get_scheme_product') }}',
+//         data: {
+//             product_id: product_id,
+//             qty: qty,
+//             dcdate: dcdate,
+//             rate: rate,
+//         },
+//         dataType: 'json',
+//         success: function (data) {
+
+//             let $schemeDropdown = row.find('.scheme_product');
+//             let $schemePcsDropdown = row.find('.scheme_product_pcs');
+
+//             // Reset old options
+//             $schemeDropdown.empty().append('<option value="">Select</option>');
+//             $schemePcsDropdown.empty().append('<option value="">Select</option>');
+
+//             let schemeOptions = [];
+//             let schemePcsOptions = [];
+
+//             // Populate scheme_product dropdown
+//             $.each(data.scheme_product, function (key, value) {
+
+//                 let option =
+//                     `<option value="${value.scheme_id},${value.scheme_data_id}"
+//                         data-scheme_amount="${value.scheme_amount}"
+//                         data-qty="${value.qty}">
+//                         ${value.scheme_name} -- qty ${value.qty}
+//                     </option>`;
+
+//                 schemeOptions.push(option);
+//             });
+
+//             // Populate scheme_product_pcs dropdown
+//             $.each(data.scheme_product_pcs, function (key, value) {
+
+//                 let option =
+//                     `<option value="${value.scheme_id_pcs},${value.scheme_data_id_pcs}"
+//                         data-scheme_pcs_get="${value.qty}"
+//                         data-scheme_pcs="${value.scheme_Pcs}">
+//                         ${value.scheme_name} -- qty ${value.qty}
+//                     </option>`;
+
+//                 schemePcsOptions.push(option);
+//             });
+
+//             // Append options
+//             $schemeDropdown.append(schemeOptions.join(''));
+//             $schemePcsDropdown.append(schemePcsOptions.join(''));
+
+//             // ------------------------------
+//             // Auto Restore OR Auto Select First
+//             // ------------------------------
+
+//             // SCHEME PRODUCT
+//             if (previousSelectedScheme &&
+//                 $schemeDropdown.find(`option[value="${previousSelectedScheme}"]`).length > 0) {
+
+//                 $schemeDropdown.val(previousSelectedScheme);
+
+//             } else if ($schemeDropdown.find("option:eq(1)").length > 0) {
+
+//                 // Auto-select first real option
+//                 $schemeDropdown.find("option:eq(1)").prop("selected", true);
+//             }
+
+//             // SCHEME PRODUCT PCS
+//             if (previousSelectedSchemePcs &&
+//                 $schemePcsDropdown.find(`option[value="${previousSelectedSchemePcs}"]`).length > 0) {
+
+//                 $schemePcsDropdown.val(previousSelectedSchemePcs);
+
+//             } else if ($schemePcsDropdown.find("option:eq(1)").length > 0) {
+
+//                 // Auto-select first real option
+//                 $schemePcsDropdown.find("option:eq(1)").prop("selected", true);
+//             }
+
+//             // Trigger change events
+//             $schemeDropdown.trigger('change');
+//             $schemePcsDropdown.trigger('change');
+//         }
+//     });
+// }
 
 
 function validateSchemeSelection(selectBox) {

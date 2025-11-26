@@ -554,20 +554,55 @@ class ExecutionController extends Controller
         return view($this->page.'bill_printing');
     }
 
-    function multi_so_view(Request $request)
-    {
-        $ids = $request->ids;
-        // dd($ids);
-        if ($ids) {
-            $sos = SaleOrder::with('shop:company_name,id,route_id','distributor:distributor_name,id','tso:name,id','saleOrderData')
-                    ->whereIn('id',$ids)
-                    ->get();
+    // function multi_so_view(Request $request)
+    // {
+    //     $ids = $request->ids;
+    //     // dd($ids);
+    //     if ($ids) {
+    //         $sos = SaleOrder::with('shop:company_name,id,route_id','distributor:distributor_name,id','tso:name,id','saleOrderData')
+    //                 ->whereIn('id',$ids)
+    //                 ->get();
 
-            return view($this->page.'multi_so_view',compact('sos'));
+    //         return view($this->page.'multi_so_view',compact('sos'));
+    //     }
+    //     else{
+    //         return redirect()->back()->with('catchError',"SO not selected");
+    //     }
+    // }
+
+
+public function multi_so_view(Request $request)
+{
+    $ids = $request->ids;
+    if ($ids) {
+        $sos = SaleOrder::with('shop:company_name,id,route_id','distributor:distributor_name,id','tso:name,id','saleOrderData')
+                ->whereIn('id',$ids)
+                ->get();
+
+        // Fetch scheme pcs product for ALL sale orders
+        $scheme_Pcs = [];
+        foreach ($sos as $so) {
+            $scheme_Pcs[$so->id] = DB::table('sale_orders as so')
+                ->leftJoin('sale_order_data as sod', 'sod.so_id', '=', 'so.id')
+                ->leftJoin('scheme_product_pcs as sp', 'sp.id', '=', 'sod.scheme_id_pcs')
+                ->leftJoin('scheme_product_data_pcs as spd', 'spd.scheme_id', '=', 'sp.id')
+                ->leftJoin('products as p', 'p.id', '=', 'spd.product_id')
+                ->where('so.id', $so->id)
+                ->select(
+                    'p.id as product_id',
+                    'p.product_name',
+                    'spd.scheme_Pcs',
+                    'sod.scheme_data_pcs'
+                )
+                ->get()
+                ->keyBy('product_id');  // ⭐ important
         }
-        else{
-            return redirect()->back()->with('catchError',"SO not selected");
-        }
+
+        return view($this->page.'multi_so_view',compact('sos', 'scheme_Pcs'));
     }
+    else{
+        return redirect()->back()->with('catchError',"SO not selected");
+    }
+}
 
 }

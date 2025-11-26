@@ -252,7 +252,6 @@ h2,h3,h4,p,table{margin:0;padding:0;}
     @endforeach
 </div> -->
 
-
 <div id="content" class="container print">
     @php
         // OVERALL TOTALS OUTSIDE LOOP
@@ -274,10 +273,17 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         // INDIVIDUAL VOUCHER TOTALS
         $voucher_grand_total = 0;
         $voucher_total_qty = 0;
+        $voucher_scheme_total = 0;
         
         foreach($so->saleOrderData as $row) {
             $voucher_total_qty += $row->qty;
             $voucher_grand_total += $row->total;
+            
+            // Calculate scheme total for this voucher
+            $pid = $row->product_id;
+            if(isset($scheme_Pcs[$so->id][$pid]) && $scheme_Pcs[$so->id][$pid]->scheme_data_pcs > 0) {
+                $voucher_scheme_total += $scheme_Pcs[$so->id][$pid]->scheme_data_pcs;
+            }
         }
     @endphp
 
@@ -404,53 +410,84 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
 
     <!-- ITEMS TABLE -->
-    <table class="item-table">
+  <table class="item-table">
+    <tr>
+        <th><u>S#</u></th>
+        <th colspan="3"><u>Item Name</u></th>
+        <th><u>Packing</u></th>
+        <th><u>Brand</u></th>
+        <th><u>Qty</u></th>
+        <th><u>T.P</u></th>
+        <th><u>Amount</u></th>
+        <th><u>SCH D</u></th>
+        <th><u>Fu</u></th>
+        <th><u>T/O</u></th>
+        <th><u>AMT</u></th>
+        <th><u>A&D AMT</u></th>
+        <th><u>%</u></th>
+        <th><u>AddDisco</u></th>
+        <th><u>Final Amount</u></th>
+    </tr>
 
-        <tr>
-            <th><u>S#</u></th>
-            <th colspan="3"><u>Item Name</u></th>
-            <th><u>Packing</u></u></th>
-            <th><u>Brand</th>
-            <th><u>Qty</u></th>
-            <th><u>T.P</u></th>
-            <th><u>Amount</u></th>
-            <th><u>SC/B</u></th>
-            <th><u>Eu</u></th>
-            <th><u>T/O</u></th>
-            <th><u>AMT</u></th>
-            <th><u>A&D AMT</u></th>
-            <th><u>%</u></th>
-            <th><u>AddDisco</u></th>
-            <th><u>Final Amount</u></th>
-        </tr>
+    @php
+        $s = 1;
+        $grand_total = 0;
+        $total_qty = 0;
+        $total_scheme_pcs = 0;
+    @endphp
 
+    @foreach($so->saleOrderData as $row)
         @php
-            $s = 1;
+
+         $total_item_amount = $row->qty * $row->rate;
+            $amt = ($row->trade_offer_amount > 0)
+                ? ($row->trade_offer_amount * $row->qty)
+                : 0;
+            
+            $grand_total += ($total_item_amount) - ($row->scheme_amount) - ($amt);
+            $a_d_amt = ($total_item_amount) - ($row->scheme_amount) - ($amt);
+            $toal_amount = ($total_item_amount) - ($row->scheme_amount) - ($amt);
+            $pid = $row->product_id;
+            
+            // Calculate totals for this row
+            $total_qty += $row->qty;
+            
+            // Get scheme pcs value
+            $scheme_pcs_value = 0;
+            if(isset($scheme_Pcs[$so->id][$pid]) && $scheme_Pcs[$so->id][$pid]->scheme_data_pcs > 0) {
+                $scheme_pcs_value = $scheme_Pcs[$so->id][$pid]->scheme_data_pcs;
+                $total_scheme_pcs += $scheme_pcs_value;
+            }
         @endphp
 
-        @foreach($so->saleOrderData as $row)
-            <tr>
-                <td>{{ $s++ }}</td>
-                <td colspan="3">{{ $row->product->product_name ?? '' }}</td>
-                <td>{{ $row->product->packing_size ?? '' }}</td>
-                <td>{{ $row->product->brand ?? '' }}</td>
-                <td>{{ number_format($row->qty) }}</td>
-                <td>{{ number_format($row->rate, 2) }}</td>
-                <td>{{ number_format($row->total, 2) }}</td>
+        <tr>
+            <td>{{ $s++ }}</td>
+            <td colspan="3">{{ $row->product->product_name ?? '' }}</td>
+            <td>{{ $row->product->packing_size ?? '' }}</td>
+            <td>{{ $row->product->brand ?? '' }}</td>
+            <td>{{ number_format($row->qty) }}</td>
+            <td>{{ number_format($row->rate, 2) }}</td>
+            <td>{{ number_format($total_item_amount, 2) }}</td>
+            <td>{{ number_format($row->scheme_amount, 2) }}</td>
 
-                <td>{{ number_format($row->discount, 2) }}</td>
-                <td>{{ number_format($row->scheme_amount, 2) }}</td>
-                <td>{{ number_format($row->trade_offer_amount, 2) }}</td>
-                <td>{{ number_format($row->discount_amount, 2) }}</td>
-                <td>{{ number_format($row->discount_amount, 2) }}</td>
-                <td>{{ $so->discount_percent }}</td>
+            <!-- ⭐ FU (Scheme PCS for each product) -->
+            <td>
+                @if($scheme_pcs_value > 0)
+                    {{ number_format($scheme_pcs_value, 2) }}
+                @else
+                    0.00
+                @endif
+            </td>
 
-                <td>0</td> {{-- Static: Add/Less --}}
-
-                <td>{{ number_format($row->total, 2) }}</td>
-            </tr>
-        @endforeach
-    </table>
+            <td>{{ number_format($row->trade_offer_amount, 2) }}</td>
+            <td>{{ number_format($amt, 2) }}</td>
+            <td>{{ number_format($a_d_amt, 2) }}</td>
+            <td>{{ $so->discount_percent }}</td>
+            <td>0</td>
+            <td>{{ number_format($toal_amount, 2) }}</td>
+        </tr>
+    @endforeach
+</table>
 
     
     <!-- SUMMARY -->
@@ -466,29 +503,32 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         <div class="right-summary">
             <table class="item-table2">
                 <tr style="border-bottom:5px solid #000;">
-                    <td style="text-align:left;"><u>{{number_format($voucher_total_qty)}}</u></td>
+                    <td style="text-align:left;"><u>{{ number_format($total_qty) }}</u></td>
                     <td></td>
                     <td colspan="3"></td>
                     <td></td>
-                    <td><u>{{number_format($voucher_grand_total, 2)}}</u></td>
+                    <td><u>{{ number_format($grand_total, 2) }}</u></td>
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td><u>00</u></td>
+                    <td><u>{{ number_format($total_scheme_pcs, 2) }}</u></td> <!-- Fu Total -->
                     <td></td>
                     <td></td>
                     <td></td>
                     <td colspan="2"><u>0.00</u></td>
-                    <td style="text-align:right;"><u>{{number_format($voucher_grand_total, 2)}}</u></td>
+                    <td style="text-align:right;"><u>{{ number_format($grand_total, 2) }}</u></td>
                 </tr>
             </table>
             
+            
             <table class="item-table" style="width:55%;float:right;border: none !important;">
+
                 <tr>
                     <td style=" text-align:left;">
                          <p><b>Targeted Discount in %:</b> {{ $so->discount_percent }}</p>
                     </td>
                 </tr>
+
 
                 <tr style=" border:1px solid #000;">
                     <td style=" text-align:left;">
@@ -496,13 +536,17 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                     </td>
 
                     <td  style=" text-align:right;">
-                        <p><b><u>{{ number_format($voucher_grand_total - $so->discount_amount, 2) }}</u></b></p>
+                        <p><b><u>{{ number_format($grand_total - $so->discount_amount, 2) }}</u></b></p>
                     </td>
                 </tr>
-            </table>
-        </div>
-    </div>
 
+            </table>
+
+
+        </div>
+
+    </div>
+    
     @if($so->payment_type == 'credit')
     <!-- SIGNATURE BOXES -->
    <div class="signature-area">
@@ -525,7 +569,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
 </div>
     @endforeach
-
+</div>
     {{-- OVERALL SUMMARY (OPTIONAL) --}}
     <!-- @if(count($sos) > 1)
     <div class="overall-summary" style="margin-top: 20px; padding: 15px; border: 2px solid #000;">
@@ -540,7 +584,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         </table>
     </div>
     @endif -->
-</div>
+<!-- </div> -->
 
 <!-- new OLd copy design -->
 

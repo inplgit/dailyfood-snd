@@ -151,6 +151,8 @@ public function all_scheme_product(Request $request)
     $qty = $request->qty;
     $today = Carbon::today()->toDateString();
 
+
+
     // SchemeProduct query
     $scheme_product_query = SchemeProduct::Status()->Active()
         ->whereDate('scheme_product.end_date', '>=', $today)
