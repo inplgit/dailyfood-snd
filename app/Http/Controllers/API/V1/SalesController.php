@@ -724,26 +724,36 @@ if ($request->has('order_time') && !empty($request->order_time)) {
                 $total_qty = 0;
                 foreach ($request->product_id as $key => $product_id):
 
+                $scheme_id = 0;
+            $scheme_data_id = 0;
+            $scheme_amount = 0;
 
-                    $scheme_id = 0;
-                    $scheme_data_id = 0;
-                    $scheme_id_pcs = 0;
-                    $scheme_data_id_pcs = 0;
-                    $scheme_amount = 0; // Ensure it's defined
-                    $scheme_amount1 = 0; // Ensure it's defined
+
+            $scheme_id_pcs = 0;
+            $scheme_data_id_pcs = 0;
+            $scheme_data_pcs = 0;
                     
-                    if (!empty($request->type_scheme[$key])) { 
-                        if ($request->type_scheme[$key] === 'amount') {
-                            $scheme_id = $request->scheme_id[$key] ?? 0;
-                            $scheme_data_id = $request->scheme_data_id[$key] ?? 0;
-                            $scheme_amount = $request->scheme_value[$key] ?? 0;
-                        } elseif ($request->type_scheme[$key] === 'pcs') {
-                            $scheme_id_pcs = $request->scheme_id[$key] ?? 0;
-                            $scheme_data_id_pcs = $request->scheme_data_id[$key] ?? 0;
-                            $scheme_amount1 = $request->scheme_value[$key] ?? 0;
-                        }
-                    }
+                    // if (!empty($request->type_scheme[$key])) { 
+                    //     if ($request->type_scheme[$key] === 'amount') {
+                    //         $scheme_id = $request->scheme_id[$key] ?? 0;
+                    //         $scheme_data_id = $request->scheme_data_id[$key] ?? 0;
+                    //         $scheme_amount = $request->scheme_value[$key] ?? 0;
+                    //     } elseif ($request->type_scheme[$key] === 'pcs') {
+                    //         $scheme_id_pcs = $request->scheme_id[$key] ?? 0;
+                    //         $scheme_data_id_pcs = $request->scheme_data_id[$key] ?? 0;
+                    //         $scheme_amount1 = $request->scheme_value[$key] ?? 0;
+                    //     }
+                    // }
 
+
+                        $scheme_id = $request->scheme_id[$key] ?? 0;
+                    $scheme_data_id = $request->scheme_data_id[$key] ?? 0;
+                    $scheme_amount = $request->scheme_amount[$key] ?? 0;
+              
+                    $scheme_id_pcs = $request->scheme_id_pcs[$key] ?? 0;
+                    $scheme_data_id_pcs = $request->scheme_data_id_pcs[$key] ?? 0;
+                    $scheme_data_pcs = $request->scheme_data_pcs[$key] ?? 0;
+                
                     
                     $total = ($request->rate[$key] * $request->qty[$key]);
                     //$scheme_amount = $request->sheme_amount[$key] ?? 0;
@@ -763,13 +773,16 @@ if ($request->has('order_time') && !empty($request->order_time)) {
                         'total' => $total,
                         'sheme_product_id' => $request->shceme_product_id[$key] ?? 0,
                         'offer_qty' => $request->offer[$key] ?? 0,
-                        'scheme_id' => $scheme_id ?? 0,
-                        'scheme_data_id' => $scheme_data_id ?? 0,
-                        'scheme_amount' => $scheme_amount ?? 0,
+                         'scheme_id' => $scheme_id,
+                'scheme_data_id' => $scheme_data_id,
+                'scheme_amount' => $scheme_amount,
 
-                        'scheme_id_pcs' => $scheme_id_pcs ?? 0,
-                        'scheme_data_id_pcs' => $scheme_data_id_pcs ?? 0,
-                        'scheme_data_pcs' => $scheme_amount1 ?? 0,
+                'scheme_id_pcs' => $scheme_id_pcs,
+                'scheme_data_id_pcs' => $scheme_data_id_pcs,
+                'scheme_data_pcs' => $scheme_data_pcs,
+
+
+                        
                         'trade_offer_amount' => $trade_offer_amount,
                     ]);
                     $total_amount+= $total;
