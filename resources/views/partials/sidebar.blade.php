@@ -348,7 +348,7 @@
                             </li>
                      	
 
-                            <li>
+                            <!-- <li>
                                 <a class="d-flex align-items-center" href="#">
                                     <i data-feather="circle"></i>
                                     <span class="menu-item text-truncate">
@@ -375,7 +375,7 @@
                                         </li>
                                     
                                 </ul>
-                            </li>
+                            </li> -->
 
                         @can('Create_Category', 'Category_List')
                             <li>
