@@ -1052,15 +1052,114 @@ $this.closest('tr').find('.data-total').val(parseInt(data_total));
 //     });
 // }
 
+// function get_scheme_product(val) {
+
+//     var row = $(val).closest('tr');
+//     var qty = row.find('.data-quantity').val();
+//     var rate = row.find('.data-rate').val();
+//     var product_id = row.find('.product_id').val();
+//     var dcdate = $('#dcdate').val();
+
+//     // Store previous selections BEFORE clearing dropdown
+//     var previousSelectedScheme = row.find('.scheme_product').val() || "";
+//     var previousSelectedSchemePcs = row.find('.scheme_product_pcs').val() || "";
+
+//     $.ajax({
+//         type: "get",
+//         url: '{{ route('get_scheme_product') }}',
+//         data: {
+//             product_id: product_id,
+//             qty: qty,
+//             dcdate: dcdate,
+//             rate: rate,
+//         },
+//         dataType: 'json',
+//         success: function (data) {
+
+//             let $schemeDropdown = row.find('.scheme_product');
+//             let $schemePcsDropdown = row.find('.scheme_product_pcs');
+//             let $schDInput = row.find('.sch_d'); // SCH D input
+
+//             // Reset old options
+//             $schemeDropdown.empty().append('<option value="">Select</option>');
+//             $schemePcsDropdown.empty().append('<option value="">Select</option>');
+
+//             let schemeOptions = [];
+//             let schemePcsOptions = [];
+
+//             // Populate scheme_product dropdown
+//             $.each(data.scheme_product, function (key, value) {
+//                 let option =
+//                     `<option value="${value.scheme_id},${value.scheme_data_id}"
+//                         data-scheme_amount="${value.scheme_amount}"
+//                         data-qty="${value.qty}">
+//                         ${value.scheme_name} -- qty ${value.qty}
+//                     </option>`;
+//                 schemeOptions.push(option);
+//             });
+
+//             // Populate scheme_product_pcs dropdown
+//             $.each(data.scheme_product_pcs, function (key, value) {
+//                 let option =
+//                     `<option value="${value.scheme_id_pcs},${value.scheme_data_id_pcs}"
+//                         data-scheme_pcs_get="${value.qty}"
+//                         data-scheme_pcs="${value.scheme_Pcs}">
+//                         ${value.scheme_name} -- qty ${value.qty}
+//                     </option>`;
+//                 schemePcsOptions.push(option);
+//             });
+
+//             // Append options
+//             $schemeDropdown.append(schemeOptions.join(''));
+//             $schemePcsDropdown.append(schemePcsOptions.join(''));
+
+//             // ------------------------------
+//             // Auto Restore OR Auto Select First
+//             // ------------------------------
+
+//             // SCHEME PRODUCT
+//             if (previousSelectedScheme &&
+//                 $schemeDropdown.find(`option[value="${previousSelectedScheme}"]`).length > 0) {
+//                 $schemeDropdown.val(previousSelectedScheme);
+//             } else if ($schemeDropdown.find("option:eq(1)").length > 0) {
+//                 $schemeDropdown.find("option:eq(1)").prop("selected", true);
+//             }
+
+//             // SCHEME PRODUCT PCS
+//             if (previousSelectedSchemePcs &&
+//                 $schemePcsDropdown.find(`option[value="${previousSelectedSchemePcs}"]`).length > 0) {
+//                 $schemePcsDropdown.val(previousSelectedSchemePcs);
+//             } else if ($schemePcsDropdown.find("option:eq(1)").length > 0) {
+//                 $schemePcsDropdown.find("option:eq(1)").prop("selected", true);
+//             }
+
+//             // ------------------------------
+//             // Update SCH D column
+//             // ------------------------------
+//             if(data.scheme_amount_pcs !== undefined){
+//                 $schDInput.val(parseFloat(data.scheme_amount_pcs).toFixed(2));
+//             } else {
+//                 $schDInput.val(0);
+//             }
+
+//             // Trigger change events
+//             $schemeDropdown.trigger('change');
+//             $schemePcsDropdown.trigger('change');
+//         }
+//     });
+// }
+
+
 function get_scheme_product(val) {
 
+    
     var row = $(val).closest('tr');
     var qty = row.find('.data-quantity').val();
     var rate = row.find('.data-rate').val();
     var product_id = row.find('.product_id').val();
     var dcdate = $('#dcdate').val();
 
-    // Store previous selections BEFORE clearing dropdown
+    // Store previous selections BEFORE clearing dropdowns
     var previousSelectedScheme = row.find('.scheme_product').val() || "";
     var previousSelectedSchemePcs = row.find('.scheme_product_pcs').val() || "";
 
@@ -1074,11 +1173,42 @@ function get_scheme_product(val) {
             rate: rate,
         },
         dataType: 'json',
-        success: function (data) {
+        success: function(data) {
+            console.log('AJAX Response:', data); // Debug log
 
             let $schemeDropdown = row.find('.scheme_product');
             let $schemePcsDropdown = row.find('.scheme_product_pcs');
-            let $schDInput = row.find('.sch_d'); // SCH D input
+            let $schDInput = row.find('.sch_d');
+            // let $schemepcs = row.find('.scheme_pcs');
+
+
+let $schemepcs = row.find('.scheme_pcs');
+let freePcsValue = 0;
+
+if (data.total_free_pcs !== undefined && data.total_free_pcs !== null) {
+    freePcsValue = parseInt(data.total_free_pcs);
+    if (isNaN(freePcsValue)) freePcsValue = 0;
+}
+
+console.log('Setting scheme_pcs to:', freePcsValue);
+
+// Method 1: Remove readonly, set value, then restore
+$schemepcs.prop('readonly', false);
+$schemepcs.val(freePcsValue);
+$schemepcs.prop('readonly', true);
+
+// Method 2: Use native JavaScript
+$schemepcs[0].value = freePcsValue;
+
+// Method 3: Force DOM update
+setTimeout(function() {
+    $schemepcs.val(freePcsValue);
+}, 10);
+
+console.log('Current scheme_pcs value:', $schemepcs.val());
+
+           
+            // alert(data.total_free_pcs);
 
             // Reset old options
             $schemeDropdown.empty().append('<option value="">Select</option>');
@@ -1088,9 +1218,8 @@ function get_scheme_product(val) {
             let schemePcsOptions = [];
 
             // Populate scheme_product dropdown
-            $.each(data.scheme_product, function (key, value) {
-                let option =
-                    `<option value="${value.scheme_id},${value.scheme_data_id}"
+            $.each(data.scheme_product, function(key, value) {
+                let option = `<option value="${value.scheme_id},${value.scheme_data_id}"
                         data-scheme_amount="${value.scheme_amount}"
                         data-qty="${value.qty}">
                         ${value.scheme_name} -- qty ${value.qty}
@@ -1099,9 +1228,8 @@ function get_scheme_product(val) {
             });
 
             // Populate scheme_product_pcs dropdown
-            $.each(data.scheme_product_pcs, function (key, value) {
-                let option =
-                    `<option value="${value.scheme_id_pcs},${value.scheme_data_id_pcs}"
+            $.each(data.scheme_product_pcs, function(key, value) {
+                let option = `<option value="${value.scheme_id_pcs},${value.scheme_data_id_pcs}"
                         data-scheme_pcs_get="${value.qty}"
                         data-scheme_pcs="${value.scheme_Pcs}">
                         ${value.scheme_name} -- qty ${value.qty}
@@ -1112,6 +1240,24 @@ function get_scheme_product(val) {
             // Append options
             $schemeDropdown.append(schemeOptions.join(''));
             $schemePcsDropdown.append(schemePcsOptions.join(''));
+
+          
+// alert(data.total_free_pcs);
+
+// Set SCHEME PCS value as integer
+// if (data.total_free_pcs !== undefined && data.total_free_pcs !== null) {
+//     $schemepcs.val(parseInt(data.total_free_pcs)); // Convert to integer
+// } else {
+//     $schemepcs.val(0);
+// }
+
+
+            // Set SCH D value
+            if (data.scheme_amount_pcs !== undefined) {
+                $schDInput.val(parseFloat(data.scheme_amount_pcs).toFixed(2));
+            } else {
+                $schDInput.val(0);
+            }
 
             // ------------------------------
             // Auto Restore OR Auto Select First
@@ -1133,18 +1279,15 @@ function get_scheme_product(val) {
                 $schemePcsDropdown.find("option:eq(1)").prop("selected", true);
             }
 
-            // ------------------------------
-            // Update SCH D column
-            // ------------------------------
-            if(data.scheme_amount_pcs !== undefined){
-                $schDInput.val(parseFloat(data.scheme_amount_pcs).toFixed(2));
-            } else {
-                $schDInput.val(0);
-            }
-
             // Trigger change events
             $schemeDropdown.trigger('change');
             $schemePcsDropdown.trigger('change');
+
+            // Recalculate after setting values
+            calc(val);
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX Error:', error);
         }
     });
 }
