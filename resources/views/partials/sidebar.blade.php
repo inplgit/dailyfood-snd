@@ -285,39 +285,39 @@
                             </li> --}}
                         @endcan
 
-                        @can('Create_Scheme_Product', 'Scheme_Product_List')
-                            <!-- <li>
+                        <!-- @can('Create_Scheme_Product', 'Scheme_Product_List')
+                            <li>
                                 <a class="d-flex align-items-center" href="#">
                                     <i data-feather="circle"></i>
                                     <span class="menu-item text-truncate">
                                         Scheme Product
                                     </span>
                                 </a>
-                                <ul class="menu-content"> -->
+                                <ul class="menu-content">
                                     @can('Create_Scheme_Product')
-                                        <!-- <li>
+                                        <li>
                                             <a class="d-flex align-items-center" href="{{ url('product/scheme_product/create') }}">
                                                 <span class="menu-item text-truncate">
                                                     Add Scheme Product
                                                 </span>
                                             </a>
-                                        </li> -->
+                                        </li>
                                     @endcan
                                     @can('Scheme_Product_List')
-                                        <!-- <li>
+                                        <li>
                                             <a class="d-flex align-items-center" href="{{ url('product/scheme_product') }}">
                                                 <span class="menu-item text-truncate">
                                                     Scheme Product List
                                                 </span>
                                             </a>
-                                        </li> -->
+                                        </li>
                                     @endcan
 
 
 
                                 </ul>
                             </li>
-                        @endcan
+                        @endcan -->
 
    <li>
                                 <a class="d-flex align-items-center" href="#">
