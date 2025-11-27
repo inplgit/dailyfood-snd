@@ -61,6 +61,12 @@ Route::group(['middleware' => ['auth','track']], function() {
     Route::get('user/profileEdit', 'Backend\UserController@profileEdit')->name('user.profileEdit');
     // Route::resource('products', ProductController::class);
 
+
+
+    Route::group(['namespace' => 'Backend','prefix'=>'category'],function () {
+        Route::resource('slab_category', 'SlabCategoryController');
+    }); 
+
     Route::group(['namespace' => 'Backend','prefix'=>'product'],function () {
         Route::resource('scheme_product', 'SchemeProductController');
         Route::post('scheme_product_active/{id}', 'SchemeProductController@scheme_product_active')->name('scheme_product.active');
