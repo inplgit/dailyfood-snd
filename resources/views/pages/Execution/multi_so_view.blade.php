@@ -472,8 +472,8 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
             <!-- ⭐ FU (Scheme PCS for each product) -->
             <td>
-                @if($scheme_pcs_value > 0)
-                    {{ number_format($scheme_pcs_value, 2) }}
+                @if($row->scheme_data_pcs > 0)
+                    {{ number_format($row->scheme_data_pcs , 2) }}
                 @else
                     0.00
                 @endif
