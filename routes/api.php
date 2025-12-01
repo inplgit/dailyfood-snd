@@ -52,6 +52,9 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'API\V1'], functi
     Route::controller('ChannelController')->group(function(){
         Route::get('channels', "channels");
     });
+    Route::controller('SlabCategoryApiController')->group(function(){
+        Route::get('slabs', "getSlabs");
+    });
 
     
 
