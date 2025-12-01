@@ -157,6 +157,7 @@ Route::delete('/destroy_pcs/{id}', 'SchemeProductController@destroy_pcs')->name(
         Route::resource('department', 'DepartmentController');
         Route::resource('city', 'CityController');
         Route::resource('role', 'RoleController');
+        Route::resource('channels','ChannelController');
 
         Route::get('config', 'SettingController@config')->name('config.index');
         Route::post('config_store', 'SettingController@config_store')->name('config.store');

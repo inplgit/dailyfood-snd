@@ -348,11 +348,11 @@
                             </li>
                      	
 
-                            <!-- <li>
+                            <li>
                                 <a class="d-flex align-items-center" href="#">
                                     <i data-feather="circle"></i>
                                     <span class="menu-item text-truncate">
-                                        Slab Category
+                                        Slab
                                     </span>
                                 </a>
                                 <ul class="menu-content">
@@ -360,7 +360,7 @@
                                         <li>
                                             <a class="d-flex align-items-center" href="{{ url('category/slab_category/create') }}">
                                                 <span class="menu-item text-truncate">
-                                                    Add Slab Category
+                                                    Add Slab
                                                 </span>
                                             </a>
                                         </li>
@@ -369,13 +369,13 @@
                                         <li>
                                             <a class="d-flex align-items-center" href="{{ url('category/slab_category') }}">
                                                 <span class="menu-item text-truncate">
-                                                Slab Category List
+                                                Slab List
                                                 </span>
                                             </a>
                                         </li>
                                     
                                 </ul>
-                            </li> -->
+                            </li>
 
                         @can('Create_Category', 'Category_List')
                             <li>
@@ -1548,6 +1548,15 @@
                                 </a>
                             </li>
                         @endcan
+
+                          <li>
+                                <a class="d-flex align-items-center" href="{{ route('channels.index') }}">
+                                    <i data-feather="circle"></i>
+                                    <span class="menu-item text-truncate">
+                                       Channel
+                                    </span>
+                                </a>
+                            </li>
 
 
                         {{-- @can('Config') --}}
