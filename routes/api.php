@@ -6,12 +6,16 @@ use Illuminate\Support\Facades\Route;
 
 
 
+
 Route::get('test', function () {
     return response()->json([
         'status' => true,
         'message' => 'API working fine'
     ]);
 });
+
+
+
 
 
 // protected route
@@ -22,6 +26,7 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'API\V1'], functi
     Route::post('resgister', 'register');
     Route::post('login', 'login');
   });
+
 
   // With Auth
   Route::middleware(['auth:sanctum'])->group(function () {
@@ -41,6 +46,15 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'API\V1'], functi
       Route::get('getAttendenceList', 'getAttendenceList');
     });
 
+
+
+    
+    Route::controller('ChannelController')->group(function(){
+        Route::get('channels', "channels");
+    });
+
+    
+
     Route::controller('ShopController')->prefix('shop')->group(function () {
       Route::post('addShop', 'addShop')->middleware('check_route');
       Route::get('userWiseShopList', 'userWiseShopList');
@@ -56,6 +70,7 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'API\V1'], functi
       Route::get('order_booker_daily_activity_location_report_new', 'order_booker_daily_activity_location_report_new');
 
     });
+
 
 
 
@@ -108,6 +123,9 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'API\V1'], functi
         Route::post('scan_rack', "scan_rack");
 
     });
+
+    
+
     // Route::get('rack/search','RackController@search');
   });
 });
