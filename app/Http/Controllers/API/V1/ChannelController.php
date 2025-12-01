@@ -13,9 +13,11 @@ class ChannelController extends Controller
     {
         $channels = Channel::where('status', 1)->get();
 
-        return response()->json([
-            'success' => true,
-            'data' => $channels
-        ], 200);
+      return response()->json([
+    'success' => true,
+    'data' => $channels,
+     'message' => 'Channel list fetched successfully!',
+], 200);
+
     }
 }
