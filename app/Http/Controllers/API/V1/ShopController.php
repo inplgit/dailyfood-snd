@@ -529,6 +529,7 @@ public function order_booker_daily_activity_location_report(Request $request)
             'payment_mode'    => $request->payment_mode,
             'route_id'        => $request->route_id,
             'class'           => $request->class,
+            'channel_id'      => $request->channel_id,
             'balance_amount'  => $request->balance_amount ?? 0,
             'debit_credit'    => $request->debit_credit ?? 1,
             'image'           => $fileName,
