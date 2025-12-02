@@ -85,7 +85,7 @@ $Channel = Channel::where('status',1)->get();
                                                 </div>
                                                 <div class="col-md-2 col-2">
                                                     <label class="control-label">To Amount</label>
-                                                    <input name="to_amount[]" required type="number" step="any" value="{{ old('to_amount[]', $category->to_amount) }}" placeholder="Amount" class="form-control"/>
+                                                    <input name="to_amount[]"  type="number" step="any" value="{{ old('to_amount[]', $category->to_amount) }}" placeholder="Amount" class="form-control"/>
                                                 </div>
                                                 <div class="col-md-2 col-2">
                                                     <label class="control-label">Percentage</label>
@@ -139,7 +139,7 @@ $Channel = Channel::where('status',1)->get();
                     <input name="amount[]" required type="number" step="any" placeholder="Amount" class="form-control"/>
                 </div>
                  <div class="col-md-2 col-2">
-                    <input name="to_amount[]" required type="number" step="any" placeholder="Amount" class="form-control"/>
+                    <input name="to_amount[]" type="number" step="any" placeholder="Amount" class="form-control"/>
                 </div>
                 <div class="col-md-2 col-2">
                     <input name="percentage[]" required type="number" step="any" placeholder="Percentage" class="form-control"/>
