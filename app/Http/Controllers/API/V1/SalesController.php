@@ -598,7 +598,8 @@ public function orderCreateNew(Request $request)
             'distributor_id', 'transport_details', 'cost_center',
             'invoice_no', 'shop_id', 'notes', 'discount_percent',
             'payment_type', 'total_pcs', 'discount_amount',
-            'total_amount', 'products_subtotal', 'excecution'
+            'total_amount', 'products_subtotal', 'excecution',
+             'slab_id', 'slab_details_id', 'slab_amount'
         );
         $data['signature_image'] = $signature;
         $data['merchandising_image'] = $marchadising;
@@ -789,7 +790,20 @@ if ($request->has('order_time') && !empty($request->order_time)) {
                     $total_qty += $request->qty[$key];
                 endforeach;
                 $total_amount = $request->total_amount??$total_amount;
-                SaleOrder::find($request->id)->update(['total_amount'=>$total_amount, 'discount_percent' => $request->discount_percent, 'discount_amount' => $request->discount_amount, 'total_pcs'=>$total_qty]);
+                // SaleOrder::find($request->id)->update(['total_amount'=>$total_amount, 'discount_percent' => $request->discount_percent, 'discount_amount' => $request->discount_amount, 'total_pcs'=>$total_qty]);
+                SaleOrder::find($request->id)->update([
+                    'total_amount'     => $total_amount,
+                    'discount_percent' => $request->discount_percent,
+                    'discount_amount'  => $request->discount_amount,
+                    'total_pcs'        => $total_qty,
+
+                    // 👉 Add these
+                    'slab_id'          => $request->slab_id,
+                    'slab_details_id'  => $request->slab_details_id,
+                    'slab_amount'      => $request->slab_amount,
+                ]);
+
+           
             else:
 
             return $this->sendError('Sale excecution.', ['error'=>'Can not update because Sale is excecuted ']);
