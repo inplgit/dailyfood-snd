@@ -599,7 +599,7 @@ public function orderCreateNew(Request $request)
             'invoice_no', 'shop_id', 'notes', 'discount_percent',
             'payment_type', 'total_pcs', 'discount_amount',
             'total_amount', 'products_subtotal', 'excecution',
-             'slab_id', 'slab_details_id', 'slab_amount'
+             'slab_id', 'slab_details_id', 'slab_amount','slab_percentage'
         );
         $data['signature_image'] = $signature;
         $data['merchandising_image'] = $marchadising;
@@ -801,6 +801,7 @@ if ($request->has('order_time') && !empty($request->order_time)) {
                     'slab_id'          => $request->slab_id,
                     'slab_details_id'  => $request->slab_details_id,
                     'slab_amount'      => $request->slab_amount,
+                    'slab_percentage'      => $request->slab_percentage,
                 ]);
 
            
