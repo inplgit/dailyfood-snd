@@ -27,6 +27,7 @@ use App\Models\ReceiptVoucher;
 use App\Models\City;
 use App\Models\UsersDistributors;
 use App\Models\SubRoutes;
+use App\Models\Channel;
 use Spatie\Permission\Models\Role;
 use DB;
 use Illuminate\Support\Facades\Storage;
@@ -503,6 +504,10 @@ public static function get_sale_qty2_excute_suumary_details_with_city($from , $t
     public function get_all_shop_type()
     {
         return  ShopType::status()->get();
+    }
+    public function get_all_shop_channel()
+    {
+        return  Channel::where('status',1)->get();
     }
     public function shop_type_name($id)
     {

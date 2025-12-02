@@ -177,6 +177,18 @@ $master = new MasterFormsHelper;
                                                         </select>
                                                     </div>
                                                 </div>
+                                                    <div class="col-md-3 col-12">
+                                                            <div class="form-group">
+                                                                <label class="control-label">Shop Channel</label>
+                                                                <select name="channel_id" class="select2 form-control form-control-lg">
+                                                                    <option value="">select</option>
+                                                                    @foreach ( $master->get_all_shop_channel() as $row )
+                                                                    <option @if($shop->channel_id==$row->id) selected @endif value="{{ $row->id }}">{{ $row->name }}</option>
+                                                                    @endforeach
+
+                                                                </select>
+                                                            </div>
+                                                        </div>
                                                 <div class="col-md-3 col-12">
                                                     <div class="form-group">
                                                         <label>Shop Zone</label>

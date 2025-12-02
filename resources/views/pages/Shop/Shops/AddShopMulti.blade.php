@@ -180,11 +180,23 @@ $master = new MasterFormsHelper;
                                                         </div>
                                                         <div class="col-md-3 col-12">
                                                             <div class="form-group">
-                                                                <label class="control-label">Shop Type</label>
+                                                                <label class="control-label">Shop Category</label>
                                                                 <select name="shop_type_id" class="select2 form-control form-control-lg">
                                                                     <option value="">select</option>
                                                                     @foreach ( $master->get_all_shop_type() as $row )
                                                                     <option value="{{ $row->id }}">{{ $row->shop_type_name }}</option>
+                                                                    @endforeach
+
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3 col-12">
+                                                            <div class="form-group">
+                                                                <label class="control-label">Shop Channel</label>
+                                                                <select name="channel_id" class="select2 form-control form-control-lg">
+                                                                    <option value="">select</option>
+                                                                    @foreach ( $master->get_all_shop_channel() as $row )
+                                                                    <option value="{{ $row->id }}">{{ $row->name }}</option>
                                                                     @endforeach
 
                                                                 </select>

@@ -443,6 +443,8 @@ class ShopController extends Controller
 {
     DB::beginTransaction();
     
+
+   
     try {
         // Get all input except the relationship data
         $data = $request->except('tso_id');
