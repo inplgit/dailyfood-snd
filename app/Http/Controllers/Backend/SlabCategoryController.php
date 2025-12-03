@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\SlabCategory;
 use App\Models\SlabCategoryDetail;
+use App\Models\Shop;
 use DB;
 
 class SlabCategoryController extends Controller
@@ -196,4 +197,125 @@ class SlabCategoryController extends Controller
         SlabCategoryDetail::where('slab_categories_id' , $id)->update(['status' => 0]);
         return response()->json(['success' => 'Deleted Successfully!']);
     }
+
+public function calculateSlabDiscount(Request $request)
+    {
+        try {
+            $request->validate([
+                'shop_id' => 'required|integer|exists:shops,id',
+                'total_amount' => 'required|numeric|min:0'
+            ]);
+
+            $shopId = $request->input('shop_id');
+            $totalAmount = (float) $request->input('total_amount');
+
+            // Get shop with channel
+            $shop = Shop::with('channel')->find($shopId);
+            
+            if (!$shop) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Shop not found'
+                ], 404);
+            }
+
+            // Get channel ID
+            $channelId = $shop->channel_id;
+
+            // Calculate slab discount
+            $slabDiscount = $this->getSlabDiscount($totalAmount, $channelId);
+
+            return response()->json([
+                'success' => true,
+                'shop_id' => $shopId,
+                'channel_id' => $channelId,
+                'total_amount' => $totalAmount,
+                'slab_discount' => $slabDiscount,
+                'message' => $slabDiscount ? 'Slab discount calculated successfully' : 'No slab discount applicable'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error calculating slab discount: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get slab discount based on total amount and channel
+     *
+     * @param float $totalAmount Order total amount (before bulk discount)
+     * @param int|null $channelId Shop's channel ID
+     * @return array|null Returns discount details or null if no match
+     */
+    private function getSlabDiscount($totalAmount, $channelId)
+    {
+        // Validation
+        if ($channelId === null) {
+            return null;
+        }
+
+        // Get all active slabs for this channel
+        $matchingSlabs = SlabCategory::with(['SlabCategoryDetail' => function ($q) {
+                $q->where('status', 1)
+                  ->select('id', 'slab_categories_id', 'amount', 'to_amount', 'percentage');
+            }])
+            ->where('channel_id', $channelId)
+            ->where('active', 1)
+            ->where('status', 1)
+            ->select('id', 'slab_name', 'description', 'channel_id', 'active', 'date')
+            ->get();
+
+        if ($matchingSlabs->isEmpty()) {
+            return null;
+        }
+
+        // Iterate through matching slabs
+        foreach ($matchingSlabs as $slab) {
+            // Check each slab detail range
+            foreach ($slab->SlabCategoryDetail as $slabDetail) {
+                $amount = (float) $slabDetail->amount;
+                $toAmount = (float) $slabDetail->to_amount;
+                $percentage = (float) $slabDetail->percentage;
+
+                // Range matching logic
+                $isInRange = false;
+
+                if ($toAmount == 0) {
+                    // Last/upper range (unlimited)
+                    // Apply if totalAmount >= amount
+                    $isInRange = $totalAmount >= $amount;
+                }
+                else if ($amount == $toAmount) {
+                    // Fixed amount range
+                    // Apply if totalAmount >= amount
+                    $isInRange = $totalAmount >= $amount;
+                }
+                else {
+                    // Normal range
+                    // Apply if totalAmount is between amount and toAmount
+                    $isInRange = ($totalAmount >= $amount && $totalAmount <= $toAmount);
+                }
+
+                // If range matches, calculate and return discount
+                if ($isInRange) {
+                    $slabDiscountAmount = ($totalAmount * $percentage) / 100.0;
+
+                    return [
+                        'slab_id' => $slab->id,
+                        'slab_name' => $slab->slab_name,
+                        'slab_details_id' => $slabDetail->id,
+                        'slab_amount' => $slabDiscountAmount,
+                        'percentage' => $percentage,
+                        'amount_range' => $amount . ' - ' . ($toAmount == 0 ? '∞' : $toAmount)
+                    ];
+                }
+            }
+        }
+
+        // No matching range found
+        return null;
+    }
+
 }

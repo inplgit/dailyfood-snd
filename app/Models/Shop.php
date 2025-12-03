@@ -121,6 +121,10 @@ public function shop()
 {
     return $this->belongsToMany(Shop::class, 'shop_tso', 'tso_id', 'shop_id');
 }
+public function channel()
+{
+    return $this->belongsTo(Channel::class, 'channel_id');
+}
 
 
 }
