@@ -530,23 +530,12 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         <div class="right-summary">
             <table class="item-table2">
                 <tr style="border-bottom:5px solid #000;">
-                <td></td>
-                <td style="text-align:left;"><u>{{ number_format($total_qty) }}</u></td>
-                <td colspan="3"></td>
-                <td></td>
-                <td style=" text-align:center;width:42px !important;"><u>{{number_format($item_total_amounts,2)}}</u></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td><u>{{ number_format($a_d_amt_total, 2) }}</u></td> 
-                <td></td>
-                <td colspan="2"><u>{{number_format($row_percentage_amount_total, 2) }}</u></td>
-                <td style="text-align:right;"><u>{{ number_format($grand_total, 2) }}</u></td>
+                <td><u>{{ number_format($total_qty) }}</u></td>
+                <td><u>{{number_format($item_total_amounts,2)}}</u></td>
+                <td><u>{{number_format($a_d_amt_total,2)}}</u></td> 
+                <td><u>{{number_format($row_percentage_amount_total, 2) }}</u></td>
+                <td><u>{{ number_format($grand_total, 2) }}</u></td>
                 </tr>
-                
-
             </table>
 
 
