@@ -400,12 +400,14 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         $grand_total = 0;
         $total_qty = 0; // ADD THIS
         $total_scheme_pcs = 0; // ADD THIS
+        $item_total_amounts = 0;
     @endphp
 
     @foreach($so->saleOrderData as $row)
         @php
 
          $total_item_amount = $row->qty * $row->rate;
+
             $amt = ($row->trade_offer_amount > 0)
                 ? ($row->trade_offer_amount * $row->qty)
                 : 0;
@@ -424,7 +426,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                 $scheme_pcs_value = $scheme_Pcs[$pid]->scheme_data_pcs;
                 $total_scheme_pcs += $scheme_pcs_value;
             }
-
+            $item_total_amounts += $row->qty * $row->rate;
            
         @endphp
 
@@ -478,7 +480,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                 <td></td>
                 <td colspan="3"></td>
                 <td></td>
-                <td><u>{{ number_format($grand_total, 2) }}</u></td>
+                <td><u>{{ number_format($item_total_amounts, 2) }}</u></td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -494,15 +496,20 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         <table class="item-table" style="width:55%;float:right;border: none !important;">
             <tr>
                 <td style=" text-align:left;">
-                    <p><b>Targeted Discount in %:</b> {{ $so->discount_percent }}</p>
+                    <p><b>Targeted Discount in %:</b> {{ $so->slab_percentage }}</p>
                 </td>
             </tr>
             <tr style=" border:1px solid #000;">
                 <td style=" text-align:left;">
                     <p><b><u>TOTAL NET AMOUNT</u></b></p>
                 </td>
+                @php
+                    $base_amount = $grand_total - $so->discount_amount;
+                        $percentage_amount = ($base_amount * $so->slab_percentage) / 100;
+                        $final_amount = $base_amount - $percentage_amount;
+                    @endphp
                 <td style=" text-align:right;">
-                    <p><b><u>{{ number_format($grand_total - $so->discount_amount, 2) }}</u></b></p>
+                    <p><b><u>{{ number_format($final_amount, 2) }}</u></b></p>
                 </td>
             </tr>
         </table>
