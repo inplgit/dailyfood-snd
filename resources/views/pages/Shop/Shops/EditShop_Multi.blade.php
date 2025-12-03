@@ -168,7 +168,7 @@ $master = new MasterFormsHelper;
                                                 </div>
                                                 <div class="col-md-3 col-12">
                                                     <div class="form-group">
-                                                        <label>Shop Type</label>
+                                                        <label>Shop category</label>
                                                         <select name="shop_type_id" class="select2 form-control form-control-lg">
                                                             <option value="">select</option>
                                                            @foreach ($master->get_all_shop_type() as $row )
