@@ -18,6 +18,9 @@ use App\Models\ShopType;
 
 
 
+Route::get('/import-shops', function () {
+    return view('shop-import');
+})->name('shops.import');
 Route::post('/import-shops', function (Request $request) {
 
     ini_set('max_execution_time', 0);
@@ -65,7 +68,6 @@ Route::post('/import-shops', function (Request $request) {
 
     return back()->with('success', 'Shops updated successfully!');
 });
-
 
 /*
 |--------------------------------------------------------------------------
