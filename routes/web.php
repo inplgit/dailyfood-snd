@@ -18,58 +18,54 @@ use App\Models\ShopType;
 
 
 
-Route::get('/import-shops', function () {
-    return view('shop-import');
-})->name('shops.import');
-
 Route::post('/import-shops', function (Request $request) {
-  ini_set('max_execution_time', 0);  // unlimited time
-    ini_set('memory_limit', '-1');     // unlimited memory
+
+    ini_set('max_execution_time', 0);
+    ini_set('memory_limit', '-1');
+
     $request->validate([
-        'excel_file' => 'required|mimes:xlsx,xls,csv'
+        'excel_file' => 'required|mimes:xlsx,xls,csv',
     ]);
 
-    $path = $request->file('excel_file')->getRealPath();
-    $rows = Excel::toArray([], $path)[0];
+    $file = $request->file('excel_file');
+    $rows = Excel::toArray([], $file)[0];
 
-    foreach ($rows as $index => $row) {
+    // cache existing values
+    $channels = Channel::pluck('id','name')->toArray();
+    $types = ShopType::pluck('id','shop_type_name')->toArray();
 
-        // Skip heading
-        if ($index === 0) continue;
+    foreach ($rows as $i => $row) {
+
+        if ($i == 0) continue; // skip heading
 
         $shopCode  = trim($row[0]);
-        $category  = trim($row[1]);  // ShopType
-        $channel   = trim($row[2]);  // Channel
+        $category  = trim($row[1]);
+        $channel   = trim($row[2]);
 
         if (!$shopCode) continue;
 
-        // -------------------------------------------------------
-        // 1️⃣ CHANNEL (check → get id, else create)
-        // -------------------------------------------------------
-        $channelObj = Channel::firstOrCreate(
-            ['name' => $channel],
-            ['status' => 1]
-        );
+        // CHANNEL
+        if (!isset($channels[$channel])) {
+            $chan = Channel::create(['name' => $channel, 'status' => 1]);
+            $channels[$channel] = $chan->id;
+        }
 
-        // -------------------------------------------------------
-        // 2️⃣ SHOP TYPE (check → get id, else create)
-        // -------------------------------------------------------
-        $shopTypeObj = ShopType::firstOrCreate(
-            ['shop_type_name' => $category],
-            ['status' => 1]
-        );
+        // SHOP TYPE
+        if (!isset($types[$category])) {
+            $type = ShopType::create(['shop_type_name' => $category, 'status' => 1]);
+            $types[$category] = $type->id;
+        }
 
-        // -------------------------------------------------------
-        // 3️⃣ UPDATE SHOP RECORD
-        // -------------------------------------------------------
+        // UPDATE SHOP
         Shop::where('shop_code', $shopCode)->update([
-            'shop_type_id' => $shopTypeObj->id,
-            'channel_id'   => $channelObj->id,
+            'shop_type_id' => $types[$category],
+            'channel_id'   => $channels[$channel],
         ]);
     }
 
     return back()->with('success', 'Shops updated successfully!');
 });
+
 
 /*
 |--------------------------------------------------------------------------
