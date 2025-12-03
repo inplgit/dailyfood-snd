@@ -476,7 +476,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
             <td>{{ $so->slab_percentage }}</td>
 
         
-            <td>{{$row_percentage_amount}}</td>
+            <td>{{number_format($row_percentage_amount, 2) }}</td>
             <td>{{ number_format($pcs_per_amount, 2) }}</td>
         </tr>
     @endforeach
