@@ -98,6 +98,10 @@ class SaleOrderController extends Controller
                 'old_receivable' => $request->old_receivable ?? 0,
                 'freight_charges' => $request->freight_charges ?? 0,
                 'delivery_date' => $request->delivery_date ?? '0000-00-00',
+                'slab_id' => $request->slab_id ?? 0,
+                'slab_details_id' => $request->slab_details_id ?? 0,
+                'slab_percentage' => $request->slab_percentage ?? 0,
+                'slab_amount' => $request->slab_amount ?? 0,
 
             ]);
 
@@ -339,6 +343,10 @@ class SaleOrderController extends Controller
             'old_receivable' => $request->old_receivable ?? 0,
             'freight_charges' => $request->freight_charges ?? 0,
             'delivery_date' => $request->delivery_date ?? '0000-00-00',
+              'slab_id' => $request->slab_id ?? 0,
+                'slab_details_id' => $request->slab_details_id ?? 0,
+                'slab_percentage' => $request->slab_percentage ?? 0,
+                'slab_amount' => $request->slab_amount ?? 0,
         ]);
 
         // Remove deleted rows

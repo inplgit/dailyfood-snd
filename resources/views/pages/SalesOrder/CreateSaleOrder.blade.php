@@ -110,7 +110,7 @@ $master = new MasterFormsHelper();
                                                         <div class="col-md-3">
                                                             <div class="cust2">
                                                                 <label class="control-label">Shop</label>
-                                                                <select class="form-control select2" id="shop_id" name="shop_id"  required="">
+                                                                <select class="form-control select2 shop_id" id="shop_id" name="shop_id"  required="">
                                                                     <option value="">Select a Shop </option>
                                                                     {{-- @foreach ($shops as $shop)
                                                                         <option value="{{ $shop->id }}">{{ $shop->company_name }}</option>
@@ -420,9 +420,26 @@ $master = new MasterFormsHelper();
                                 <div class="col-md-4">
                                     <div class="total_button">
 
+
+                                       <div class="slab_discount_fields">
+                                        <label class="control-label hide">Slab ID</label>
+                                        <input type="hidden" id="slab_id" name="slab_id" class="form-control " readonly>
+                                        
+                                        <label class="control-label hide">Slab Details ID</label>
+                                        <input type="hidden" id="slab_details_id" name="slab_details_id" class="form-control " readonly>
+                                        
+                                        <label class="control-label ">Slab Percentage</label>
+                                        <input type="text" id="slab_percentage" name="slab_percentage" class="form-control" readonly>
+                                        
+                                        <label class="control-label">Slab Discount Amount</label>
+                                        <input type="text" id="slab_amount" name="slab_amount" class="form-control" readonly>
+                                        
                                         <label class="control-label">Total</label>
                                         <input id="net_total" name="total" type="number" class="change form-control" id="total" readonly="readonly" required="">
                                     </div>
+                                        <!-- <label class="control-label">Total</label>
+                                        <input id="net_total" name="total" type="number" class="change form-control" id="total" readonly="readonly" required="">
+                                    </div> -->
 
                                     <div class="button_create text-right">
                                         <input name="submit2" type="submit" id="submit2" accesskey="o" tabindex="15" class="btn btn-warning" value="Submit">
@@ -460,28 +477,171 @@ $master = new MasterFormsHelper();
         // }
 
 
-        function calculation() {
+//         function calculation() {
+//     var $total = 0;
+
+//     $('.data-total').each(function (index) {
+//         $total += parseFloat(this.value) || 0; // Ensure proper addition even if some values are empty
+//     });
+
+//     $('#products_subtotal').val($total.toFixed(2)); // Format to 2 decimal places
+
+//     var freight_charges = parseFloat($('#freight_charges').val()) || 0;
+//     var discount_percent = parseFloat($('#discount_percent').val()) || 0;
+
+//     var discount_amount = ($total / 100) * discount_percent;
+//     var $net_total = $total + freight_charges - discount_amount;
+
+//     $('#total_amount').val($net_total.toFixed(2)); // Format to 2 decimal places
+//     $('#discount_amount').val(discount_amount.toFixed(2)); // Format to 2 decimal places
+//     $('#pending_amount').val($net_total.toFixed(2)); // Format to 2 decimal places
+//     $('#net_total').val($net_total.toFixed(2)); // Format to 2 decimal places
+
+//     console.log(discount_amount.toFixed(2)); // Format to 2 decimal places in the log
+// }
+
+
+function calculation() {
     var $total = 0;
 
     $('.data-total').each(function (index) {
-        $total += parseFloat(this.value) || 0; // Ensure proper addition even if some values are empty
+        $total += parseFloat(this.value) || 0;
     });
 
-    $('#products_subtotal').val($total.toFixed(2)); // Format to 2 decimal places
+    $('#products_subtotal').val($total.toFixed(2));
 
     var freight_charges = parseFloat($('#freight_charges').val()) || 0;
     var discount_percent = parseFloat($('#discount_percent').val()) || 0;
 
     var discount_amount = ($total / 100) * discount_percent;
-    var $net_total = $total + freight_charges - discount_amount;
-
-    $('#total_amount').val($net_total.toFixed(2)); // Format to 2 decimal places
-    $('#discount_amount').val(discount_amount.toFixed(2)); // Format to 2 decimal places
-    $('#pending_amount').val($net_total.toFixed(2)); // Format to 2 decimal places
-    $('#net_total').val($net_total.toFixed(2)); // Format to 2 decimal places
-
-    console.log(discount_amount.toFixed(2)); // Format to 2 decimal places in the log
+    var $net_total_before_slab = $total + freight_charges - discount_amount;
+    
+    // Step 1: Calculate base total (bulk discount se pehle)
+    var baseTotal = $total + freight_charges; // Bulk discount se pehle
+    $('#total_amount').val(baseTotal.toFixed(2));
+    
+    // Step 2: Apply bulk discount
+    var bulkDiscountAmount = discount_amount;
+    $('#discount_amount').val(bulkDiscountAmount.toFixed(2));
+    
+    // Step 3: Calculate slab discount
+    calculateSlabDiscount(baseTotal, bulkDiscountAmount, $net_total_before_slab);
+    
+    // Note: Final total calculation ab calculateSlabDiscount function mein hoga
 }
+
+function calculateSlabDiscount(baseTotal, bulkDiscountAmount, netTotalBeforeSlab) {
+    var shopId = $('#shop_id').val();
+    
+    if (!shopId) {
+        // Reset slab discount if no shop selected
+        resetSlabDiscount(netTotalBeforeSlab);
+        return;
+    }
+    
+    $.ajax({
+        type: "GET",
+        url: "{{ route('calculate.slab.discount') }}",
+        data: {
+            shop_id: shopId,
+            total_amount: baseTotal
+        },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                if (response.slab_discount) {
+                    // Slab discount found
+                    var slabDiscount = response.slab_discount;
+                    var slabDiscountAmount = parseFloat(slabDiscount.slab_amount) || 0;
+                    
+                    // Display slab discount details
+                    $('#slab_id').val(slabDiscount.slab_id);
+                    $('#slab_id_display').val(slabDiscount.slab_id);
+                    $('#slab_details_id').val(slabDiscount.slab_details_id);
+                    $('#slab_details_id_display').val(slabDiscount.slab_details_id);
+                    $('#slab_percentage').val(slabDiscount.percentage + '%');
+                    $('#slab_amount').val(slabDiscount.slab_amount.toFixed(2));
+                    
+                    // Calculate final total
+                    // finalTotal = netTotalBeforeSlab - slabDiscountAmount
+                    var finalTotal = netTotalBeforeSlab - slabDiscountAmount;
+                    
+                    $('#pending_amount').val(finalTotal.toFixed(2));
+                    $('#net_total').val(finalTotal.toFixed(2));
+                    
+                    console.log('Slab Discount Applied:', slabDiscount);
+                    console.log('Base Total:', baseTotal);
+                    console.log('Bulk Discount:', bulkDiscountAmount);
+                    console.log('Slab Discount:', slabDiscountAmount);
+                    console.log('Final Total:', finalTotal);
+                } else {
+                    // No slab discount found
+                    resetSlabDiscount(netTotalBeforeSlab);
+                }
+            } else {
+                // Error in API response
+                resetSlabDiscount(netTotalBeforeSlab);
+                console.error('Error calculating slab discount:', response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            // AJAX error
+            resetSlabDiscount(netTotalBeforeSlab);
+            console.error('AJAX Error:', error);
+        }
+    });
+}
+
+// Function to reset slab discount
+function resetSlabDiscount(netTotalBeforeSlab) {
+    // Reset slab fields
+    $('#slab_id').val('');
+    $('#slab_id_display').val('');
+    $('#slab_details_id').val('');
+    $('#slab_details_id_display').val('');
+    $('#slab_percentage').val('0%');
+    $('#slab_amount').val('0.00');
+    
+    // Set final total (no slab discount)
+    $('#pending_amount').val(netTotalBeforeSlab.toFixed(2));
+    $('#net_total').val(netTotalBeforeSlab.toFixed(2));
+}
+
+
+
+
+$(document).on('change', '#shop_id', function() {
+    var newShopId = $(this).val();
+    
+   
+    var previousShopId = window.previousShopId || null;
+    
+  
+    window.previousShopId = newShopId;
+    
+  
+    $(this).data('previous-value', newShopId);
+    
+   
+    if (newShopId !== previousShopId && previousShopId !== null) {
+        console.log('Shop changed! Clearing previous slab discount...');
+        resetSlabDiscountFields();
+    }
+    
+
+    setTimeout(function() {
+        calculation();
+    }, 100);
+});
+
+// Jab bhi product ki quantity ya rate change ho to slab discount calculate ho
+$(document).on('keyup change', '.data-quantity, .data-rate, #freight_charges, #discount_percent', function() {
+    // Delay thoda sa ta ke calculations complete ho jayein
+    setTimeout(function() {
+        // Trigger calculation
+        calculation();
+    }, 300);
+});
 
         $(document).ready(function(){
 
