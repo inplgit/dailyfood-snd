@@ -9,6 +9,68 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
+
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Models\Shop;
+use App\Models\Channel;
+use App\Models\ShopType;
+
+
+
+Route::get('/import-shops', function () {
+    return view('shop-import');
+})->name('shops.import');
+
+Route::post('/import-shops', function (Request $request) {
+  ini_set('max_execution_time', 0);  // unlimited time
+    ini_set('memory_limit', '-1');     // unlimited memory
+    $request->validate([
+        'excel_file' => 'required|mimes:xlsx,xls,csv'
+    ]);
+
+    $path = $request->file('excel_file')->getRealPath();
+    $rows = Excel::toArray([], $path)[0];
+
+    foreach ($rows as $index => $row) {
+
+        // Skip heading
+        if ($index === 0) continue;
+
+        $shopCode  = trim($row[0]);
+        $category  = trim($row[1]);  // ShopType
+        $channel   = trim($row[2]);  // Channel
+
+        if (!$shopCode) continue;
+
+        // -------------------------------------------------------
+        // 1️⃣ CHANNEL (check → get id, else create)
+        // -------------------------------------------------------
+        $channelObj = Channel::firstOrCreate(
+            ['name' => $channel],
+            ['status' => 1]
+        );
+
+        // -------------------------------------------------------
+        // 2️⃣ SHOP TYPE (check → get id, else create)
+        // -------------------------------------------------------
+        $shopTypeObj = ShopType::firstOrCreate(
+            ['shop_type_name' => $category],
+            ['status' => 1]
+        );
+
+        // -------------------------------------------------------
+        // 3️⃣ UPDATE SHOP RECORD
+        // -------------------------------------------------------
+        Shop::where('shop_code', $shopCode)->update([
+            'shop_type_id' => $shopTypeObj->id,
+            'channel_id'   => $channelObj->id,
+        ]);
+    }
+
+    return back()->with('success', 'Shops updated successfully!');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
