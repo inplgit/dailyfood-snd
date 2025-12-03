@@ -542,7 +542,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                 <td></td>
                 <td></td>
                 <td></td>
-                <td colspan="2"><u>{{$row_percentage_amount_total}}</u></td>
+                <td colspan="2"><u>{{number_format($row_percentage_amount_total, 2) }}</u></td>
                 <td style="text-align:right;"><u>{{ number_format($grand_total, 2) }}</u></td>
             </tr>
             </table>
