@@ -401,6 +401,8 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         $total_qty = 0; // ADD THIS
         $total_scheme_pcs = 0; // ADD THIS
         $item_total_amounts = 0;
+        $a_d_amt_total = 0;
+        $row_percentage_amount_total = 0;
     @endphp
 
     @foreach($so->saleOrderData as $row)
@@ -414,6 +416,8 @@ h2,h3,h4,p,table{margin:0;padding:0;}
             
            
             $a_d_amt = ($total_item_amount) - ($row->scheme_amount) - ($amt);
+
+            $a_d_amt_total += $a_d_amt;
             $toal_amount = ($total_item_amount) - ($row->scheme_amount) - ($amt);
             $pid = $row->product_id;
             
@@ -432,6 +436,8 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
   $row_net = $a_d_amt; // already row net amount
                 $row_percentage_amount = ($row_net * $so->slab_percentage) / 100;
+
+                $row_percentage_amount_total += ($row_net * $so->slab_percentage) / 100;
                 $pcs_per_amount = $row_net - $row_percentage_amount;
 
         $grand_total += $pcs_per_amount;
@@ -496,11 +502,11 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                 <td></td>
                 <td></td>
                 <td></td>
-                <td><u>{{ number_format($total_scheme_pcs, 2) }}</u></td> <!-- Fu Total - FIXED -->
+                <td><u>{{ number_format($a_d_amt_total, 2) }}</u></td> <!-- Fu Total - FIXED -->
                 <td></td>
                 <td></td>
                 <td></td>
-                <td colspan="2"><u>0.00</u></td>
+                <td colspan="2"><u>{{$row_percentage_amount_total}}</u></td>
                 <td style="text-align:right;"><u>{{ number_format($grand_total, 2) }}</u></td>
             </tr>
         </table>
@@ -508,7 +514,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         <table class="item-table" style="width:55%;float:right;border: none !important;">
             <tr>
                 <td style=" text-align:left;">
-                    <p><b>Targeted Discount in %:</b> {{ $so->slab_percentage }}</p>
+                    <p><b>Targeted Discount in %:</b>0</p>
                 </td>
             </tr>
             <tr style=" border:1px solid #000;">

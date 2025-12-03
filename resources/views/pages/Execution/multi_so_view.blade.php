@@ -430,38 +430,54 @@ h2,h3,h4,p,table{margin:0;padding:0;}
     </tr>
 
     @php
-        $s = 1;
+         $s = 1;
         $grand_total = 0;
-        $total_qty = 0;
-        $total_scheme_pcs = 0;
-           $item_total_amounts = 0;
+        $total_qty = 0; // ADD THIS
+        $total_scheme_pcs = 0; // ADD THIS
+        $item_total_amounts = 0;
+        $a_d_amt_total = 0;
+        $row_percentage_amount_total = 0;
     @endphp
 
     @foreach($so->saleOrderData as $row)
         @php
 
          $total_item_amount = $row->qty * $row->rate;
+
             $amt = ($row->trade_offer_amount > 0)
                 ? ($row->trade_offer_amount * $row->qty)
                 : 0;
             
-            $grand_total += ($total_item_amount) - ($row->scheme_amount) - ($amt);
+           
             $a_d_amt = ($total_item_amount) - ($row->scheme_amount) - ($amt);
+
+            $a_d_amt_total += $a_d_amt;
             $toal_amount = ($total_item_amount) - ($row->scheme_amount) - ($amt);
             $pid = $row->product_id;
             
-            // Calculate totals for this row
+            // Calculate totals
             $total_qty += $row->qty;
             
-            // Get scheme pcs value
+            // Get scheme pcs value - FIXED: Use scheme_data_pcs instead of scheme_Pcs
             $scheme_pcs_value = 0;
-            if(isset($scheme_Pcs[$so->id][$pid]) && $scheme_Pcs[$so->id][$pid]->scheme_data_pcs > 0) {
-                $scheme_pcs_value = $scheme_Pcs[$so->id][$pid]->scheme_data_pcs;
+            if(isset($scheme_Pcs[$pid]) && $scheme_Pcs[$pid]->scheme_data_pcs > 0) {
+                $scheme_pcs_value = $scheme_Pcs[$pid]->scheme_data_pcs;
                 $total_scheme_pcs += $scheme_pcs_value;
             }
+            $item_total_amounts += $row->qty * $row->rate;
 
 
-               $item_total_amounts += $row->qty * $row->rate;
+
+  $row_net = $a_d_amt; // already row net amount
+                $row_percentage_amount = ($row_net * $so->slab_percentage) / 100;
+
+                $row_percentage_amount_total += ($row_net * $so->slab_percentage) / 100;
+                $pcs_per_amount = $row_net - $row_percentage_amount;
+
+        $grand_total += $pcs_per_amount;
+              
+
+           
         @endphp
 
         <tr>
@@ -471,24 +487,31 @@ h2,h3,h4,p,table{margin:0;padding:0;}
             <td>{{ $row->product->brand ?? '' }}</td>
             <td>{{ number_format($row->qty) }}</td>
             <td>{{ number_format($row->rate, 2) }}</td>
-            <td>{{ number_format($total_item_amount, 2) }}</td>
+            <td>{{ number_format($total_item_amount , 2) }}</td>
             <td>{{ number_format($row->scheme_amount, 2) }}</td>
 
-            <!-- ⭐ FU (Scheme PCS for each product) -->
+            <!-- ⭐ FU (Scheme PCS for each product) - FIXED -->
             <td>
                 @if($row->scheme_data_pcs > 0)
                     {{ number_format($row->scheme_data_pcs , 2) }}
                 @else
                     0.00
                 @endif
+                <!-- @if($scheme_pcs_value > 0)
+                    {{ number_format($scheme_pcs_value, 2) }}
+                @else
+                    0.00
+                @endif -->
             </td>
 
             <td>{{ number_format($row->trade_offer_amount, 2) }}</td>
             <td>{{ number_format($amt, 2) }}</td>
             <td>{{ number_format($a_d_amt, 2) }}</td>
-            <td>{{ $so->discount_percent }}</td>
-            <td>0</td>
-            <td>{{ number_format($toal_amount, 2) }}</td>
+            <td>{{ $so->slab_percentage }}</td>
+
+        
+            <td>{{$row_percentage_amount}}</td>
+            <td>{{ number_format($pcs_per_amount, 2) }}</td>
         </tr>
     @endforeach
 </table>
@@ -507,21 +530,21 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         <div class="right-summary">
             <table class="item-table2">
                 <tr style="border-bottom:5px solid #000;">
-                    <td style="text-align:left;"><u>{{ number_format($total_qty) }}</u></td>
-                    <td></td>
-                    <td colspan="3"></td>
-                    <td></td>
-                    <td><u>{{ number_format($item_total_amounts, 2) }}</u></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td><u>{{ number_format($total_scheme_pcs, 2) }}</u></td> <!-- Fu Total -->
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td colspan="2"><u>0.00</u></td>
-                    <td style="text-align:right;"><u>{{ number_format($grand_total, 2) }}</u></td>
-                </tr>
+                <td style="text-align:left;"><u>{{ number_format($total_qty) }}</u></td> <!-- FIXED -->
+                <td></td>
+                <td colspan="3"></td>
+                <td></td>
+                <td><u>{{ number_format($item_total_amounts, 2) }}</u></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><u>{{ number_format($a_d_amt_total, 2) }}</u></td> <!-- Fu Total - FIXED -->
+                <td></td>
+                <td></td>
+                <td></td>
+                <td colspan="2"><u>{{$row_percentage_amount_total}}</u></td>
+                <td style="text-align:right;"><u>{{ number_format($grand_total, 2) }}</u></td>
+            </tr>
             </table>
             
             
@@ -529,7 +552,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
                 <tr>
                     <td style=" text-align:left;">
-                         <p><b>Targeted Discount in %:</b> {{ $so->slab_percentage }}</p>
+                         <p><b>Targeted Discount in %:</b> 0</p>
                     </td>
                 </tr>
 
@@ -538,15 +561,16 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                     <td style=" text-align:left;">
                         <p><b><u>TOTAL NET AMOUNT</u></b></p>
                     </td>
-                        @php
+                     
+                    @php
                     $base_amount = $grand_total - $so->discount_amount;
                         $percentage_amount = ($base_amount * $so->slab_percentage) / 100;
                         $final_amount = $base_amount - $percentage_amount;
                     @endphp
-
-                    <td  style=" text-align:right;">
-                          <p><b><u>{{ number_format($final_amount, 2) }}</u></b></p>
-                    </td>
+                <td style=" text-align:right;">
+                    <p><b><u>{{ number_format($grand_total, 2) }}</u></b></p>
+                    <!-- <p><b><u>{{ number_format($final_amount, 2) }}</u></b></p> -->
+                </td>
                 </tr>
 
             </table>
