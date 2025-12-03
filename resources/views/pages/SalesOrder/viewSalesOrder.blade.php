@@ -412,7 +412,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                 ? ($row->trade_offer_amount * $row->qty)
                 : 0;
             
-            $grand_total += ($total_item_amount) - ($row->scheme_amount) - ($amt);
+           
             $a_d_amt = ($total_item_amount) - ($row->scheme_amount) - ($amt);
             $toal_amount = ($total_item_amount) - ($row->scheme_amount) - ($amt);
             $pid = $row->product_id;
@@ -427,6 +427,16 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                 $total_scheme_pcs += $scheme_pcs_value;
             }
             $item_total_amounts += $row->qty * $row->rate;
+
+
+
+  $row_net = $a_d_amt; // already row net amount
+                $row_percentage_amount = ($row_net * $so->slab_percentage) / 100;
+                $pcs_per_amount = $row_net - $row_percentage_amount;
+
+        $grand_total += $pcs_per_amount;
+              
+
            
         @endphp
 
@@ -457,9 +467,11 @@ h2,h3,h4,p,table{margin:0;padding:0;}
             <td>{{ number_format($row->trade_offer_amount, 2) }}</td>
             <td>{{ number_format($amt, 2) }}</td>
             <td>{{ number_format($a_d_amt, 2) }}</td>
-            <td>{{ $so->discount_percent }}</td>
-            <td>0</td>
-            <td>{{ number_format($toal_amount, 2) }}</td>
+            <td>{{ $so->slab_percentage }}</td>
+
+        
+            <td>{{$row_percentage_amount}}</td>
+            <td>{{ number_format($pcs_per_amount, 2) }}</td>
         </tr>
     @endforeach
 </table>
@@ -509,7 +521,8 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                         $final_amount = $base_amount - $percentage_amount;
                     @endphp
                 <td style=" text-align:right;">
-                    <p><b><u>{{ number_format($final_amount, 2) }}</u></b></p>
+                    <p><b><u>{{ number_format($grand_total, 2) }}</u></b></p>
+                    <!-- <p><b><u>{{ number_format($final_amount, 2) }}</u></b></p> -->
                 </td>
             </tr>
         </table>
