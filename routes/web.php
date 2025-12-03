@@ -65,6 +65,9 @@ Route::group(['middleware' => ['auth','track']], function() {
 
     Route::group(['namespace' => 'Backend','prefix'=>'category'],function () {
         Route::resource('slab_category', 'SlabCategoryController');
+
+        Route::get('/calculate-slab-discount','SlabCategoryController@calculateSlabDiscount')
+    ->name('calculate.slab.discount');
     }); 
 
     Route::group(['namespace' => 'Backend','prefix'=>'product'],function () {
