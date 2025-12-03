@@ -21,6 +21,7 @@ use App\Models\ShopType;
 Route::get('/import-shops', function () {
     return view('shop-import');
 })->name('shops.import');
+
 Route::post('/import-shops', function (Request $request) {
 
     ini_set('max_execution_time', 0);
@@ -35,27 +36,34 @@ Route::post('/import-shops', function (Request $request) {
 
     // cache existing values
     $channels = Channel::pluck('id','name')->toArray();
-    $types = ShopType::pluck('id','shop_type_name')->toArray();
+    $types    = ShopType::pluck('id','shop_type_name')->toArray();
 
     foreach ($rows as $i => $row) {
 
         if ($i == 0) continue; // skip heading
 
-        $shopCode  = trim($row[0]);
-        $category  = trim($row[1]);
-        $channel   = trim($row[2]);
-
+        $shopCode = trim($row[0]);
         if (!$shopCode) continue;
+
+        // Normalize values (VERY IMPORTANT)
+        $category = trim(ucwords(strtolower($row[1])));
+        $channel  = trim(ucwords(strtolower($row[2])));
 
         // CHANNEL
         if (!isset($channels[$channel])) {
-            $chan = Channel::create(['name' => $channel, 'status' => 1]);
+            $chan = Channel::create([
+                'name' => $channel,
+                'status' => 1
+            ]);
             $channels[$channel] = $chan->id;
         }
 
         // SHOP TYPE
         if (!isset($types[$category])) {
-            $type = ShopType::create(['shop_type_name' => $category, 'status' => 1]);
+            $type = ShopType::create([
+                'shop_type_name' => $category,
+                'status' => 1
+            ]);
             $types[$category] = $type->id;
         }
 

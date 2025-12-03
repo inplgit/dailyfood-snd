@@ -581,7 +581,7 @@
                                 <a class="d-flex align-items-center" href="#">
                                     <i data-feather="circle"></i>
                                     <span class="menu-item text-truncate">
-                                        Shop Type
+                                        Shop Category
                                     </span>
                                 </a>
                                 <ul class="menu-content">
@@ -589,7 +589,7 @@
                                         <li>
                                             <a class="d-flex align-items-center" href="{{ route('shoptype.create') }}">
                                                 <span class="menu-item text-truncate">
-                                                    Add Shop Type
+                                                    Add Shop Category
                                                 </span>
                                             </a>
                                         </li>
@@ -606,6 +606,14 @@
                                 </ul>
                             </li>
                         @endcan
+                           <li>
+                                <a class="d-flex align-items-center" href="{{ route('channels.index') }}">
+                                    <i data-feather="circle"></i>
+                                    <span class="menu-item text-truncate">
+                                       Channel
+                                    </span>
+                                </a>
+                            </li>
                         @can('rack', 'rack_List')
                         <li>
                             <a class="d-flex align-items-center" href="#">
@@ -1549,14 +1557,7 @@
                             </li>
                         @endcan
 
-                          <li>
-                                <a class="d-flex align-items-center" href="{{ route('channels.index') }}">
-                                    <i data-feather="circle"></i>
-                                    <span class="menu-item text-truncate">
-                                       Channel
-                                    </span>
-                                </a>
-                            </li>
+                       
 
 
                         {{-- @can('Config') --}}
