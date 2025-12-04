@@ -413,7 +413,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
   <table class="item-table">
     <tr>
         <th><u>S#</u></th>
-         <th style=" width:218px;" colspan="3"><u>Item Name</u></th>
+        <th colspan="3"><u>Item Name</u></th>
         <th><u>Packing</u></th>
         <th><u>Brand</u></th>
         <th><u>Qty</u></th>
