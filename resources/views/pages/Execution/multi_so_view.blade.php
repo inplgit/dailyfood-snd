@@ -513,6 +513,27 @@ h2,h3,h4,p,table{margin:0;padding:0;}
              <td>{{number_format($row_percentage_amount, 2) }}</td>
             <td>{{ number_format($pcs_per_amount, 2) }}</td>
         </tr>
+        <tr>
+            <td colspan="5"> <p><b>For Inquiry/Complaint:</b><br>
+            Contact/WhatsApp: 0300-0813906<br>
+            Email us at: support@dailyfoodindustries.com
+        </p></td>
+        <td></td>
+        <td></td>
+        <td><u>{{ number_format($total_qty) }}</u></td>
+              <td></td>
+                <td><u>{{number_format($item_total_amounts,2)}}</u></td>
+                  <td></td>
+                   <td></td>
+                   <td></td>
+                   <td></td>
+                   <td><u>{{number_format($a_d_amt_total,2)}}</u></td> 
+                     <td></td>
+                        <td><u>{{number_format($row_percentage_amount_total, 2) }}</u></td>
+                         <td></td>
+                        <td><u>{{ number_format($grand_total, 2) }}</u></td>
+
+        </tr>
     @endforeach
 </table>
 
