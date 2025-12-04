@@ -49,10 +49,10 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 .item-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;border:1px solid #000;}
 .item-table th,.item-table td{border:1px solid #000;padding:5px;text-align:center;color:#000;font-size:13px;}
 .item-table td{border:none;}
-.item-table2{border-collapse:collapse;margin-top:15px;font-size:14px;border:none;margin-bottom:12px;}
+.item-table2{border-collapse:collapse;margin-top:15px;font-size:14px;border:none;margin-bottom:12px;    width: 100%;}
 .item-table2 th,.item-table2 td{border:1px solid #000;padding:5px;text-align:center;color:#000;font-size:13px;}
 .item-table2 td{border:none;}
-.summary-box{width:100%;margin-top:10px;display:flex;justify-content:space-between;align-items:flex-start;}
+.summary-box{width:100%;margin-top:10px;display:flex;align-items:flex-start;gap:16px;}
 .left-box{width:28%;height:130px;border:1px solid #000;padding:10px;display:flex;align-items:flex-end;}
 .left-box p{font-size:11px;color:#000;}
 .right-summary{width:70%;float:right;text-align:right;color:#000;}
@@ -971,11 +971,12 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 .item-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;border:1px solid #000;}
 .item-table th,.item-table td{border:1px solid #000;padding:5px;text-align:center;color:#000;font-size:13px;}
 .item-table td{border:none;}
-.item-table2{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;border:none;margin-bottom:12px;}
+.item-table2{border-collapse:collapse;margin-top:15px;font-size:14px;border:none;margin-bottom:12px;}
 .item-table2 th,.item-table2 td{border:1px solid #000;padding:5px;text-align:center;color:#000;font-size:13px;}
 .item-table2 td{border:none;}
-.summary-box{width:100%;margin-top:10px;display:flex;justify-content:space-between;align-items:flex-start;}
+.summary-box{width:100%;margin-top:10px;display:flex;align-items:flex-start;gap:16px;}
 .left-box{width:28%;height:130px;border:1px solid #000;padding:10px;display:flex;align-items:flex-end;}
+
 .left-box p{font-size:11px;color:#000;}
 .right-summary{width:70%;float:right;text-align:right;color:#000;}
 .signature-area{width:100%;margin-top:40px;display:flex;justify-content:space-between;}
