@@ -970,7 +970,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 .section-table td{border:1px solid #000;padding:5px;color:#000;    font-size: 13px;}
 .section-table td b{color:#000;}
 .section-table2 td{border:none !important;color:#000;    font-size: 13px;}
-.item-table{border-collapse:collapse;margin-top:15px;font-size:14px;border:1px solid #000;}
+.item-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;border:1px solid #000;}
 .item-table th,.item-table td{border:1px solid #000;padding:5px;text-align:center;color:#000;font-size:13px;}
 .item-table td{border:none;}
 .item-table2{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;border:none;margin-bottom:12px;}
