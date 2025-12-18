@@ -99,12 +99,22 @@ $user_allocate = $master->get_assign_user()->toArray();
                                 ->where('rd.day', $day)
                                 ->pluck('routes.id');
 
+                             
+
                             $routeNames = Route::whereIn('id', $dayRoutes)->pluck('route_name')->implode(', ');
 
                             // Shops
-                           $todayShop = DB::table('shops')
-    ->whereIn('route_id', $dayRoutes)
-    ->count();
+                       $todayShop = DB::table('shops as s')
+    ->join('shop_tso as st', 'st.shop_id', '=', 's.id')
+    ->whereIn('s.route_id', $dayRoutes)
+    ->where('s.distributor_id', $tso['distributor_id'])
+    ->where('st.tso_id', $tso['id'])
+    ->where('s.status', 1)
+    ->where('s.active', 1)
+    ->distinct('s.id')
+    ->count('s.id');
+
+
 
 
                               
