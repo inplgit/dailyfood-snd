@@ -49,7 +49,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 .item-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;border:1px solid #000;}
 .item-table th,.item-table td{border:1px solid #000;padding:5px;text-align:center;color:#000;font-size:13px;}
 .item-table td{border:none;}
-.item-table2{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;border:none;margin-bottom:12px;}
+.item-table2{border-collapse:collapse;margin-top:15px;font-size:14px;border:none;margin-bottom:12px;}
 .item-table2 th,.item-table2 td{border:1px solid #000;padding:5px;text-align:center;color:#000;font-size:13px;}
 .item-table2 td{border:none;}
 .summary-box{width:100%;margin-top:10px;display:flex;justify-content:space-between;align-items:flex-start;}
@@ -423,7 +423,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         <th><u>Fu</u></th>
         <th><u>T/O</u></th>
         <th><u>AMT</u></th>
-        <th><u>A&D AMT</u></th>
+        <th><u>ASD AMT</u></th>
         <th><u>%</u></th>
         <th><u>AddDisco</u></th>
         <th><u>Final Amount</u></th>
@@ -530,22 +530,57 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         <div class="right-summary">
             <table class="item-table2">
                 <tr style="border-bottom:5px solid #000;">
-                <td style="text-align:left;"><u>{{ number_format($total_qty) }}</u></td> <!-- FIXED -->
-                <td></td>
-                <td colspan="3"></td>
-                <td></td>
-                <td><u>{{ number_format($item_total_amounts, 2) }}</u></td>
                 <td></td>
                 <td></td>
                 <td></td>
-                <td><u>{{ number_format($a_d_amt_total, 2) }}</u></td> <!-- Fu Total - FIXED -->
+                <td><u>{{ number_format($total_qty) }}</u></td>
                 <td></td>
                 <td></td>
                 <td></td>
-                <td colspan="2"><u>{{number_format($row_percentage_amount_total, 2) }}</u></td>
-                <td style="text-align:right;"><u>{{ number_format($grand_total, 2) }}</u></td>
-            </tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><u>{{number_format($item_total_amounts,2)}}</u></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><u>{{number_format($a_d_amt_total,2)}}</u></td> 
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><u>{{number_format($row_percentage_amount_total, 2) }}</u></td>
+                 <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><u>{{ number_format($grand_total, 2) }}</u></td>
+                </tr>
             </table>
+
+
+
+            
             
             
             <table class="item-table" style="width:55%;float:right;border: none !important;">
@@ -934,7 +969,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 .item-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;border:1px solid #000;}
 .item-table th,.item-table td{border:1px solid #000;padding:5px;text-align:center;color:#000;font-size:13px;}
 .item-table td{border:none;}
-.item-table2{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;border:none;margin-bottom:12px;}
+.item-table2{border-collapse:collapse;margin-top:15px;font-size:14px;border:none;margin-bottom:12px;}
 .item-table2 th,.item-table2 td{border:1px solid #000;padding:5px;text-align:center;color:#000;font-size:13px;}
 .item-table2 td{border:none;}
 .summary-box{width:100%;margin-top:10px;display:flex;justify-content:space-between;align-items:flex-start;}
