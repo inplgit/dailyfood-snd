@@ -424,43 +424,33 @@ public function AddRouteMultiTso_update(Request $request, Route $route)
       return redirect()->back()->with('success', 'Routes Updated');
     }
 
+public function route_transfer(Request $request)
+{
+    $distributor_id = $request->distribuotr_id;
+    $tso_id = $request->tso_id;
 
-    public function route_transfer(Request $request)
-    {
-        $distributor_id = $request->distribuotr_id;
-        $tso_id = $request->tso_id;
+    $tso = DB::table('routes as r')
+        ->join('route_tso as rt', 'r.id', '=', 'rt.route_id')
+        ->where('r.distributor_id', $distributor_id)
+        ->when($tso_id, function ($q) use ($tso_id) {
+            $q->where('rt.tso_id', $tso_id);
+        })
+        ->groupBy('r.id', 'r.route_name', 'r.distributor_id')
+        ->select(
+            'r.id',
+            'r.route_name',
+            'r.distributor_id',
+            DB::raw('GROUP_CONCAT(rt.tso_id) as tso_ids')
+        )
+        ->get();
 
-        // $routeIds = DB::table('route_tso')
-        //     ->where('tso_id', $tso_id)
-        //     ->pluck('route_id');
-
-        // $tso = Route::status()
-        //     ->where('distributor_id', $distributor_id)
-        //     ->whereIn('id', $routeIds)
-        //     ->get();
-
-
-        $tso = DB::table('routes as r')
-    ->join('route_tso as rt', 'r.id', '=', 'rt.route_id')
-    ->where('r.distributor_id', $distributor_id)
-    ->when($tso_id, function ($query) use ($tso_id) {
-        $query->where('rt.tso_id', $tso_id);
-    })
-    ->select('r.id', 'r.route_name', 'r.distributor_id', 'rt.tso_id')
-    ->get();
-
-            
-        if ($request->ajax()) return view($this->page . 'RouteTransferAjax', compact('tso', 'tso_id'));
-
-        return view($this->page . 'RouteTransfer');
-        //   $distributor_id= $request->distribuotr_id;
-        //   $tso_id= $request->tso_id;
-        //   $tso = Route::status()->where('distributor_id',$distributor_id)->where('tso_id',$tso_id)->get();
-        //   if ($request->ajax()):
-        //    return view($this->page.'RouteTransferAjax',compact('tso' , 'tso_id'));
-        //   endif;
-        //    return view($this->page.'RouteTransfer');
+    if ($request->ajax()) {
+        return view($this->page.'RouteTransferAjax', compact('tso'));
     }
+
+    return view($this->page.'RouteTransfer');
+}
+
 
     // public function route_transfer_store(Request $request,Route $route)
     // {
@@ -575,72 +565,58 @@ public function AddRouteMultiTso_update(Request $request, Route $route)
 
         return redirect()->back()->with('success', 'Routes transferred successfully');
     }
-    public function route_transfer_store(Request $request)
-    {
-        $tso_ids         = $request->tso_ids;
-        $distributor_ids = $request->distributor_ids;
-        $ids             = $request->ids;
+ public function route_transfer_store(Request $request)
+{
+    foreach ($request->ids as $key => $routeId) {
 
-        foreach ($ids as $key => $routeId) {
+        $selectedTsoIds = $request->tso_ids[$key] ?? [];
+        $distributorId  = $request->distributor_ids[$key] ?? null;
 
-            // Get selected TSO array for this route
-            // $selectedTsoIds = $tso_ids[$key] ?? [];
-            $selectedTsoIds = (array) ($tso_ids[$key] ?? []);
-
-
-            if (!empty($selectedTsoIds)) {
-
-                $distributorId = $distributor_ids[$key];
-
-                // 🔸 1. Update Route table (distributor only)
-                Route::where('id', $routeId)->update([
-                    'distributor_id' => $distributorId,
-                ]);
-
-                // 🔸 2. Update Shop table (if needed)
-                // Choose the first TSO ID as the "main" tso_id for the shop table
-                $primaryTsoId = $selectedTsoIds[0];
-
-                Shop::where('route_id', $routeId)->update([
-                    'tso_id'         => $primaryTsoId,
-                    'distributor_id' => $distributorId,
-                ]);
-
-                // 🔸 3. Update route_tso table (many-to-many)
-                DB::table('route_tso')->where('route_id', $routeId)->delete();
-
-                $routeTsoInsert = collect($selectedTsoIds)->map(function ($tsoId) use ($routeId) {
-                    return [
-                        'route_id' => $routeId,
-                        'tso_id'   => $tsoId,
-                    ];
-                })->toArray();
-
-                DB::table('route_tso')->insert($routeTsoInsert);
-
-                // 🔸 4. Update shop_tso table (many-to-many)
-                $shopIds = Shop::where('route_id', $routeId)->pluck('id');
-
-                if ($shopIds->isNotEmpty()) {
-                    DB::table('shop_tso')->whereIn('shop_id', $shopIds)->delete();
-
-                    $shopTsoInsert = [];
-                    foreach ($shopIds as $shopId) {
-                        foreach ($selectedTsoIds as $tsoId) {
-                            $shopTsoInsert[] = [
-                                'shop_id' => $shopId,
-                                'tso_id'  => $tsoId,
-                            ];
-                        }
-                    }
-
-                    DB::table('shop_tso')->insert($shopTsoInsert);
-                }
-            }
+        if (empty($selectedTsoIds)) {
+            continue;
         }
 
-        return redirect()->back()->with('success', 'Routes transferred successfully with multiple TSO!');
+        // 1️⃣ Update Route
+        Route::where('id', $routeId)->update([
+            'distributor_id' => $distributorId,
+        ]);
+
+        // 2️⃣ Update Shops (primary TSO)
+        $primaryTsoId = $selectedTsoIds[0];
+
+        Shop::where('route_id', $routeId)->update([
+            'tso_id'         => $primaryTsoId,
+            'distributor_id' => $distributorId,
+        ]);
+
+        // 3️⃣ route_tso (many-to-many)
+        DB::table('route_tso')->where('route_id', $routeId)->delete();
+
+        foreach ($selectedTsoIds as $tsoId) {
+            DB::table('route_tso')->insert([
+                'route_id' => $routeId,
+                'tso_id'   => $tsoId,
+            ]);
+        }
+
+        // 4️⃣ shop_tso (many-to-many)
+        $shopIds = Shop::where('route_id', $routeId)->pluck('id');
+
+        DB::table('shop_tso')->whereIn('shop_id', $shopIds)->delete();
+
+        foreach ($shopIds as $shopId) {
+            foreach ($selectedTsoIds as $tsoId) {
+                DB::table('shop_tso')->insert([
+                    'shop_id' => $shopId,
+                    'tso_id'  => $tsoId,
+                ]);
+            }
+        }
     }
+
+    return redirect()->back()->with('success', 'Routes & Shops updated with multiple TSOs');
+}
+
 
     public function GetTsoByDistributor(Request $request)
     {

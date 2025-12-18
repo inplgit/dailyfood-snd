@@ -28,7 +28,7 @@ $master = new MasterFormsHelper();
                                 @endforeach
                             </select>
                         </td>
-                        <td>
+                        <!-- <td>
                             <select class="form-control select2 tso_ids" id="tso_ids" name="tso_ids[{{ $key }}]"
                                 required>
                                 <option value="">select</option>
@@ -40,7 +40,24 @@ $master = new MasterFormsHelper();
                                 @endforeach --}}
                             </select>
                             <input type="hidden" name="ids[{{ $key }}]" value="{{ $row->id }}" />
-                        </td>
+                        </td> -->
+                        <td>
+    <select 
+        class="form-control select2 tso_ids"
+        name="tso_ids[{{ $key }}][]"
+        multiple
+        required
+    >
+        @foreach ($master->get_all_tso_by_distributor_id($row->distributor_id) as $row2)
+            <option value="{{ $row2->id }}"
+                {{ $row->tso_id == $row2->id ? 'selected' : '' }}>
+                {{ $row2->name }}
+            </option>
+        @endforeach
+    </select>
+
+    <input type="hidden" name="ids[{{ $key }}]" value="{{ $row->id }}" />
+</td>
                     </tr>
                 @endforeach
             </tbody>
