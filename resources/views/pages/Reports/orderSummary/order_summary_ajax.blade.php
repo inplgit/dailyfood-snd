@@ -102,16 +102,12 @@ $user_allocate = $master->get_assign_user()->toArray();
                             $routeNames = Route::whereIn('id', $dayRoutes)->pluck('route_name')->implode(', ');
 
                             // Shops
-                            $todayShop = DB::table('shops')
-                                ->whereIn('route_id', $dayRoutes)
-                                ->whereIn('id', function ($q) use ($tso, $fromDate, $toDate) {
-                                    $q->select('shop_id')
-                                      ->from('sale_orders')
-                                      ->where('distributor_id', $tso['distributor_id'])
-                                      ->where('tso_id', $tso['id'])
-                                      ->whereBetween('dc_date', [$fromDate, $toDate]);
-                                })
-                                ->count();
+                           $todayShop = DB::table('shops')
+    ->whereIn('route_id', $dayRoutes)
+    ->count();
+
+
+                              
 
                             $shop_create = UsersLocation::where('user_id', $tso['user_id'])
                                 ->where('table_name', 'shops')
