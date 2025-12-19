@@ -598,7 +598,7 @@
         type: "GET",
         url: "{{ route('route.GetTsoByDistributor') }}",
         data: {
-            distributor_id: distributor_id
+            distribuotr_id: distributor_id
         },
         dataType: "json",
         success: function (data) {
