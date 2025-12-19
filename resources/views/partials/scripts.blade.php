@@ -579,6 +579,45 @@
         });
     }
 
+
+    function get_tso2_tasfer(instance) {
+
+    let distributor_id = $(instance).val();
+    let row = $(instance).closest('tr');
+    let tsoSelect = row.find('.tso_ids');
+
+    // clear old options
+    tsoSelect.empty();
+
+    if (!distributor_id) {
+        tsoSelect.trigger('change');
+        return;
+    }
+
+    $.ajax({
+        type: "GET",
+        url: "{{ route('route.GetTsoByDistributor') }}",
+        data: {
+            distributor_id: distributor_id
+        },
+        dataType: "json",
+        success: function (data) {
+
+            $.each(data.tso, function (key, value) {
+                tsoSelect.append(
+                    $('<option>', {
+                        value: value.id,
+                        text: value.name
+                    })
+                );
+            });
+
+            // refresh select2
+            tsoSelect.trigger('change');
+        }
+    });
+}
+
     function get_tso_all(instance) {
         var distribuotr_id = $('#distribuotr_id').val();
         var o = new Option("select", "");
