@@ -575,9 +575,18 @@ public function multi_so_view(Request $request)
 {
     $ids = $request->ids;
     if ($ids) {
-        $sos = SaleOrder::with('shop:company_name,id,route_id','distributor:distributor_name,id','tso:name,id','saleOrderData')
-                ->whereIn('id',$ids)
-                ->get();
+        // $sos = SaleOrder::with('shop:company_name,id,route_id','distributor:distributor_name,id','tso:name,id','saleOrderData')
+        //         ->whereIn('id',$ids)
+        //         ->get();
+
+        $sos = SaleOrder::with([
+    'shop:id,company_name,route_id,shop_type_id',
+    'shop.shopType:id,shop_type_name',   // ⭐ MUST
+    'shop.route:id,route_name',
+    'distributor:id,distributor_name',
+    'tso:id,name',
+    'saleOrderData'
+])->whereIn('id', $ids)->get();
 
         // Fetch scheme pcs product for ALL sale orders
         $scheme_Pcs = [];
