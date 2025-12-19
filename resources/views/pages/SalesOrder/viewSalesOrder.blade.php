@@ -431,8 +431,9 @@ h2,h3,h4,p,table{margin:0;padding:0;}
         <tr>
             <td>{{ $s++ }}</td>
             <td colspan="3">{{ $row->product->product_name ?? '' }}</td>
-            <td>{{ $row->product->packing_size ?? '' }}</td>
-            <td>{{ $row->product->brand ?? '' }}</td>
+            <td>{{ $row->product->carton_size ?? '' }}</td>
+          <td>{{ $row->product->Brand->brand_name ?? '' }}</td>
+
             <td>{{ number_format($row->qty) }}</td>
             <td>{{ number_format($row->rate, 2) }}</td>
             <td>{{ number_format($total_item_amount , 2) }}</td>
