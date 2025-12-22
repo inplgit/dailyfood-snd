@@ -928,7 +928,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
     // ✅ Print CSS dynamically add karna
     const printStyle = `
       @media print {
-        @page{  size: A4 landscape;margin:6mm 6mm 6mm 6mm !important;}
+        @page{  size: A4;margin:6mm 6mm 6mm 6mm !important;}
 
 
 
