@@ -4,9 +4,11 @@
 
 @endphp
 @foreach ($data as $key => $row)
+  
     @php
-        $type = $row->type->type;
-    @endphp
+    $type = $row->type->type ?? '--';
+@endphp
+
     <tr id="{{ $row->id }}">
         <td>{{ ++$key }}</td>
         <td>{{ $row->name }}</td>
