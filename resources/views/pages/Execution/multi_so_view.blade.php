@@ -936,7 +936,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
     /* Avoid breaking inside invoice content */
 
 
-  .invoice-container{page-break-inside:avoid;margin-bottom:20px;}
+  .invoice-container{page-break-inside:avoid;margin-bottom:60px;}
 
 /* Only force new page AFTER every 2 invoices */
 
