@@ -47,7 +47,7 @@ $master = new MasterFormsHelper();
 
         <div class="dates-info-head">
             <p>
-                <strong>Laziza International</strong><br>
+                <strong>Daily Food</strong><br>
                 <strong>Distributor Product Sales Value Report</strong><br>
                 <b>From:</b> {{ \Carbon\Carbon::parse($from)->format('d-M-Y') }} |
                 <b>To:</b> {{ \Carbon\Carbon::parse($to)->format('d-M-Y') }} |

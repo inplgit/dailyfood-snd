@@ -21,7 +21,7 @@ $user_allocate = $master->get_assign_user()->toArray();
         @endphp
         <div class="dates-info-head text-center">
             <p>
-                <strong>Laziza International</strong><br>
+                <strong>Daily Food</strong><br>
                 <strong>TSO Summary</strong><br>
                 <b>From:</b> {{ $from }} |
                 <b>To:</b> {{ $to }} |

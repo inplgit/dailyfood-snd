@@ -35,7 +35,7 @@ use App\Models\ProductPrice;
 
         <div class="dates-info-head text-center">
             <p>
-                <strong>Laziza International</strong><br>
+                <strong>Daily Food</strong><br>
                 <strong>Order Booker Target Sheet</strong><br>
                 <b>From:</b> {{ \Carbon\Carbon::parse($from)->format('d-M-Y') }} |
                 <b>To:</b> {{ \Carbon\Carbon::parse($to)->format('d-M-Y') }} |

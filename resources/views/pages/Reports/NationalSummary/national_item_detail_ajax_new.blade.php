@@ -22,7 +22,7 @@ strong{font-weight:bold !important;color:#000!important;}
 
             <div class="dates-info-head" >
                 <p>
-                    <strong>Laziza International</strong><br>
+                    <strong>Daily Food</strong><br>
                     <strong>Brand / Area Wise Daily Sales Sheet</strong><br>
                     <b>From:</b> {{ \Carbon\Carbon::parse($from)->format('d-M-Y') }} |
                     <b>To:</b> {{ \Carbon\Carbon::parse($to)->format('d-M-Y') }} |

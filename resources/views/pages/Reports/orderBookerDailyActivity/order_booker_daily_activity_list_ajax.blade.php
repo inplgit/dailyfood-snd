@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 
         <div class="dates-info-head text-center mb-3">
             <p class="mb-0">
-                <strong>Laziza International</strong><br>
+                <strong>Daily Food</strong><br>
                 <strong>Order Booker Daily Activity Report</strong><br>
                 <b>From:</b> {{ \Carbon\Carbon::parse($from)->format('d-M-Y') }} |
                 <b>To:</b> {{ \Carbon\Carbon::parse($to)->format('d-M-Y') }} |

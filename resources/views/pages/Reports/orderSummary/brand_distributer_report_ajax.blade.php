@@ -58,7 +58,7 @@ $user_allocate = $master->get_assign_user()->toArray();
 
         <div class="dates-info-head">
             <p>
-                <strong>Laziza International</strong><br>
+                <strong>Daily Food</strong><br>
                 <strong>Brand Distribution Report</strong><br>
                 <b>From:</b> {{ \Carbon\Carbon::parse($from)->format('d-M-Y') }} |
                 <b>To:</b> {{ \Carbon\Carbon::parse($to)->format('d-M-Y') }} |
@@ -100,7 +100,7 @@ $user_allocate = $master->get_assign_user()->toArray();
 
                     <div class="dates-info-head">
                         <p>
-                            <strong>Laziza International</strong><br>
+                            <strong>Daily Food</strong><br>
                             <strong>Brand Distribution Report</strong><br>
                             <b>From:</b> {{ \Carbon\Carbon::parse($from)->format('d-M-Y') }} |
                             <b>To:</b> {{ \Carbon\Carbon::parse($to)->format('d-M-Y') }} |

@@ -13,7 +13,7 @@
         @endphp
         <div class="dates-info-head text-center" >
             <p>
-                <strong>Laziza International</strong><br>
+                <strong>Daily Food</strong><br>
                 <strong>TSO Sales Return Report</strong><br>
                 <b>From:</b> {{ \Carbon\Carbon::parse($from)->format('d-M-Y') }} |
                 <b>To:</b> {{ \Carbon\Carbon::parse($to)->format('d-M-Y') }} |
