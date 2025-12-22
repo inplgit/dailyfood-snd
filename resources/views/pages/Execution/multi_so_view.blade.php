@@ -936,7 +936,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
     /* Avoid breaking inside invoice content */
 
 
-  .invoice-container{page-break-inside:avoid;margin-bottom:100px;}
+  .invoice-container{page-break-inside:avoid;}
 
 /* Only force new page AFTER every 2 invoices */
 
@@ -956,7 +956,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 .logo.logo-flex-cont{display:flex;align-items:baseline;gap:20px}
 .logo-text p{color:#000;font-weight:bold;font-size:18px;}
 body{font-family:Arial,sans-serif;margin:0;padding:0;background:#fff;}
-.invoice-container{width:900px;margin:auto;padding:20px 0px;}
+.invoice-container{width:900px;margin:auto;padding:20px 0px;margin-bottom:1000px;}
 h2,h3,h4,p,table{margin:0;padding:0;}
 .header{display:flex;justify-content:space-between;align-items:baseline; margin-bottom: 0px;}
 .logo img{width:80px;}
