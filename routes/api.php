@@ -81,6 +81,7 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'API\V1'], functi
     Route::controller('SalesController')->prefix('sales')->group(function () {
       Route::post('orderCreate', 'orderCreate');
  Route::post('orderCreateNew', 'orderCreateNew');
+ Route::post('orderCreateBulk', 'orderCreateBulk');
       Route::post('orderUpdate/{id}', 'orderUpdate');
       Route::get('orderList', 'orderList');
       Route::get('orderdetails/{id}','OrderDetails');

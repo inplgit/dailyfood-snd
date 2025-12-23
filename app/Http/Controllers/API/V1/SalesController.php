@@ -700,6 +700,193 @@ if ($request->has('order_time') && !empty($request->order_time)) {
         return $this->sendError("Server Error!", ['error' => $th->getMessage() . ' on line ' . $th->getLine()]);
     }
 }
+
+public function orderCreateBulk(Request $request)
+{
+    date_default_timezone_set("Asia/Karachi");
+
+    $orders = $request->all(); // Expecting an array of orders
+    $response = [
+        'success' => [],
+        'failed' => []
+    ];
+
+    foreach ($orders as $order) {
+
+        // Validator for each order
+        $validator = Validator::make($order, [
+            'local_id' => 'required',
+            'shop_id' => 'required|exists:shops,id',
+            'notes' => 'required',
+            'discount_percent' => 'required',
+            'payment_type' => 'required',
+            'total_pcs' => 'required',
+            'total_amount' => 'required',
+            'products_subtotal' => 'required',
+            'user_id' => 'required|exists:users,id',
+
+            'product_id' => 'required|array',
+            'product_id.*' => 'required|gt:0|exists:products,id',
+
+            'flavour_id' => 'required|array',
+            'flavour_id.*' => 'required|gt:0|exists:product_flavours,id',
+
+            'sale_type' => 'required|array',
+            'sale_type.*' => 'required|gt:0',
+
+            'rate' => 'required|array',
+            'rate.*' => 'required|gt:0',
+
+            'qty' => 'required|array',
+            'qty.*' => 'required|gt:0',
+
+            'discount' => 'required|array',
+            'discount_amount_data' => 'required|array',
+            'total' => 'required|array',
+            'total.*' => 'required|gt:0',
+        ]);
+
+        if ($validator->fails()) {
+            $response['failed'][] = [
+                'local_id' => $order['local_id'] ?? null,
+                'errors' => $validator->errors()->all()
+            ];
+            continue; // Skip to next order
+        }
+
+        DB::beginTransaction();
+        try {
+            $shop_data = Shop::find($order['shop_id']);
+            $distributor_id = $shop_data->distributor_id;
+
+            $order['invoice_no'] = SaleOrder::UniqueNo();
+            $tso = User::find($order['user_id'])->tso;
+
+            // Calculate total discount amount
+            $total_discount_amount = is_array($order['discount_amount_data'])
+                ? array_sum($order['discount_amount_data'])
+                : ($order['discount_amount'] ?? 0);
+
+            $data = [
+                'user_id' => $order['user_id'],
+                'tso_id' => $tso->id,
+                'dc_date' => date('Y-m-d'),
+                'delivery_date' => $order['delivery_date'] ?? '0000-00-00',
+                'distributor_id' => $distributor_id,
+                'transport_details' => 0,
+                'cost_center' => 0,
+                'invoice_no' => $order['invoice_no'],
+                'shop_id' => $order['shop_id'],
+                'notes' => $order['notes'],
+                'discount_percent' => $order['discount_percent'],
+                'payment_type' => $order['payment_type'],
+                'total_pcs' => $order['total_pcs'],
+                'discount_amount' => $total_discount_amount,
+                'total_amount' => $order['total_amount'],
+                'products_subtotal' => $order['products_subtotal'],
+                'excecution' => 0 ?? null,
+                'signature_image' => null,
+                'merchandising_image' => null,
+                'slab_id' => $order['slab_id'] ?? null,
+                'slab_details_id' => $order['slab_details_id'] ?? null,
+                'slab_amount' => $order['slab_amount'] ?? null,
+                'slab_percentage' => $order['slab_percentage'] ?? null,
+                'created_at' => $order['order_time'] ?? now(),
+            ];
+
+            // Handle images (if sent as file objects)
+            if (!empty($order['signature_image_file'])) {
+                $file = $order['signature_image_file'];
+                $data['signature_image'] = time() . '-' . $file->getClientOriginalName();
+                $file->storeAs('sales', $data['signature_image'], 'public');
+            }
+
+            if (!empty($order['merchandising_image_file'])) {
+                $file = $order['merchandising_image_file'];
+                $data['merchandising_image'] = time() . '-' . $file->getClientOriginalName();
+                $file->storeAs('sales', $data['merchandising_image'], 'public');
+            }
+
+            $saleOrder = SaleOrder::create($data);
+
+            MasterFormsHelper::users_location_submit(
+                $saleOrder,
+                $order['latitude'] ?? null,
+                $order['longitude'] ?? null,
+                'sale_orders',
+                'Create Sale Order'
+            );
+
+            $total_amount = 0;
+            $total_qty = 0;
+
+            foreach ($order['product_id'] as $key => $product_id) {
+                $scheme_id = $order['scheme_id'][$key] ?? 0;
+                $scheme_data_id = $order['scheme_data_id'][$key] ?? 0;
+                $scheme_amount = $order['scheme_amount'][$key] ?? 0;
+
+                $scheme_id_pcs = $order['scheme_id_pcs'][$key] ?? 0;
+                $scheme_data_id_pcs = $order['scheme_data_id_pcs'][$key] ?? 0;
+                $scheme_data_pcs = $order['scheme_data_pcs'][$key] ?? 0;
+
+                $total = $order['rate'][$key] * $order['qty'][$key];
+                $trade_offer_amount = $order['trade_offer_amount'][$key] ?? 0;
+                $discount_amount = ($order['discount'][$key] ?? 0) > 0
+                    ? ($total / 100) * $order['discount'][$key]
+                    : 0;
+                $total -= ($discount_amount + $scheme_amount + $trade_offer_amount);
+
+                $saleOrder->saleOrderData()->create([
+                    'product_id' => $product_id,
+                    'flavour_id' => $order['flavour_id'][$key],
+                    'sale_type' => $order['sale_type'][$key],
+                    'rate' => $order['rate'][$key],
+                    'qty' => $order['qty'][$key],
+                    'foc' => $order['foc'][$key] ?? 0,
+                    'availability' => $order['availability'][$key] ?? 0,
+                    'discount' => $order['discount'][$key] ?? 0,
+                    'discount_amount' => $discount_amount,
+                    'total' => $total,
+                    'sheme_product_id' => $order['shceme_product_id'][$key] ?? 0,
+                    'offer_qty' => $order['offer'][$key] ?? 0,
+                    'scheme_id' => $scheme_id,
+                    'scheme_data_id' => $scheme_data_id,
+                    'scheme_amount' => $scheme_amount,
+                    'scheme_id_pcs' => $scheme_id_pcs,
+                    'scheme_data_id_pcs' => $scheme_data_id_pcs,
+                    'scheme_data_pcs' => $scheme_data_pcs,
+                    'trade_offer_amount' => $trade_offer_amount
+                ]);
+
+                $total_amount += $total;
+                $total_qty += $order['qty'][$key];
+            }
+
+            $saleOrder->update([
+                'total_amount' => $total_amount,
+                'total_pcs' => $total_qty
+            ]);
+
+            DB::commit();
+
+            $response['success'][] = [
+                'local_id' => $order['local_id'],
+                'sale_order_id' => $saleOrder->id
+            ];
+
+        } catch (Exception $th) {
+            DB::rollBack();
+            $response['failed'][] = [
+                'local_id' => $order['local_id'],
+                'error' => $th->getMessage() . ' on line ' . $th->getLine()
+            ];
+        }
+    }
+
+    return response()->json($response);
+}
+
+
   public function orderUpdate(Request $request)
     {
 
