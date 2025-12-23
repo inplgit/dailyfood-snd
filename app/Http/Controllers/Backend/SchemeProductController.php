@@ -470,35 +470,45 @@ public function get_scheme_product(Request $request)
     //     ]);
     // }
 
-    /* ----------------------------------------------
-       4) CALCULATE FREE PCS & SCHEME AMOUNT
-    ---------------------------------------------- */
+   /* ----------------------------------------------
+   4) CALCULATE FREE PCS & SCHEME AMOUNT (FIXED)
+---------------------------------------------- */
 
-    $schemeQty    = (int)$scheme_product_pcs_sch->qty;
-    $freePcs      = floatval($scheme_product_pcs_sch->scheme_Pcs);
-    $enteredQty   = (int)$qty;
-    $productRate  = floatval($rate);
+if (!$scheme_product_pcs_sch || $qty <= 0 || $rate <= 0) {
+    return response()->json([
+        'success' => true,
+        'scheme_product' => $scheme_product,
+        'scheme_product_pcs' => $scheme_product_pcs,
+        'scheme_amount_pcs' => 0,
+        'total_free_pcs' => 0
+    ]);
+}
 
-    // how many scheme packs
-    $applicableSchemes = floor($enteredQty / $schemeQty);
+$schemeQty      = (int) $scheme_product_pcs_sch->qty;          // e.g. 12
+$freeQty        = (int) $scheme_product_pcs_sch->scheme_Pcs;   // e.g. 1
+$enteredQty     = (int) $qty;
+$productRate    = (float) $rate;
 
-    // total free pcs
-    $totalFreePcs = $freePcs * $applicableSchemes;
+/* -------- Free PCS -------- */
+$applicableSchemes = floor($enteredQty / $schemeQty);
+$totalFreePcs      = $freeQty * $applicableSchemes;
 
-    // single unit value
-    $totalUnits = $schemeQty + $freePcs;
-    $sch_single_value = $productRate / $totalUnits;
+/* -------- Scheme Amount -------- */
+$value      = $productRate * $schemeQty;           // Step 1
+$divisor    = $schemeQty + $freeQty;                // Step 2
+$netAmount  = $value / $divisor;                    // Step 2
+$discountPc = $productRate - $netAmount;            // Step 3
 
-    // scheme amount
-    $remainder = $enteredQty % $schemeQty;
+$remainder = $enteredQty % $schemeQty;
 
-    if ($enteredQty < $schemeQty) {
-        $schemeAmount = $sch_single_value * $enteredQty;
-    } elseif ($remainder == 0) {
-        $schemeAmount = 0;
-    } else {
-        $schemeAmount = $sch_single_value * $remainder;
-    }
+if ($remainder == 0) {
+    $schemeAmount = 0;
+} elseif ($enteredQty < $schemeQty) {
+    $schemeAmount = $discountPc * $enteredQty;
+} else {
+    $schemeAmount = $discountPc * $remainder;
+}
+
 
     /* ----------------------------------------------
        5) FINAL RESPONSE
