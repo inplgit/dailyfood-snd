@@ -37,7 +37,7 @@ use App\Models\Shop;
 @if($row->merchandising_image)
     @php
         $imageName = rawurlencode(basename($row->merchandising_image));
-        $imagePath = 'https://laziza-snd.inplsnd.com/storage/visitshope/' . $imageName;
+        $imagePath = 'https://dailyfood.inplsnd.com/storage/visitshope/' . $imageName;
     @endphp
     <a target="_blank" href="{{ $imagePath }}">
         <img width="100" height="200" src="{{ $imagePath }}" alt="Merchandising Image">
