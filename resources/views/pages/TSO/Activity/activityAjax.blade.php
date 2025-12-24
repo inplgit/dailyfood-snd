@@ -38,8 +38,14 @@
                                     $name = $tsoActivity->location->company_name ?? $tsoActivity->location->shop->company_name ?? $tsoActivity->location->invoice_no ?? '--';
                                     $shop_name =  $tsoActivity->location->company_name ?? $tsoActivity->location->shop->company_name ?? '--';
                                     $distributor_name = htmlspecialchars($tsoActivity->location->distributor->distributor_name ?? $tsoActivity->location->shop->distributor->distributor_name ?? '--' , ENT_QUOTES);
-                                    $tso_name = $tsoActivity->location->tso->name ?? $tsoActivity->location->shop->tso->name ?? '--';
-                                    $location []= [
+                                  //  $tso_name = $tsoActivity->location->tso->name ?? $tsoActivity->location->shop->tso->name ?? '--';
+                                  
+                                  $tso_name = $tsoActivity->location->tso->first()->name
+    ?? $tsoActivity->location->shop->tso->first()->name
+    ?? '--';
+
+                                  
+                                  $location []= [
                                         'lat'=>$tsoActivity->latitude,
                                         'long'=>$tsoActivity->longitude,
                                         'title'=>$tsoActivity->location_title ,
