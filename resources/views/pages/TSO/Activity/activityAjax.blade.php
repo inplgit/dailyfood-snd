@@ -40,8 +40,8 @@
                                     $distributor_name = htmlspecialchars($tsoActivity->location->distributor->distributor_name ?? $tsoActivity->location->shop->distributor->distributor_name ?? '--' , ENT_QUOTES);
                                   //  $tso_name = $tsoActivity->location->tso->name ?? $tsoActivity->location->shop->tso->name ?? '--';
                                   
-                                  $tso_name = $tsoActivity->location->tso->first()->name
-    ?? $tsoActivity->location->shop->tso->first()->name
+                                  $tso_name = optional(optional($tsoActivity->location)->tso)->first()->name
+    ?? optional(optional(optional($tsoActivity->location)->shop)->tso)->first()->name
     ?? '--';
 
                                   
