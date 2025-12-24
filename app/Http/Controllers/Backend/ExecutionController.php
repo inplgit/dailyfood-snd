@@ -579,14 +579,16 @@ public function multi_so_view(Request $request)
         //         ->whereIn('id',$ids)
         //         ->get();
 
-        $sos = SaleOrder::with([
-    'shop:id,company_name,route_id,shop_type_id',
-    'shop.shopType:id,shop_type_name',   // ⭐ MUST
+    $sos = SaleOrder::with([
+    'shop:id,company_name,route_id,shop_type_id,channel_id', // ⭐ MUST
+    'shop.channel:id,name',                                  // ⭐ MUST
+    'shop.shopType:id,shop_type_name',
     'shop.route:id,route_name',
     'distributor:id,distributor_name',
     'tso:id,name',
     'saleOrderData'
 ])->whereIn('id', $ids)->get();
+
 
         // Fetch scheme pcs product for ALL sale orders
         $scheme_Pcs = [];

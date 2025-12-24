@@ -384,7 +384,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                 <tr>
                     <td></td>
                     <td>{{ $so->shop->shopType->shop_type_name ?? '--' }}</td>
-                    <td> --</td>
+                    <td>{{ $so->shop->channel->name ?? 'N/A' }}</td>
                     <td>{{ $so->payment_type ?? '--'}}</td>
                 </tr>
             </table>
