@@ -978,6 +978,10 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 .right-summary{width:70%;float:right;text-align:right;color:#000;}
 .signature-area{width:100%;margin-top:40px;display:flex;justify-content:space-between;}
 .signature-box{border:1px solid #000;width:250px;height:30px;}
+   .col-lg-4{flex:0 0 33.33333%;max-width:33.33333%;}
+.col-lg-8{flex:0 0 66.66667%;max-width:66.66667%;}
+
+
 
       }
     `;
