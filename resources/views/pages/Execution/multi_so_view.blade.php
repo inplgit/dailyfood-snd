@@ -945,7 +945,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 .logo img{width:80px;}
 .title{text-align:center;font-size:20px;font-weight:bold;text-decoration:underline;color:#000;}
 .right-title{text-align:right;font-size:18px;font-weight:bold;text-decoration:underline;color:#000;}
-.section-table{width:50%;border-collapse:collapse;margin-top:10px;font-size:14px;}
+.section-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px;}
 .section-table td{border:1px solid #000;padding:5px;color:#000;    font-size: 13px;}
 .section-table td b{color:#000;}
 .section-table2 td{border:none !important;color:#000;    font-size: 13px;}
@@ -964,7 +964,12 @@ h2,h3,h4,p,table{margin:0;padding:0;}
    .col-lg-4{flex:0 0 33.33333%;max-width:33.33333%;}
 .col-lg-8{flex:0 0 66.66667%;max-width:66.66667%;}
 
-
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -1rem;
+    margin-left: -1rem;
+}
 
       }
     `;
