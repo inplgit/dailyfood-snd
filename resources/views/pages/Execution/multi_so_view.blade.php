@@ -391,113 +391,113 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
     </div>
 
-<div class="row"
-    <!-- ITEMS TABLE -->
-    <table class="item-table">
-        <tr>
-            <th><u>S#</u></th>
-            <th colspan="3"><u>Item Name</u></th>
-            <th><u>Packing</u></th>
-            <th><u>Brand</u></th>
-            <th><u>Qty</u></th>
-            <th><u>T.P</u></th>
-            <th><u>Amount</u></th>
-            <th><u>SCH D</u></th>
-            <th><u>Fu</u></th>
-            <th><u>T/O</u></th>
-            <th><u>AMT</u></th>
-            <th><u>ASD AMT</u></th>
-            <th><u>%</u></th>
-            <th><u>AddDisco</u></th>
-            <th><u>Final Amount</u></th>
-        </tr>
 
+    <!-- ITEMS TABLE -->
+  <table class="item-table">
+    <tr>
+        <th><u>S#</u></th>
+        <th colspan="3"><u>Item Name</u></th>
+        <th><u>Packing</u></th>
+        <th><u>Brand</u></th>
+        <th><u>Qty</u></th>
+        <th><u>T.P</u></th>
+        <th><u>Amount</u></th>
+        <th><u>SCH D</u></th>
+        <th><u>Fu</u></th>
+        <th><u>T/O</u></th>
+        <th><u>AMT</u></th>
+        <th><u>ASD AMT</u></th>
+        <th><u>%</u></th>
+        <th><u>AddDisco</u></th>
+        <th><u>Final Amount</u></th>
+    </tr>
+
+    @php
+         $s = 1;
+        $grand_total = 0;
+        $total_qty = 0; // ADD THIS
+        $total_scheme_pcs = 0; // ADD THIS
+        $item_total_amounts = 0;
+        $a_d_amt_total = 0;
+        $row_percentage_amount_total = 0;
+    @endphp
+
+    @foreach($so->saleOrderData as $row)
         @php
-            $s = 1;
-            $grand_total = 0;
-            $total_qty = 0; // ADD THIS
-            $total_scheme_pcs = 0; // ADD THIS
-            $item_total_amounts = 0;
-            $a_d_amt_total = 0;
-            $row_percentage_amount_total = 0;
+
+         $total_item_amount = $row->qty * $row->rate;
+
+            $amt = ($row->trade_offer_amount > 0)
+                ? ($row->trade_offer_amount * $row->qty)
+                : 0;
+            
+           
+            $a_d_amt = ($total_item_amount) - ($row->scheme_amount) - ($amt);
+
+            $a_d_amt_total += $a_d_amt;
+            $toal_amount = ($total_item_amount) - ($row->scheme_amount) - ($amt);
+            $pid = $row->product_id;
+            
+            // Calculate totals
+            $total_qty += $row->qty;
+            
+            // Get scheme pcs value - FIXED: Use scheme_data_pcs instead of scheme_Pcs
+            $scheme_pcs_value = 0;
+            if(isset($scheme_Pcs[$pid]) && $scheme_Pcs[$pid]->scheme_data_pcs > 0) {
+                $scheme_pcs_value = $scheme_Pcs[$pid]->scheme_data_pcs;
+                $total_scheme_pcs += $scheme_pcs_value;
+            }
+            $item_total_amounts += $row->qty * $row->rate;
+
+
+
+  $row_net = $a_d_amt; // already row net amount
+                $row_percentage_amount = ($row_net * $so->slab_percentage) / 100;
+
+                $row_percentage_amount_total += ($row_net * $so->slab_percentage) / 100;
+                $pcs_per_amount = $row_net - $row_percentage_amount;
+
+        $grand_total += $pcs_per_amount;
+              
+
+           
         @endphp
 
-        @foreach($so->saleOrderData as $row)
-            @php
+        <tr>
+            <td>{{ $s++ }}</td>
+            <td colspan="3">{{ $row->product->product_name ?? '' }}</td>
+            <td>{{ $row->product->carton_size ?? '' }}</td>
+          <td>{{ $row->product->Brand->brand_name ?? '' }}</td>
+            <td>{{ number_format($row->qty) }}</td>
+            <td>{{ number_format($row->rate, 2) }}</td>
+            <td>{{ number_format($total_item_amount , 2) }}</td>
+            <td>{{ number_format($row->scheme_amount, 2) }}</td>
 
-            $total_item_amount = $row->qty * $row->rate;
+            <!-- ⭐ FU (Scheme PCS for each product) - FIXED -->
+            <td>
+                @if($row->scheme_data_pcs > 0)
+                    {{ number_format($row->scheme_data_pcs , 2) }}
+                @else
+                    0.00
+                @endif
+                <!-- @if($scheme_pcs_value > 0)
+                    {{ number_format($scheme_pcs_value, 2) }}
+                @else
+                    0.00
+                @endif -->
+            </td>
 
-                $amt = ($row->trade_offer_amount > 0)
-                    ? ($row->trade_offer_amount * $row->qty)
-                    : 0;
-                
-            
-                $a_d_amt = ($total_item_amount) - ($row->scheme_amount) - ($amt);
+            <td>{{ number_format($row->trade_offer_amount, 2) }}</td>
+            <td>{{ number_format($amt, 2) }}</td>
+            <td>{{ number_format($a_d_amt, 2) }}</td>
+            <td>{{ $so->slab_percentage }}</td>
 
-                $a_d_amt_total += $a_d_amt;
-                $toal_amount = ($total_item_amount) - ($row->scheme_amount) - ($amt);
-                $pid = $row->product_id;
-                
-                // Calculate totals
-                $total_qty += $row->qty;
-                
-                // Get scheme pcs value - FIXED: Use scheme_data_pcs instead of scheme_Pcs
-                $scheme_pcs_value = 0;
-                if(isset($scheme_Pcs[$pid]) && $scheme_Pcs[$pid]->scheme_data_pcs > 0) {
-                    $scheme_pcs_value = $scheme_Pcs[$pid]->scheme_data_pcs;
-                    $total_scheme_pcs += $scheme_pcs_value;
-                }
-                $item_total_amounts += $row->qty * $row->rate;
-
-
-
-     $row_net = $a_d_amt; // already row net amount
-                    $row_percentage_amount = ($row_net * $so->slab_percentage) / 100;
-
-                    $row_percentage_amount_total += ($row_net * $so->slab_percentage) / 100;
-                    $pcs_per_amount = $row_net - $row_percentage_amount;
-
-            $grand_total += $pcs_per_amount;
-                
-
-            
-            @endphp
-
-            <tr>
-                <td>{{ $s++ }}</td>
-                <td colspan="3">{{ $row->product->product_name ?? '' }}</td>
-                <td>{{ $row->product->carton_size ?? '' }}</td>
-            <td>{{ $row->product->Brand->brand_name ?? '' }}</td>
-                <td>{{ number_format($row->qty) }}</td>
-                <td>{{ number_format($row->rate, 2) }}</td>
-                <td>{{ number_format($total_item_amount , 2) }}</td>
-                <td>{{ number_format($row->scheme_amount, 2) }}</td>
-
-                <!-- ⭐ FU (Scheme PCS for each product) - FIXED -->
-                <td>
-                    @if($row->scheme_data_pcs > 0)
-                        {{ number_format($row->scheme_data_pcs , 2) }}
-                    @else
-                        0.00
-                    @endif
-                    <!-- @if($scheme_pcs_value > 0)
-                        {{ number_format($scheme_pcs_value, 2) }}
-                    @else
-                        0.00
-                    @endif -->
-                </td>
-
-                <td>{{ number_format($row->trade_offer_amount, 2) }}</td>
-                <td>{{ number_format($amt, 2) }}</td>
-                <td>{{ number_format($a_d_amt, 2) }}</td>
-                <td>{{ $so->slab_percentage }}</td>
-
-            
-                <td>{{number_format($row_percentage_amount, 2) }}</td>
-                <td>{{ number_format($pcs_per_amount, 2) }}</td>
-            </tr>
-        @endforeach
-    </table>
+        
+             <td>{{number_format($row_percentage_amount, 2) }}</td>
+            <td>{{ number_format($pcs_per_amount, 2) }}</td>
+        </tr>
+    @endforeach
+</table>
 
     
     <!-- SUMMARY -->
@@ -601,23 +601,23 @@ h2,h3,h4,p,table{margin:0;padding:0;}
     @if($so->payment_type == 'credit')
     <!-- SIGNATURE BOXES -->
    <div class="signature-area">
-        <div class="signature-item">
-            <div class="signature-box"></div>
-            <span>Order Booker</span>
-        </div>
-
-        <div class="signature-item">
-            <div class="signature-box"></div>
-            <span>Sale Person</span>
-        </div>
-
-        <div class="signature-item">
-            <div class="signature-box"></div>
-            <span>Shop Keeper</span>
-        </div>
+    <div class="signature-item">
+        <div class="signature-box"></div>
+        <span>Order Booker</span>
     </div>
+
+    <div class="signature-item">
+        <div class="signature-box"></div>
+        <span>Sale Person</span>
+    </div>
+
+    <div class="signature-item">
+        <div class="signature-box"></div>
+        <span>Shop Keeper</span>
+    </div>
+</div>
    @endif
- </div>
+
 </div>
     @endforeach
 </div>
@@ -961,15 +961,10 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 .right-summary{width:70%;float:right;text-align:right;color:#000;}
 .signature-area{width:100%;margin-top:40px;display:flex;justify-content:space-between;}
 .signature-box{border:1px solid #000;width:250px;height:30px;}
-   .col-lg-4{flex:0 0 33.33333%;max-width:33.33333%;}
+.col-lg-4{flex:0 0 33.33333%;max-width:33.33333%;}
 .col-lg-8{flex:0 0 66.66667%;max-width:66.66667%;}
+.row{display:flex;flex-wrap:wrap;margin-right:-1rem;margin-left:-1rem;}
 
-.row {
-    display: flex;
-    flex-wrap: wrap;
-    margin-right: -1rem;
-    margin-left: -1rem;
-}
 
       }
     `;
