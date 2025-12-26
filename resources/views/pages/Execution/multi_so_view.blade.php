@@ -935,29 +935,20 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
 .logo-hide{display:none;}
 
-
-   .col-lg-4{flex:0 0 33.33333%;max-width:33.33333%;}
-.col-lg-8{flex:0 0 66.66667%;max-width:66.66667%;}
-
-
-
-.signature-area{display:flex;justify-content:space-between;margin-top:30px;}
-.signature-item{text-align:center;width:30%;}
-.signature-box{border-bottom:1px solid #000;height:40px;margin-bottom:5px;}
 .table-bordered{border:1px solid #ddd !important;}
-.logo.logo-flex-cont{display:flex;align-items:baseline;}
+.logo.logo-flex-cont{display:flex;align-items:baseline;gap:20px}
 .logo-text p{color:#000;font-weight:bold;font-size:18px;}
 body{font-family:Arial,sans-serif;margin:0;padding:0;background:#fff;}
-.invoice-container{width:900px;margin:auto;padding:20px 0px;}
+.invoice-container{width:900px;margin:auto;padding:20px 0px;margin-bottom:50px;}
 h2,h3,h4,p,table{margin:0;padding:0;}
-.header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:-30px;}
+.header{display:flex;justify-content:space-between;align-items:baseline; margin-bottom: 0px;}
 .logo img{width:80px;}
 .title{text-align:center;font-size:20px;font-weight:bold;text-decoration:underline;color:#000;}
 .right-title{text-align:right;font-size:18px;font-weight:bold;text-decoration:underline;color:#000;}
-.section-table{width:98%;border-collapse:collapse;margin-top:10px;font-size:14px;}
-.section-table td{border:1px solid #000;padding:5px;color:#000;font-size:13px;}
+.section-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px;}
+.section-table td{border:1px solid #000;padding:5px;color:#000;    font-size: 13px;}
 .section-table td b{color:#000;}
-.section-table2 td{border:none !important;color:#000;font-size:13px;}
+.section-table2 td{border:none !important;color:#000;    font-size: 13px;}
 .item-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;border:1px solid #000;}
 .item-table th,.item-table td{border:1px solid #000;padding:5px;text-align:center;color:#000;font-size:13px;}
 .item-table td{border:none;}
@@ -970,6 +961,8 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 .right-summary{width:70%;float:right;text-align:right;color:#000;}
 .signature-area{width:100%;margin-top:40px;display:flex;justify-content:space-between;}
 .signature-box{border:1px solid #000;width:250px;height:30px;}
+   .col-lg-4{flex:0 0 33.33333%;max-width:33.33333%;}
+.col-lg-8{flex:0 0 66.66667%;max-width:66.66667%;}
 
 
 
