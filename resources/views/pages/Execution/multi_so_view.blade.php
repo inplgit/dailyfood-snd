@@ -945,7 +945,7 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 .logo img{width:80px;}
 .title{text-align:center;font-size:20px;font-weight:bold;text-decoration:underline;color:#000;}
 .right-title{text-align:right;font-size:18px;font-weight:bold;text-decoration:underline;color:#000;}
-.section-table{width:90%;border-collapse:collapse;margin-top:10px;font-size:14px;}
+.section-table{width:50%;border-collapse:collapse;margin-top:10px;font-size:14px;}
 .section-table td{border:1px solid #000;padding:5px;color:#000;    font-size: 13px;}
 .section-table td b{color:#000;}
 .section-table2 td{border:none !important;color:#000;    font-size: 13px;}
