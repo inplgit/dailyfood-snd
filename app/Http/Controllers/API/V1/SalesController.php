@@ -977,7 +977,7 @@ public function orderCreateBulk(Request $request)
                 'discount_amount' => $total_discount_amount,
                 'total_amount' => $order['total_amount'],
                 'products_subtotal' => $order['products_subtotal'],
-                'excecution' => null,
+                'excecution' => 0,
                 'signature_image' => null,
                 'merchandising_image' => null,
                 'slab_id' => $order['slab_id'] ?? null,
