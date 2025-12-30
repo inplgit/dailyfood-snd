@@ -817,6 +817,93 @@ if ($request->has('visit_time') && !empty($request->visit_time)) {
         return $this->sendResponse([$shopVisit], 'Shop Type List Successfully Retrive.');
     }
 
+public function visitShopAddBulk(Request $request)
+{
+    date_default_timezone_set("Asia/Karachi");
+
+    $visits = $request->json()->all(); // Expect array of visits
+    $userId = Auth::id();
+
+    $response = [
+        'success' => [],
+        'failed'  => []
+    ];
+
+    foreach ($visits as $visit) {
+
+        // local_id for mobile sync (optional but recommended)
+        $visit['local_id'] = (string) ($visit['local_id'] ?? '');
+
+        // 🔎 SAME validation as single API
+        $validator = Validator::make($visit, [
+            'shop_id'    => 'required',
+            'remark'     => 'required',
+            'visit_date' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            $response['failed'][] = [
+                'local_id' => $visit['local_id'],
+                'errors'   => $validator->errors()->all()
+            ];
+            continue;
+        }
+
+        DB::beginTransaction();
+
+        try {
+
+            $data = [
+                'user_id'          => $userId,
+                'shop_id'          => $visit['shop_id'],
+                'visit_reason_id'  => $visit['visit_reason_id'] ?? null,
+                'remark'           => $visit['remark'],
+                'visit_date'       => $visit['visit_date'],
+                'latitude'         => $visit['latitude'] ?? null,
+                'longitude'        => $visit['longitude'] ?? null,
+                'type'             => $visit['type'] ?? null,
+            ];
+
+            // Same created_at logic
+            if (!empty($visit['visit_time'])) {
+                $data['created_at'] = $visit['visit_time'];
+            }
+
+            // SAME create
+            $shopVisit = ShopVisit::create($data);
+
+            // SAME location helper
+            MasterFormsHelper::users_location_submit(
+                $shopVisit,
+                $visit['latitude'] ?? null,
+                $visit['longitude'] ?? null,
+                'shop_visits',
+                'Shop Visit'
+            );
+
+            DB::commit();
+
+            $response['success'][] = [
+                'local_id' => $visit['local_id'],
+                'visit_id' => $shopVisit->id
+            ];
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            $response['failed'][] = [
+                'local_id' => $visit['local_id'],
+                'error'    => $e->getMessage()
+            ];
+        }
+    }
+
+    return response()->json($response);
+}
+
+
+
     public function updateCordinates(Request $request , $id)
     {
 
