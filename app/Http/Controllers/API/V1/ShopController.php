@@ -816,12 +816,13 @@ if ($request->has('visit_time') && !empty($request->visit_time)) {
         ->latest()->paginate($request->limit??5);
         return $this->sendResponse([$shopVisit], 'Shop Type List Successfully Retrive.');
     }
-
 public function visitShopAddBulk(Request $request)
 {
     date_default_timezone_set("Asia/Karachi");
 
-    $visits = $request->json()->all(); // Expect array of visits
+    // Decode visits JSON from form-data
+    $visits = json_decode($request->visits, true);
+    $images = $request->file('merchandising_image', []);
     $userId = Auth::id();
 
     $response = [
@@ -829,16 +830,16 @@ public function visitShopAddBulk(Request $request)
         'failed'  => []
     ];
 
-    foreach ($visits as $visit) {
+    foreach ($visits as $index => $visit) {
 
-        // local_id for mobile sync (optional but recommended)
+        // Optional local_id for mobile sync
         $visit['local_id'] = (string) ($visit['local_id'] ?? '');
 
-        // 🔎 SAME validation as single API
+        // Validation
         $validator = Validator::make($visit, [
-            'shop_id'    => 'required',
+            'shop_id'    => 'required|exists:shops,id',
             'remark'     => 'required',
-            'visit_date' => 'required',
+            'visit_date' => 'required|date',
         ]);
 
         if ($validator->fails()) {
@@ -852,27 +853,32 @@ public function visitShopAddBulk(Request $request)
         DB::beginTransaction();
 
         try {
-
-            $data = [
-                'user_id'          => $userId,
-                'shop_id'          => $visit['shop_id'],
-                'visit_reason_id'  => $visit['visit_reason_id'] ?? null,
-                'remark'           => $visit['remark'],
-                'visit_date'       => $visit['visit_date'],
-                'latitude'         => $visit['latitude'] ?? null,
-                'longitude'        => $visit['longitude'] ?? null,
-                'type'             => $visit['type'] ?? null,
-            ];
-
-            // Same created_at logic
-            if (!empty($visit['visit_time'])) {
-                $data['created_at'] = $visit['visit_time'];
+            // Handle merchandising image for this visit
+            $merchandisingImage = null;
+            if (isset($images[$index])) {
+                $file = $images[$index];
+                $merchandisingImage = time() . "-{$index}-" . $file->getClientOriginalName();
+                $file->storeAs('visitshope', $merchandisingImage, 'public');
             }
 
-            // SAME create
+            // Prepare visit data
+            $data = [
+                'user_id'             => $userId,
+                'shop_id'             => $visit['shop_id'],
+                'visit_reason_id'     => $visit['visit_reason_id'] ?? null,
+                'remark'              => $visit['remark'],
+                'visit_date'          => $visit['visit_date'],
+                'latitude'            => $visit['latitude'] ?? null,
+                'longitude'           => $visit['longitude'] ?? null,
+                'type'                => $visit['type'] ?? null,
+                'merchandising_image' => $merchandisingImage,
+                'created_at'          => $visit['visit_time'] ?? now(),
+            ];
+
+            // Create visit
             $shopVisit = ShopVisit::create($data);
 
-            // SAME location helper
+            // Save user location
             MasterFormsHelper::users_location_submit(
                 $shopVisit,
                 $visit['latitude'] ?? null,
@@ -889,12 +895,11 @@ public function visitShopAddBulk(Request $request)
             ];
 
         } catch (\Exception $e) {
-
             DB::rollBack();
 
             $response['failed'][] = [
                 'local_id' => $visit['local_id'],
-                'error'    => $e->getMessage()
+                'error'    => $e->getMessage() . ' on line ' . $e->getLine()
             ];
         }
     }
