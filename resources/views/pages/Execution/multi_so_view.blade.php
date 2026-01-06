@@ -344,51 +344,49 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
         <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
 
-            <div class="row">
-                <table class="section-table section-table2">
-                    <tr>
-                        <td><u>Invoice Date</u></td>
-                        <td><b>{{ date("d-m-Y", strtotime($so->dc_date)) }}</b></td>
-            
-                        <td><u>Supply Date</u></td>
-                        <td><b>{{ \Carbon\Carbon::parse($so->dc_date)->addDay()->format('d-m-Y') }}</b></td>
+        
+            <table style="width: 97% !important;" class="section-table section-table2">
+                <tr>
+                    <td><u>Invoice Date</u></td>
+                    <td><b>{{ date("d-m-Y", strtotime($so->dc_date)) }}</b></td>
+        
+                    <td><u>Supply Date</u></td>
+                     <td><b>{{ \Carbon\Carbon::parse($so->dc_date)->addDay()->format('d-m-Y') }}</b></td>
 
-                        <td><u>Due Date</u></td>
-                    <td><b>{{ \Carbon\Carbon::parse($so->dc_date)->addDay()->format('d-m-Y') }}</b></td>
-                    </tr>
-                </table>
-            
-                <table class="section-table">
-                    <tr>
-                        <td style=" text-align:center;"><u>Tax Status</u></td>   
-                        <td style=" text-align:center;"><u>Shop Type</u></td>
-                        <td style=" text-align:center;"><u>Bus Type</u></u></td>
-                        <td style=" text-align:center;"><u>Terms</td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td>{{ $so->shop->shopType->shop_type_name ?? '--' }}</td>
-                        <td>{{ $so->shop->channel->name ?? 'N/A' }}</td>
-                        <td>{{ $so->payment_type ?? '--'}}</td>
-                    </tr>
-                </table>
+                    <td><u>Due Date</u></td>
+                  <td><b>{{ \Carbon\Carbon::parse($so->dc_date)->addDay()->format('d-m-Y') }}</b></td>
+                </tr>
+            </table>
+        
+            <table style="width: 97% !important;" class="section-table">
+                <tr>
+                    <td style=" text-align:center;"><u>Tax Status</u></td>   
+                    <td style=" text-align:center;"><u>Shop Type</u></td>
+                    <td style=" text-align:center;"><u>Bus Type</u></u></td>
+                    <td style=" text-align:center;"><u>Terms</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>{{ $so->shop->shopType->shop_type_name ?? '--' }}</td>
+                    <td>{{ $so->shop->channel->name ?? 'N/A' }}</td>
+                    <td>{{ $so->payment_type ?? '--'}}</td>
+                </tr>
+            </table>
 
-                <table class="section-table">
-                    <tr>
-                        <td style=" text-align:center;"><u>ASM</u></td>
-                        <td style=" text-align:center;"><u>TSO </u></td>
-                        <td style=" text-align:center;"><u>SE</u></td>
-                        <td style=" text-align:center;"><u>SM</u></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td style=" text-align:center;"></td>
-                        <td style=" text-align:center;">{{$so->tso->name }}</td>
-                        <td></td>
-                    </tr>
-                </table>
-
-            </div>
+            <table style="width: 97% !important;" class="section-table">
+                <tr>
+                    <td style=" text-align:center;"><u>ASM</u></td>
+                    <td style=" text-align:center;"><u>TSO </u></td>
+                    <td style=" text-align:center;"><u>SE</u></td>
+                    <td style=" text-align:center;"><u>SM</u></td>
+                </tr>
+                <tr>
+                    <td></td>
+                      <td style=" text-align:center;"></td>
+                    <td style=" text-align:center;">{{$so->tso->name }}</td>
+                    <td></td>
+                </tr>
+            </table>
 
         </div>
 
