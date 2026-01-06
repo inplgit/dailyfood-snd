@@ -174,6 +174,50 @@
         });
 
     });
+    $("#subm_rest").submit(function(e) {
+
+        e.preventDefault(); // avoid to execute the actual submit of the form.
+        $(".print-error-msg").find("ul").html('');
+        $(".alert-success").find("ul").html('');
+
+        var form = $(this);
+        var actionUrl = form.attr('action');
+        $.ajaxSetup({
+            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        });
+        $.ajax({
+            type: "POST",
+            url: actionUrl,
+            data: new FormData(this), // serializes the form's elements.
+            // data: form.serialize(), // serializes the form's elements.
+            contentType: false, // Set contentType to false
+            processData: false, // Set processData to false
+
+            success: function(data) {
+
+                // console.log(data);
+                if (data.catchError) {
+                    $(".print-error-msg").find("ul").html('');
+                    $(".print-error-msg").css('display', 'block');
+                    $(".print-error-msg").find("ul").append('<li>' + data.catchError + '</li>');
+                    window.scrollTo(0, 0);
+                    return;
+                }
+                if ($.isEmptyObject(data.error)) {
+
+                    $(".alert-success").find("ul").html('<li>' + data.success + '</li>');
+                    $("#subm").trigger("reset");
+                    // get_ajax_data();
+                    handleSuccess();
+                    $('#unique_code').val(data.code);
+
+                } else {
+                    printErrorMsg(data.error);
+                }
+            }
+        });
+
+    });
 
     // reset form
     function reset_form(id)

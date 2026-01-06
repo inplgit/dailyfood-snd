@@ -21,7 +21,7 @@ $master = new MasterFormsHelper();
                         <h4 class="card-title">Edit SALE ORDER</h4>
                     </div>
                     <div class="card-body">
-                        <form id="subm" method="POST" action="{{ route('sale.update', $record->id) }}" class="form">
+                        <form id="subm_rest" method="POST" action="{{ route('sale.update', $record->id) }}" class="form">
                             @csrf
                             @method('patch')
                             <div class="col-md-12">
