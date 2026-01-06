@@ -310,7 +310,111 @@ class SaleOrderController extends Controller
     // }
 
 
-    public function update(UpdateSaleOrderRequest $request, $id)
+//     public function update(UpdateSaleOrderRequest $request, $id)
+// {
+//     $requestData = $request->all();
+
+    
+//     DB::beginTransaction();
+//     try {
+//         $saleOrder = SaleOrder::findOrFail($id);
+//         $saleOrder->update([
+//             'distributor_id' => $request->distributor_id ?? 0,
+//             'tso_id' => $request->tso_id ?? 0,
+//             'route_id' => $request->route_id ?? 0,
+//             'shop_id' => $request->shop_id ?? 0,
+//             'user_id' => auth()->user()->id ?? 0,
+//             'invoice_no' => $request->invoice_no ?? 0,
+//             'dc_no' => $request->dc_no ?? 0,
+//             'lpo_no' => $request->lpo_no ?? 0,
+//             'dc_date' => $request->dc_date ?? '0000-00-00',
+//             'excecution' => $request->excecution ?? 0,
+//             'excecution_date' => $request->excecution_date ?? null,
+//             'payment_type' => $request->payment_type ?? 0,
+//             'total_carton' => $request->total_carton ?? 0,
+//             'total_pcs' => $request->total_pcs ?? 0,
+//             'cost_center' => $request->cost_center ?? 0,
+//             'notes' => $request->notes ?? 0,
+//             'transport_details' => $request->transport_details ?? 0,
+//             'discount_percent' => $request->discount_percent ?? 0,
+//             'discount_amount' => $request->discount_amount ?? 0,
+//             'tax_applied' => $request->tax_applied ?? 0,
+//             'pending_amount' => $request->pending_amount ?? 0,
+//             'total_amount' => $request->total ?? 0,
+//             'products_subtotal' => $request->products_subtotal ?? 0,
+//             'old_receivable' => $request->old_receivable ?? 0,
+//             'freight_charges' => $request->freight_charges ?? 0,
+//             'delivery_date' => $request->delivery_date ?? '0000-00-00',
+//               'slab_id' => $request->slab_id ?? 0,
+//                 'slab_details_id' => $request->slab_details_id ?? 0,
+//                 'slab_percentage' => $request->slab_percentage ?? 0,
+//                 'slab_amount' => $request->slab_amount ?? 0,
+//         ]);
+
+//         // Remove deleted rows
+//         SaleOrderData::whereIn('id', explode(',', $request->remove_id))->delete();
+
+//         foreach ($request->product_id as $key => $item) {
+//             $saleOrderData = SaleOrderData::find($requestData['sale_order_data_id'][$key] ?? 0);
+
+//             // scheme product
+//             $scheme_id = $scheme_data_id = 0;
+//             if (!empty($request['scheme_id'][$key])) {
+//                 $scheme = explode(',', $request['scheme_id'][$key]);
+//                 $scheme_id = $scheme[0];
+//                 $scheme_data_id = $scheme[1];
+//             }
+
+//             // scheme pcs
+//             $scheme_id_pcs = $scheme_data_id_pcs = $scheme_pcs = 0;
+//             if (!empty($request['scheme_id_pcs'][$key])) {
+//                 $schemePcs = explode(',', $request['scheme_id_pcs'][$key]);
+//                 $scheme_id_pcs = $schemePcs[0];
+//                 $scheme_data_id_pcs = $schemePcs[1];
+//             }
+//             if (isset($request['scheme_pcs'][$key])) {
+//                 $scheme_pcs = $request['scheme_pcs'][$key];
+//             }
+
+//             $dataArray = [
+//                 'product_id' => $requestData['product_id'][$key] ?? 0,
+//                 'flavour_id' => $requestData['flavour_id'][$key] ?? 0,
+//                 'sale_type' => $requestData['sale_type'][$key] ?? 0,
+//                 'rate' => $requestData['rate'][$key] ?? 0,
+//                 'qty' => $requestData['qty'][$key] ?? 0,
+//                 'discount' => $requestData['data_discount'][$key] ?? 0,
+//                 'discount_amount' => $requestData['data_discount_amount'][$key] ?? 0,
+//                 'tax_percent' => $requestData['data_tax_percent'][$key] ?? 0,
+//                 'tax_amount' => $requestData['data_tax_amount'][$key] ?? 0,
+//                 'trade_offer_amount' => $requestData['trade_offer_amount'][$key] ?? 0,
+//                 'scheme_id' => $scheme_id,
+//                 'scheme_data_id' => $scheme_data_id,
+//                 'scheme_id_pcs' => $scheme_id_pcs,
+//                 'scheme_data_id_pcs' => $scheme_data_id_pcs,
+//                 'scheme_amount' => $requestData['sch_d'][$key] ?? 0,
+//                 'scheme_data_pcs' => $scheme_pcs,
+//                 'total' => $requestData['data_total'][$key] ?? 0,
+//                 'sheme_product_id' => $requestData['shceme_product_id'][$key] ?? 0,
+//                 'offer_qty' => $requestData['offer'][$key] ?? 0,
+//             ];
+
+//             if ($saleOrderData) {
+//                 $saleOrderData->update($dataArray);
+//             } else {
+//                 $dataArray['so_id'] = $id;
+//                 SaleOrderData::create($dataArray);
+//             }
+//         }
+
+//         DB::commit();
+//         return response()->json(['success' => 'Sale Order Updated Successfully']);
+//     } catch (\Throwable $th) {
+//         DB::rollBack();
+//         return response()->json(['error' => 'Oops! There might be an error: ' . $th->getMessage()]);
+//     }
+// }
+
+public function update(UpdateSaleOrderRequest $request, $id)
 {
     $requestData = $request->all();
     DB::beginTransaction();
@@ -343,64 +447,88 @@ class SaleOrderController extends Controller
             'old_receivable' => $request->old_receivable ?? 0,
             'freight_charges' => $request->freight_charges ?? 0,
             'delivery_date' => $request->delivery_date ?? '0000-00-00',
-              'slab_id' => $request->slab_id ?? 0,
-                'slab_details_id' => $request->slab_details_id ?? 0,
-                'slab_percentage' => $request->slab_percentage ?? 0,
-                'slab_amount' => $request->slab_amount ?? 0,
+            'slab_id' => $request->slab_id ?? 0,
+            'slab_details_id' => $request->slab_details_id ?? 0,
+            'slab_percentage' => $request->slab_percentage ?? 0,
+            'slab_amount' => $request->slab_amount ?? 0,
         ]);
 
-        // Remove deleted rows
-        SaleOrderData::whereIn('id', explode(',', $request->remove_id))->delete();
-
-        foreach ($request->product_id as $key => $item) {
-            $saleOrderData = SaleOrderData::find($requestData['sale_order_data_id'][$key] ?? 0);
-
-            // scheme product
-            $scheme_id = $scheme_data_id = 0;
-            if (!empty($request['scheme_id'][$key])) {
-                $scheme = explode(',', $request['scheme_id'][$key]);
-                $scheme_id = $scheme[0];
-                $scheme_data_id = $scheme[1];
+        // FIXED: Handle remove_id properly
+        if (!empty($request->remove_id) && trim($request->remove_id) !== '') {
+            $removeIds = explode(',', $request->remove_id);
+            
+            // Filter valid IDs
+            $removeIds = array_filter($removeIds, function($id) {
+                return !empty($id) && $id !== '0' && is_numeric($id);
+            });
+            
+            if (!empty($removeIds)) {
+                // Only delete rows belonging to this sale order
+                SaleOrderData::where('so_id', $id)
+                    ->whereIn('id', $removeIds)
+                    ->delete();
             }
+        }
 
-            // scheme pcs
-            $scheme_id_pcs = $scheme_data_id_pcs = $scheme_pcs = 0;
-            if (!empty($request['scheme_id_pcs'][$key])) {
-                $schemePcs = explode(',', $request['scheme_id_pcs'][$key]);
-                $scheme_id_pcs = $schemePcs[0];
-                $scheme_data_id_pcs = $schemePcs[1];
-            }
-            if (isset($request['scheme_pcs'][$key])) {
-                $scheme_pcs = $request['scheme_pcs'][$key];
-            }
+        // Process remaining rows
+        if (isset($request->product_id) && is_array($request->product_id)) {
+            foreach ($request->product_id as $key => $item) {
+                $saleOrderDataId = $requestData['sale_order_data_id'][$key] ?? 0;
+                
+                $saleOrderData = null;
+                if ($saleOrderDataId && $saleOrderDataId !== '0') {
+                    $saleOrderData = SaleOrderData::where('id', $saleOrderDataId)
+                        ->where('so_id', $id)
+                        ->first();
+                }
 
-            $dataArray = [
-                'product_id' => $requestData['product_id'][$key] ?? 0,
-                'flavour_id' => $requestData['flavour_id'][$key] ?? 0,
-                'sale_type' => $requestData['sale_type'][$key] ?? 0,
-                'rate' => $requestData['rate'][$key] ?? 0,
-                'qty' => $requestData['qty'][$key] ?? 0,
-                'discount' => $requestData['data_discount'][$key] ?? 0,
-                'discount_amount' => $requestData['data_discount_amount'][$key] ?? 0,
-                'tax_percent' => $requestData['data_tax_percent'][$key] ?? 0,
-                'tax_amount' => $requestData['data_tax_amount'][$key] ?? 0,
-                'trade_offer_amount' => $requestData['trade_offer_amount'][$key] ?? 0,
-                'scheme_id' => $scheme_id,
-                'scheme_data_id' => $scheme_data_id,
-                'scheme_id_pcs' => $scheme_id_pcs,
-                'scheme_data_id_pcs' => $scheme_data_id_pcs,
-                'scheme_amount' => $requestData['sch_d'][$key] ?? 0,
-                'scheme_data_pcs' => $scheme_pcs,
-                'total' => $requestData['data_total'][$key] ?? 0,
-                'sheme_product_id' => $requestData['shceme_product_id'][$key] ?? 0,
-                'offer_qty' => $requestData['offer'][$key] ?? 0,
-            ];
+                // scheme product
+                $scheme_id = $scheme_data_id = 0;
+                if (!empty($request['scheme_id'][$key])) {
+                    $scheme = explode(',', $request['scheme_id'][$key]);
+                    $scheme_id = $scheme[0] ?? 0;
+                    $scheme_data_id = $scheme[1] ?? 0;
+                }
 
-            if ($saleOrderData) {
-                $saleOrderData->update($dataArray);
-            } else {
-                $dataArray['so_id'] = $id;
-                SaleOrderData::create($dataArray);
+                // scheme pcs
+                $scheme_id_pcs = $scheme_data_id_pcs = $scheme_pcs = 0;
+                if (!empty($request['scheme_id_pcs'][$key])) {
+                    $schemePcs = explode(',', $request['scheme_id_pcs'][$key]);
+                    $scheme_id_pcs = $schemePcs[0] ?? 0;
+                    $scheme_data_id_pcs = $schemePcs[1] ?? 0;
+                }
+                if (isset($request['scheme_pcs'][$key])) {
+                    $scheme_pcs = $request['scheme_pcs'][$key] ?? 0;
+                }
+
+                $dataArray = [
+                    'product_id' => $requestData['product_id'][$key] ?? 0,
+                    'flavour_id' => $requestData['flavour_id'][$key] ?? 0,
+                    'sale_type' => $requestData['sale_type'][$key] ?? 0,
+                    'rate' => $requestData['rate'][$key] ?? 0,
+                    'qty' => $requestData['qty'][$key] ?? 0,
+                    'discount' => $requestData['data_discount'][$key] ?? 0,
+                    'discount_amount' => $requestData['data_discount_amount'][$key] ?? 0,
+                    'tax_percent' => $requestData['data_tax_percent'][$key] ?? 0,
+                    'tax_amount' => $requestData['data_tax_amount'][$key] ?? 0,
+                    'trade_offer_amount' => $requestData['trade_offer_amount'][$key] ?? 0,
+                    'scheme_id' => $scheme_id,
+                    'scheme_data_id' => $scheme_data_id,
+                    'scheme_id_pcs' => $scheme_id_pcs,
+                    'scheme_data_id_pcs' => $scheme_data_id_pcs,
+                    'scheme_amount' => $requestData['sch_d'][$key] ?? 0,
+                    'scheme_data_pcs' => $scheme_pcs,
+                    'total' => $requestData['data_total'][$key] ?? 0,
+                    'sheme_product_id' => $requestData['shceme_product_id'][$key] ?? 0,
+                    'offer_qty' => $requestData['offer'][$key] ?? 0,
+                ];
+
+                if ($saleOrderData) {
+                    $saleOrderData->update($dataArray);
+                } else {
+                    $dataArray['so_id'] = $id;
+                    SaleOrderData::create($dataArray);
+                }
             }
         }
 
@@ -408,6 +536,7 @@ class SaleOrderController extends Controller
         return response()->json(['success' => 'Sale Order Updated Successfully']);
     } catch (\Throwable $th) {
         DB::rollBack();
+        \Log::error('Sale Order Update Error: ' . $th->getMessage());
         return response()->json(['error' => 'Oops! There might be an error: ' . $th->getMessage()]);
     }
 }

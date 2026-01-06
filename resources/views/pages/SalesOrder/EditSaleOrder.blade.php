@@ -558,1072 +558,484 @@ $master = new MasterFormsHelper();
     <!-- Basic Floating Label Form section end -->
 
 @endsection
-
 @section('script')
-    <script>
-        // function calculation() {
-        //     var $total = 0;
-        //     $( '.data-total' ).each(function( index ) {
-        //         // console.log(this);
-        //         $total += parseFloat(this.value)
-        //     });
-        //     $('#products_subtotal').val($total);
-        //     var freight_charges = $('#freight_charges').val();
-        //     var discount_percent = $('#discount_percent').val();
-        //     var discount_amount = ( parseFloat($total) / 100 ) * parseFloat(discount_percent)
-        //     var $net_total = $total + parseFloat(freight_charges) - parseFloat(discount_amount);
-        //     $('#total_amount').val($net_total);
-        //     $('#discount_amount').val(discount_amount);
-        //     $('#pending_amount').val($net_total);
-        //     $('#net_total').val($net_total);
-        //     console.log(discount_amount);
-        // }
-
-
-//         function calculation() {
-//     var $total = 0;
-
-//     $('.data-total').each(function (index) {
-//         $total += parseFloat(this.value) || 0; // Ensure proper addition even if some values are empty
-//     });
-
-//     $('#products_subtotal').val($total.toFixed(2)); // Format to 2 decimal places
-
-//     var freight_charges = parseFloat($('#freight_charges').val()) || 0;
-//     var discount_percent = parseFloat($('#discount_percent').val()) || 0;
-
-//     var discount_amount = ($total / 100) * discount_percent;
-//     var $net_total = $total + freight_charges - discount_amount;
-
-//     $('#total_amount').val($net_total.toFixed(2)); // Format to 2 decimal places
-//     $('#discount_amount').val(discount_amount.toFixed(2)); // Format to 2 decimal places
-//     $('#pending_amount').val($net_total.toFixed(2)); // Format to 2 decimal places
-//     $('#net_total').val($net_total.toFixed(2)); // Format to 2 decimal places
-
-//     console.log(discount_amount.toFixed(2)); // Format to 2 decimal places in the log
-// }
-
-
-$(document).on('change', '#shop_id', function() {
-    var newShopId = $(this).val();
-    
-   
-    var previousShopId = window.previousShopId || null;
-    
-  
-    window.previousShopId = newShopId;
-    
-  
-    $(this).data('previous-value', newShopId);
-    
-   alert("test");
-    if (newShopId !== previousShopId && previousShopId !== null) {
-        console.log('Shop changed! Clearing previous slab discount...');
-        resetSlabDiscountFields();
-    }
-    
-
-    setTimeout(function() {
-        calculation();
-    }, 100);
-});
-
-
-function calculation() {
-    var $total = 0;
-
-    $('.data-total').each(function (index) {
-        $total += parseFloat(this.value) || 0;
-    });
-
-    $('#products_subtotal').val($total.toFixed(2));
-
-    var freight_charges = parseFloat($('#freight_charges').val()) || 0;
-    var discount_percent = parseFloat($('#discount_percent').val()) || 0;
-
-    var discount_amount = ($total / 100) * discount_percent;
-    var $net_total_before_slab = $total + freight_charges - discount_amount;
-    
-    // Step 1: Calculate base total (bulk discount se pehle)
-    var baseTotal = $total + freight_charges; // Bulk discount se pehle
-    $('#total_amount').val(baseTotal.toFixed(2));
-    
-    // Step 2: Apply bulk discount
-    var bulkDiscountAmount = discount_amount;
-    $('#discount_amount').val(bulkDiscountAmount.toFixed(2));
-    
-    // Step 3: Calculate slab discount
-    calculateSlabDiscount(baseTotal, bulkDiscountAmount, $net_total_before_slab);
-    
-    // Note: Final total calculation ab calculateSlabDiscount function mein hoga
-}
-
-function calculateSlabDiscount(baseTotal, bulkDiscountAmount, netTotalBeforeSlab) {
-    var shopId = $('#shop_id').val();
-    
-    if (!shopId) {
-        // Reset slab discount if no shop selected
-        resetSlabDiscount(netTotalBeforeSlab);
-        return;
-    }
-    
-    $.ajax({
-        type: "GET",
-        url: "{{ route('calculate.slab.discount') }}",
-        data: {
-            shop_id: shopId,
-            total_amount: baseTotal
-        },
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                if (response.slab_discount) {
-                    // Slab discount found
-                    var slabDiscount = response.slab_discount;
-                    var slabDiscountAmount = parseFloat(slabDiscount.slab_amount) || 0;
-                    
-                    // Display slab discount details
-                    $('#slab_id').val(slabDiscount.slab_id);
-                    $('#slab_id_display').val(slabDiscount.slab_id);
-                    $('#slab_details_id').val(slabDiscount.slab_details_id);
-                    $('#slab_details_id_display').val(slabDiscount.slab_details_id);
-                    $('#slab_percentage').val(slabDiscount.percentage + '%');
-                    $('#slab_amount').val(slabDiscount.slab_amount.toFixed(2));
-                    
-                    // Calculate final total
-                    // finalTotal = netTotalBeforeSlab - slabDiscountAmount
-                    var finalTotal = netTotalBeforeSlab - slabDiscountAmount;
-                    
-                    $('#pending_amount').val(finalTotal.toFixed(2));
-                    $('#net_total').val(finalTotal.toFixed(2));
-                    
-                    console.log('Slab Discount Applied:', slabDiscount);
-                    console.log('Base Total:', baseTotal);
-                    console.log('Bulk Discount:', bulkDiscountAmount);
-                    console.log('Slab Discount:', slabDiscountAmount);
-                    console.log('Final Total:', finalTotal);
-                } else {
-                    // No slab discount found
-                    resetSlabDiscount(netTotalBeforeSlab);
-                }
-            } else {
-                // Error in API response
-                resetSlabDiscount(netTotalBeforeSlab);
-                console.error('Error calculating slab discount:', response.message);
-            }
-        },
-        error: function(xhr, status, error) {
-            // AJAX error
-            resetSlabDiscount(netTotalBeforeSlab);
-            console.error('AJAX Error:', error);
+<script>
+    $(document).on('change', '#shop_id', function() {
+        var newShopId = $(this).val();
+        var previousShopId = window.previousShopId || null;
+        window.previousShopId = newShopId;
+        $(this).data('previous-value', newShopId);
+        
+        if (newShopId !== previousShopId && previousShopId !== null) {
+            console.log('Shop changed! Clearing previous slab discount...');
+            resetSlabDiscountFields();
         }
-    });
-}
-
-// Function to reset slab discount
-function resetSlabDiscount(netTotalBeforeSlab) {
-    // Reset slab fields
-    $('#slab_id').val('');
-    $('#slab_id_display').val('');
-    $('#slab_details_id').val('');
-    $('#slab_details_id_display').val('');
-    $('#slab_percentage').val('0%');
-    $('#slab_amount').val('0.00');
-    
-    // Set final total (no slab discount)
-    $('#pending_amount').val(netTotalBeforeSlab.toFixed(2));
-    $('#net_total').val(netTotalBeforeSlab.toFixed(2));
-}
-
-
-
-
-
-// Jab bhi product ki quantity ya rate change ho to slab discount calculate ho
-$(document).on('keyup change', '.data-quantity, .data-rate, #freight_charges, #discount_percent', function() {
-    // Delay thoda sa ta ke calculations complete ho jayein
-    setTimeout(function() {
-        // Trigger calculation
-        calculation();
-    }, 300);
-});
-
-
-        $(document).ready(function(){
-
-            $('.select2').select2();
-            $('#searchbox').on('change',  function(){
-
-                // let rate = $(this).find(':selected').data('rate');
-                // $(this).closest('tr').find('.data-rate').val(rate);
-            //     console.log($(this).find(':selected').data('url'))
-            //     var product_id = $(this).val()
-            //     $.ajax({
-            //     type: "get",
-            //     url: $(this).find(':selected').data('url'),
-            //     data: {}, // serializes the form's elements.
-            //     cache: false,
-            //     success: function(data)
-            //     {
-            //         $('#appendRow').append(data);
-
-            //     }
-            // });
-            });
-
-            $(document).on('keyup', '#freight_charges', function(){
-                calculation();
-            });
-            $(document).on('keyup', '#discount_percent', function(){
-                calculation();
-            });
-
-            // $(document).on('change', '#tso_id', function(){
-            //     var options = '<option value="">Select a Shop </option>';
-            //     var id = $(this).val()
-            //     $.ajax({
-            //         type: "get",
-            //         url: "{{ route('shop.by.tso') }}",
-            //         data: {id:id},
-            //         cache: false,
-            //         success: function(data)
-            //         {
-            //             data.res.forEach(element => {
-            //                 options += `<option value="${element.id}">${element.company_name}</option>`
-            //             });
-            //             $('#shop_id').html(options);
-
-            //         }
-            //     });
-            // });
-        });
-        let counter = 1;
-        function addMore() {
-
-            // <td>
-            //         ${counter+1}
-            //     </td>
-            $('#appendRow').append(`
-            <tr id="removeRow${counter}">
-
-                <td>
-                    <select onchange="get_product_price(this);get_flavour(this); get_scheme_product(this); get_total_caton_and_qty();" name="product_id[]" tabindex="-1" class="product_id combobox form-control"
-                        required class="combobox form-control" aria-hidden="true">
-                        <option value="">Select a Product</option>
-                        @foreach ($products as $product)
-                            <option data-carton_size="{{$product->carton_size}}" data-product_price="{{$master->get_product_price($product->id)}}" data-flavour="{{$product->product_flavour}}"data-url="{{ route('sale-order.table-row', $product->id) }}" value="{{ $product->id }}">{{ $product->product_name }}</option>
-                        @endforeach
-                    </select>
-                </td>
-
-                <td>
-                    <select name="flavour_id[]"  id="" class="form-control flavour">
-                    </select>
-                </td>
-                <td>
-                    <select name="sale_type[]" onchange="get_rate(this)" id="" class="form-control sale_type">
-
-                    </select>
-                </td>
-                <td>
-                    <input onkeyup="calc(this); get_scheme_product(this); get_total_caton_and_qty();" class="form-control data-quantity" type="number" min="0" name="qty[]" value="0">
-                </td>
-                <td>
-                    <input step="any" onkeyup="calc(this)" class="form-control data-rate" type="number" min="0" name="rate[]" value="0">
-                </td>
-                <td>
-                    <input onkeyup="calc(this)" class="form-control data-discount" type="text" name="data_discount[]" value="0">
-                </td>
-                    <!-- <td>
-                    <input class="form-control data-discount-amount" onkeyup="calc(this , true)"   type="integer" name="data_discount_amount[]" value="0">
-                </td>
-                <td>
-                    <input onkeyup="calc(this)" class="form-control trade_offer_amount" type="text" name="trade_offer_amount[]" value="0">
-                </td>-->
-                <td class="hide">
-                    <select name="scheme_id[]" onchange="get_scheme_amount(this);" id="" class="form-control scheme_product">
-                        <option value="">Select</option>
-                    </select>
-                </td>
-                <td class="hide">
-                    <input readonly class="form-control scheme_amount" step="any" type="number" name="scheme_amount[]" value="0">
-                </td>
-                <td class="hide">
-                    <input readonly class="form-control scheme_qty" step="any" type="number" name="scheme_qty[]" value="0">
-                </td>
-                  <td>
-                    <select name="scheme_id_pcs[]" onchange="get_scheme_pcs(this);" id="" class="form-control scheme_product_pcs">
-                        <option value="">Select</option>
-                    </select>
-                </td>
-                <td>
-                    <input readonly class="form-control scheme_pcs" step="any" type="number" name="scheme_pcs[]" value="0">
-                </td>
-
-                 <td>
-        <input style="width: 130px !important;" readonly class="form-control sch_d" type="number" name="sch_d[]" value="0">
-    </td>
-                <td class="hide">
-                    <input readonly class="form-control scheme_pcs_total" step="any" type="number" name="scheme_product_pcs_total[]" value="0">
-                </td>
-                <td class="hide">
-                    <input onkeyup="calc(this)" class="form-control data-tax-percent" type="text" name="data_tax_percent[]" value="0">
-                    <input class="data-tax-amount" type="hidden" name="data_tax_amount[]" value="0">
-                </td>
-                <td>
-                    <input readonly class="form-control data-total" type="text" name="data_total[]" value="0">
-                </td>
-                <td>
-                    <button type="button" onclick="removeRow(${counter})" class="btn btn-danger btn-xs"><i class="fa-solid fa-trash"></i></button>
-                </td>
-            </tr>
-            `)
-            ++counter;
-        }
-        function removeRow(params) {
-            $('#removeRow' +params).remove();
+        
+        setTimeout(function() {
             calculation();
+        }, 100);
+    });
+
+    function calculation() {
+        var $total = 0;
+
+        $('.data-total').each(function (index) {
+            $total += parseFloat(this.value) || 0;
+        });
+
+        $('#products_subtotal').val($total.toFixed(2));
+
+        var freight_charges = parseFloat($('#freight_charges').val()) || 0;
+        var discount_percent = parseFloat($('#discount_percent').val()) || 0;
+
+        var discount_amount = ($total / 100) * discount_percent;
+        var $net_total_before_slab = $total + freight_charges - discount_amount;
+        
+        // Step 1: Calculate base total (bulk discount se pehle)
+        var baseTotal = $total + freight_charges;
+        $('#total_amount').val(baseTotal.toFixed(2));
+        
+        // Step 2: Apply bulk discount
+        var bulkDiscountAmount = discount_amount;
+        $('#discount_amount').val(bulkDiscountAmount.toFixed(2));
+        
+        // Step 3: Calculate slab discount
+        calculateSlabDiscount(baseTotal, bulkDiscountAmount, $net_total_before_slab);
+    }
+
+    function calculateSlabDiscount(baseTotal, bulkDiscountAmount, netTotalBeforeSlab) {
+        var shopId = $('#shop_id').val();
+        
+        if (!shopId) {
+            resetSlabDiscount(netTotalBeforeSlab);
+            return;
+        }
+        
+        $.ajax({
+            type: "GET",
+            url: "{{ route('calculate.slab.discount') }}",
+            data: {
+                shop_id: shopId,
+                total_amount: baseTotal
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    if (response.slab_discount) {
+                        var slabDiscount = response.slab_discount;
+                        var slabDiscountAmount = parseFloat(slabDiscount.slab_amount) || 0;
+                        
+                        $('#slab_id').val(slabDiscount.slab_id);
+                        $('#slab_percentage').val(slabDiscount.percentage + '%');
+                        $('#slab_amount').val(slabDiscount.slab_amount.toFixed(2));
+                        
+                        var finalTotal = netTotalBeforeSlab - slabDiscountAmount;
+                        
+                        $('#pending_amount').val(finalTotal.toFixed(2));
+                        $('#net_total').val(finalTotal.toFixed(2));
+                    } else {
+                        resetSlabDiscount(netTotalBeforeSlab);
+                    }
+                } else {
+                    resetSlabDiscount(netTotalBeforeSlab);
+                    console.error('Error calculating slab discount:', response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                resetSlabDiscount(netTotalBeforeSlab);
+                console.error('AJAX Error:', error);
+            }
+        });
+    }
+
+    function resetSlabDiscount(netTotalBeforeSlab) {
+        $('#slab_id').val('');
+        $('#slab_percentage').val('0%');
+        $('#slab_amount').val('0.00');
+        
+        $('#pending_amount').val(netTotalBeforeSlab.toFixed(2));
+        $('#net_total').val(netTotalBeforeSlab.toFixed(2));
+    }
+
+    $(document).on('keyup change', '.data-quantity, .data-rate, #freight_charges, #discount_percent', function() {
+        setTimeout(function() {
+            calculation();
+        }, 300);
+    });
+
+    $(document).ready(function(){
+        $('.select2').select2();
+        
+        $(document).on('keyup', '#freight_charges', function(){
+            calculation();
+        });
+        
+        $(document).on('keyup', '#discount_percent', function(){
+            calculation();
+        });
+    });
+
+    // Initialize counter based on existing rows + 1
+    let counter = {{ count($record->saleOrderData) }} + 1;
+
+    function addMore() {
+        $('#appendRow').append(`
+        <tr id="removeRow${counter}">
+            <input type="hidden" class="data_id" name="sale_order_data_id[]" value="0">
+            <td>
+                <select style="width:290px !important;" onchange="get_product_price(this);get_flavour(this); get_scheme_product(this); get_total_caton_and_qty();" name="product_id[]" tabindex="-1" class="product_id combobox form-control" required>
+                    <option value="">Select a Product</option>
+                    @foreach ($products as $product)
+                        <option data-carton_size="{{$product->carton_size}}" data-product_price="{{$master->get_product_price($product->id)}}" data-flavour="{{$product->product_flavour}}"data-url="{{ route('sale-order.table-row', $product->id) }}" value="{{ $product->id }}">{{ $product->product_name }}</option>
+                    @endforeach
+                </select>
+            </td>
+            <td>
+                <select style="width:130px !important;" name="flavour_id[]" id="" class="form-control flavour"></select>
+            </td>
+            <td>
+                <select style="width:130px !important;" name="sale_type[]" onchange="get_rate(this)" id="" class="form-control sale_type"></select>
+            </td>
+            <td>
+                <input style="width:130px !important;" onkeyup="calc(this); get_scheme_product(this); get_total_caton_and_qty();" class="form-control data-quantity" type="number" min="0" name="qty[]" value="0">
+            </td>
+            <td>
+                <input style="width:130px !important;" step="any" onkeyup="calc(this)" class="form-control data-rate" type="number" min="0" name="rate[]" value="0">
+            </td>
+            <td>
+                <input style="width:130px !important;" onkeyup="calc(this)" class="form-control data-discount" type="text" name="data_discount[]" value="0">
+            </td>
+            <td class="hide">
+                <input style="width:130px !important;" class="form-control data-discount-amount" onkeyup="calc(this , true)" type="integer" name="data_discount_amount[]" value="0">
+            </td>
+            <td class="hide">
+                <select style="width:130px !important;" name="scheme_id[]" onchange="get_scheme_amount(this);" id="" class="form-control scheme_product">
+                    <option value="">Select</option>
+                </select>
+            </td>
+            <td class="hide">
+                <input style="width:130px !important;" readonly class="form-control scheme_amount" step="any" type="number" name="scheme_amount[]" value="0">
+            </td>
+            <td class="hide">
+                <input style="width:130px !important;" readonly class="form-control scheme_qty" step="any" type="number" name="scheme_qty[]" value="0">
+            </td>
+            <td>
+                <select style="width:130px !important;" name="scheme_id_pcs[]" onchange="get_scheme_pcs(this);" id="" class="form-control scheme_product_pcs">
+                    <option value="">Select</option>
+                </select>
+            </td>
+            <td>
+                <input style="width:130px !important;" readonly class="form-control scheme_pcs" step="any" type="number" name="scheme_pcs[]" value="0">
+            </td>
+            <td>
+                <input style="width:130px !important;" readonly class="form-control sch_d" type="number" name="sch_d[]" value="0">
+            </td>
+            <td class="hide">
+                <input style="width:130px !important;" readonly class="form-control scheme_pcs_total" step="any" type="number" name="scheme_product_pcs_total[]" value="0">
+            </td>
+            <td class="hide">
+                <input style="width:130px !important;" onkeyup="calc(this)" class="form-control data-tax-percent" type="text" name="data_tax_percent[]" value="0">
+                <input class="data-tax-amount" type="hidden" name="data_tax_amount[]" value="0">
+            </td>
+            <td>
+                <input style="width:190px !important;" readonly class="form-control data-total" type="text" name="data_total[]" value="0">
+            </td>
+            <td>
+                <button type="button" onclick="removeRow(${counter})" class="btn btn-danger btn-xs"><i class="fa-solid fa-trash"></i></button>
+            </td>
+        </tr>
+        `);
+        
+        // Initialize select2 for new row
+        setTimeout(() => {
+            $('#removeRow' + counter + ' select').select2();
+        }, 100);
+        
+        counter++;
+        calculation();
+    }
+
+    // Updated removeRow function
+    function removeRow(params) {
+        const row = $('#removeRow' + params);
+        
+        // Get the sale_order_data_id from the row
+        const dataId = row.find('.data_id').val();
+        
+        if (dataId && dataId !== '0' && dataId !== '') {
+            // Add the ID to remove_id hidden field
+            const currentRemoveIds = $('.remove_id').val();
+            const removeIdsArray = currentRemoveIds ? currentRemoveIds.split(',') : [];
+            
+            // Add the ID if not already present and it's not empty
+            if (!removeIdsArray.includes(dataId)) {
+                removeIdsArray.push(dataId);
+                $('.remove_id').val(removeIdsArray.join(','));
+                console.log('Added to remove_id:', dataId);
+            }
+        }
+        
+        // Remove the row from UI
+        row.remove();
+        
+        // Recalculate totals
+        calculation();
+    }
+
+    function calc(val, discount_amount_type) {
+        var $this = $(val);
+
+        // Get values and ensure they are numbers
+        var rate = Number($this.closest('tr').find('.data-rate').val()) || 0;
+        var qty = Number($this.closest('tr').find('.data-quantity').val()) || 0;
+        var sch_d = Number($this.closest('tr').find('.sch_d').val()) || 0;
+        var scheme_pcs_total = Number($this.closest('tr').find('.scheme_pcs_total').val()) || 0;
+        var scheme_qty = Number($this.closest('tr').find('.scheme_qty').val()) || 1;
+        var tax = Number($this.closest('tr').find('.data-tax-percent').val()) || 0;
+        var trade_offer_amount = Number($this.closest('tr').find('.trade_offer_amount').val()) || 0;
+        var scheme_amount = Number($this.closest('tr').find('.scheme_amount').val()) || 0;
+
+        // Calculate scheme_amount1 safely
+        var scheme_amount1 = (scheme_amount * qty) / scheme_qty;
+
+        var applicableSchemes = Math.floor(qty / scheme_pcs_total);
+        var totalApplicableSchemes = scheme_qty * applicableSchemes;
+
+        $this.closest('tr').find('.scheme_pcs').val(totalApplicableSchemes);
+
+        var total = qty * rate;
+        var tax_amount = (total / 100) * tax;
+
+        $this.closest('tr').find('.data-tax-amount').val(tax_amount);
+
+        var discount_total, discount_percent;
+
+        if (discount_amount_type) {
+            discount_total = Number($this.closest('tr').find('.data-discount-amount').val()) || 0;
+            discount_percent = (discount_total * 100) / total;
+            $this.closest('tr').find('.data-discount').val(discount_percent);
+        } else {
+            discount_percent = Number($this.closest('tr').find('.data-discount').val()) || 0;
+            discount_total = (total / 100) * discount_percent;
+            $this.closest('tr').find('.data-discount-amount').val(discount_total);
         }
 
-        // function calc(val , discount_amount_type)
-        // {
+        console.log("Total:", total, "Discount Total:", discount_total, "Discount Percent:", discount_percent);
 
-        //     $this = $(val);
+        // Calculate final total
+        var data_total = total - discount_total + tax_amount - trade_offer_amount - sch_d;
+        $this.closest('tr').find('.data-total').val(parseInt(data_total));
 
+        // Call calculation function
+        calculation();
+    }
 
-        //         var rate = $this.closest('tr').find('.data-rate').val();
-        //         var qty = $this.closest('tr').find('.data-quantity').val();
-        //         var scheme_qty = $this.closest('tr').find('.scheme_qty').val();
-        //         var tax = $this.closest('tr').find('.data-tax-percent').val();
-        //         var trade_offer_amount = $this.closest('tr').find('.trade_offer_amount').val();
-        //         var scheme_amount = $this.closest('tr').find('.scheme_amount').val();
-   
-
-        //         var total = parseFloat(qty) * parseFloat(rate);
-        //         var tax_amount = (parseFloat(total)/100) * parseFloat(tax);
-        //         $this.closest('tr').find('.data-tax-amount').val(tax_amount);
-        //         // console.log(total);
-
-        //         if (discount_amount_type) {
-        //             var discount_total =$this.closest('tr').find('.data-discount-amount').val();
-        //             var discount_percent = (parseFloat(discount_total)*100) / parseFloat(total) ;
-        //             // console.log(discount_amount , total , discount_percent);
-
-        //             $this.closest('tr').find('.data-discount').val(discount_percent);
-        //         }
-        //         else{
-        //             var discount_percent =$this.closest('tr').find('.data-discount').val();
-        //             var discount_total = (parseFloat(total)/100) * parseFloat(discount_percent);
-        //             $this.closest('tr').find('.data-discount-amount').val(discount_total);
-        //         }
-        //         console.log(total, discount_total, discount_percent);
-        //         var data_total = $this.closest('tr').find('.data-total').val(parseFloat(total) - parseFloat(discount_total) + parseFloat(tax_amount) - parseFloat(trade_offer_amount) - parseFloat(scheme_amount));
-        //         calculation();
-        // }
-
-
-                    function calc(val, discount_amount_type) {
-                var $this = $(val);
-
-                // Get values and ensure they are numbers
-                var rate = Number($this.closest('tr').find('.data-rate').val()) || 0;
-                var qty = Number($this.closest('tr').find('.data-quantity').val()) || 0;
-                var sch_d = Number($this.closest('tr').find('.sch_d').val()) || 0;
-                var scheme_pcs_total = Number($this.closest('tr').find('.scheme_pcs_total').val()) || 0;
-                var scheme_qty = Number($this.closest('tr').find('.scheme_qty').val()) || 1; // Avoid division by zero
-                var tax = Number($this.closest('tr').find('.data-tax-percent').val()) || 0;
-                var trade_offer_amount = Number($this.closest('tr').find('.trade_offer_amount').val()) || 0;
-                var scheme_amount = Number($this.closest('tr').find('.scheme_amount').val()) || 0;
-
-             
-
-                // Calculate scheme_amount1 safely
-                var scheme_amount1 = (scheme_amount * qty) / scheme_qty;
-
-               
-                var applicableSchemes =Math.floor(qty / scheme_pcs_total);
-var totalApplicableSchemes = scheme_qty * applicableSchemes;  
-
-
-$this.closest('tr').find('.scheme_pcs').val(totalApplicableSchemes);
-
-
-             
-                var total = qty * rate;
-                var tax_amount = (total / 100) * tax;
-
-                $this.closest('tr').find('.data-tax-amount').val(tax_amount);
-
-                var discount_total, discount_percent;
-
-                if (discount_amount_type) {
-                    discount_total = Number($this.closest('tr').find('.data-discount-amount').val()) || 0;
-                    discount_percent = (discount_total * 100) / total;
-                    $this.closest('tr').find('.data-discount').val(discount_percent);
-                } else {
-                    discount_percent = Number($this.closest('tr').find('.data-discount').val()) || 0;
-                    discount_total = (total / 100) * discount_percent;
-                    $this.closest('tr').find('.data-discount-amount').val(discount_total);
-                }
-
-                console.log("Total:", total, "Discount Total:", discount_total, "Discount Percent:", discount_percent);
-
-                // Calculate final total
-             var data_total = total - discount_total + tax_amount - trade_offer_amount - sch_d;
-$this.closest('tr').find('.data-total').val(parseInt(data_total));
-
-                // Call calculation function
-                calculation();
-            }
-
-  
-
-       function get_rate(val)
-       {
-
+    function get_rate(val) {
         sale_type = $(val).closest('tr').find('.sale_type').val();
-        console.log(sale_type , 'sale_type' , $(val).closest('tr').find('.sale_type option:selected').data('rate'));
-
-        // if (sale_type == 1) {
-        //     rate = $(val).closest('tr').find('.searchbox option:selected').data('rate');
-        // }
-        // else if(sale_type == 2)
-        // {
-        //     rate = $(val).closest('tr').find('.searchbox option:selected').data('packet_rate');
-        // }
-        // else
-        // {
-        //     rate = $(val).closest('tr').find('.searchbox option:selected').data('carton_rate');
-        // }
         rate = $(val).closest('tr').find('.sale_type option:selected').data('rate');
 
         $(val).closest('tr').find('.data-rate').val(rate);
         calc(val);
+    }
 
+    function get_product_price(val) {
+        let product_price = $(val).find(':selected').data('product_price');
+        console.log(product_price);
 
-
-
-       }
-
-        function get_product_price(val)
-        {
-            let product_price = $(val).find(':selected').data('product_price');
-            console.log(product_price);
-
-            $(val).closest('tr').find('.sale_type').empty();
-            product_price.forEach(price => {
-                if (price.status === 1) {
-                // Create an option element
+        $(val).closest('tr').find('.sale_type').empty();
+        product_price.forEach(price => {
+            if (price.status === 1) {
                 const option = document.createElement('option');
-                option.value = price.uom_id;   // Set the value attribute to the price ID
-                option.textContent = price.uom.uom_name; // Set the visible text
+                option.value = price.uom_id;
+                option.textContent = price.uom.uom_name;
                 $(option).attr('data-rate', price.trade_price);
 
                 $(val).closest('tr').find('.sale_type').append(option);
             }
-            });
+        });
 
-            get_rate(val);
+        get_rate(val);
+    }
 
-        }
-
-       function get_flavour(val)
-       {
+    function get_flavour(val) {
         let flavours = $(val).find(':selected').data('flavour');
 
         console.log(flavours);
 
         $(val).closest('tr').find('.flavour').empty();
 
-        // Loop through the flavours array
         flavours.forEach(flavour => {
-            // Only add the option if status is 1
             if (flavour.status === 1) {
-                // Create an option element
                 const option = document.createElement('option');
-                option.value = flavour.id;   // Set the value attribute to the flavour ID
-                option.textContent = flavour.flavour_name; // Set the visible text
+                option.value = flavour.id;
+                option.textContent = flavour.flavour_name;
 
                 $(val).closest('tr').find('.flavour').append(option);
             }
         });
+    }
 
-       }
+    function get_scheme_product(val) {
+        var row = $(val).closest('tr');
+        var qty = row.find('.data-quantity').val();
+        var rate = row.find('.data-rate').val();
+        var product_id = row.find('.product_id').val();
+        var dcdate = $('#dcdate').val();
 
-    //    function get_scheme_product(val)
-    //    {
-    //     var qty = $this.closest('tr').find('.data-quantity').val();
-    //     var product_id = $this.closest('tr').find('.product_id').val();
-    //     // $this.closest('tr').find('.scheme_product').empty();
-    //     // $this.closest('tr').find('.scheme_amount').val(0);
+        // Store previous selections BEFORE clearing dropdowns
+        var previousSelectedScheme = row.find('.scheme_product').val() || "";
+        var previousSelectedSchemePcs = row.find('.scheme_product_pcs').val() || "";
 
+        $.ajax({
+            type: "get",
+            url: '{{ route('get_scheme_product') }}',
+            data: {
+                product_id: product_id,
+                qty: qty,
+                dcdate: dcdate,
+                rate: rate,
+            },
+            dataType: 'json',
+            success: function(data) {
+                console.log('AJAX Response:', data);
 
-    //     console.log(qty , product_id);
-
-    //     $.ajax({
-    //         type: "get",
-    //         url: '{{ route('get_scheme_product') }}',
-    //         data: {
-    //             product_id: product_id,
-    //             qty: qty,
-    //         },
-    //         dataType: 'json',
-    //         success: function(data) {
-
-    //             $this.closest('tr').find('.scheme_product').empty();
-    //             $this.closest('tr').find('.scheme_amount').val(0);
-
-    //             console.log(data);
-    //             const option = document.createElement('option');
-    //             option.value = '';   // Set the value attribute to the flavour ID
-    //             option.textContent = 'Select'; // Set the visible text
-
-    //             $(val).closest('tr').find('.scheme_product').append(option);
-
-    //             $.each(data.scheme_product, function(key, value) {
-
-    //                 const option = document.createElement('option');
-    //                 option.value = value.scheme_id+','+value.scheme_data_id;   // Set the value attribute to the flavour ID
-    //                 option.textContent = value.scheme_name + '--qty' + value.qty; // Set the visible text
-    //                 $(option).attr('data-scheme_amount', value.scheme_amount);
-
-    //                 $(val).closest('tr').find('.scheme_product').append(option);
-    //             });
-
-
+                let $schemeDropdown = row.find('.scheme_product');
+                let $schemePcsDropdown = row.find('.scheme_product_pcs');
+                let $schDInput = row.find('.sch_d');
+                let $schemepcs = row.find('.scheme_pcs');
                 
-    //         }
-    //     });
-    //    }
+                let freePcsValue = 0;
 
-//     function get_scheme_product(val) {
-//     var row = $(val).closest('tr');
-//     var qty = row.find('.data-quantity').val();
+                if (data.total_free_pcs !== undefined && data.total_free_pcs !== null) {
+                    freePcsValue = parseInt(data.total_free_pcs);
+                    if (isNaN(freePcsValue)) freePcsValue = 0;
+                }
 
-//     var product_id = row.find('.product_id').val();
+                console.log('Setting scheme_pcs to:', freePcsValue);
 
-//     console.log(qty, product_id);
+                $schemepcs.prop('readonly', false);
+                $schemepcs.val(freePcsValue);
+                $schemepcs.prop('readonly', true);
 
-//     $.ajax({
-//         type: "get",
-//         url: '{{ route('get_scheme_product') }}',
-//         data: {
-//             product_id: product_id,
-//             qty: qty,
-//         },
-//         dataType: 'json',
-//         success: function(data) {
-//             console.log(data);
+                $schemepcs[0].value = freePcsValue;
 
-//             // Clear old options
-//             row.find('.scheme_product').empty().append('<option value="">Select</option>');
-//             row.find('.scheme_product_pcs').empty().append('<option value="">Select</option>');
+                setTimeout(function() {
+                    $schemepcs.val(freePcsValue);
+                }, 10);
 
-//             // Populate scheme_product dropdown
-//             // $.each(data.scheme_product, function(key, value) {
-//             //     const option = document.createElement('option');
-//             //     option.value = value.scheme_id + ',' + value.scheme_data_id;
-//             //     option.textContent = value.scheme_name + '--qty ' + value.qty;
-//             //     $(option).attr('data-scheme_amount', value.scheme_amount);
-//             //     row.find('.scheme_product').append(option);
-//             // });
+                console.log('Current scheme_pcs value:', $schemepcs.val());
 
-//             // Populate scheme_product dropdown
-// $.each(data.scheme_product, function(key, value) {
-//     const option = document.createElement('option');
-//     option.value = value.scheme_id + ',' + value.scheme_data_id;
-//     option.textContent = value.scheme_name + '--qty ' + value.qty;
+                // Reset old options
+                $schemeDropdown.empty().append('<option value="">Select</option>');
+                $schemePcsDropdown.empty().append('<option value="">Select</option>');
 
-//     $(option).attr('data-scheme_amount', value.scheme_amount);
-//     $(option).attr('data-qty', value.qty); 
-//     row.find('.scheme_product').append(option);
-// });
+                let schemeOptions = [];
+                let schemePcsOptions = [];
 
+                // Populate scheme_product dropdown
+                $.each(data.scheme_product, function(key, value) {
+                    let option = `<option value="${value.scheme_id},${value.scheme_data_id}"
+                            data-scheme_amount="${value.scheme_amount}"
+                            data-qty="${value.qty}">
+                            ${value.scheme_name} -- qty ${value.qty}
+                        </option>`;
+                    schemeOptions.push(option);
+                });
 
-//             // Populate scheme_product_pcs dropdown
-//             $.each(data.scheme_product_pcs, function(key, value) {
-//                 const option = document.createElement('option');
-//                 option.value = value.scheme_id_pcs + ',' + value.scheme_data_id_pcs;
-//                 option.textContent = value.scheme_name + '--qty ' + value.qty;
-//                 $(option).attr('data-scheme_pcs', value.scheme_Pcs);
-//                 row.find('.scheme_product_pcs').append(option);
-//             });
-//         }
-//     });
-// // }
+                // Populate scheme_product_pcs dropdown
+                $.each(data.scheme_product_pcs, function(key, value) {
+                    let option = `<option value="${value.scheme_id_pcs},${value.scheme_data_id_pcs}"
+                            data-scheme_pcs_get="${value.qty}"
+                            data-scheme_pcs="${value.scheme_Pcs}">
+                            ${value.scheme_name} -- qty ${value.qty}
+                        </option>`;
+                    schemePcsOptions.push(option);
+                });
 
-// function get_scheme_product(val) {
-//     var row = $(val).closest('tr');
-//     var qty = row.find('.data-quantity').val();
-//     var product_id = row.find('.product_id').val();
-//   	var dcdate = $('#dcdate').val();
+                // Append options
+                $schemeDropdown.append(schemeOptions.join(''));
+                $schemePcsDropdown.append(schemePcsOptions.join(''));
 
-//     // Store previously selected values
-//     var previousSelectedScheme = row.find('.scheme_product').val();
-//     var previousSelectedSchemePcs = row.find('.scheme_product_pcs').val();
+                // Set SCH D value
+                if (data.scheme_amount_pcs !== undefined) {
+                    $schDInput.val(parseFloat(data.scheme_amount_pcs).toFixed(2));
+                } else {
+                    $schDInput.val(0);
+                }
 
-//     console.log("Previous Selected Scheme:", previousSelectedScheme);
-//     console.log("Previous Selected Scheme PCS:", previousSelectedSchemePcs);
-    
-//     $.ajax({
-//         type: "get",
-//         url: '{{ route('get_scheme_product') }}',
-//         data: {
-//             product_id: product_id,
-//             qty: qty,
-//  	dcdate: dcdate,
-//         },
-//         dataType: 'json',
-//         success: function(data) {
-//             console.log(data);
+                // Auto Restore OR Auto Select First
+                if (previousSelectedScheme &&
+                    $schemeDropdown.find(`option[value="${previousSelectedScheme}"]`).length > 0) {
+                    $schemeDropdown.val(previousSelectedScheme);
+                } else if ($schemeDropdown.find("option:eq(1)").length > 0) {
+                    $schemeDropdown.find("option:eq(1)").prop("selected", true);
+                }
 
-//             // Clear old options but keep previous value temporarily
-//             let $schemeDropdown = row.find('.scheme_product');
-//             let $schemePcsDropdown = row.find('.scheme_product_pcs');
+                if (previousSelectedSchemePcs &&
+                    $schemePcsDropdown.find(`option[value="${previousSelectedSchemePcs}"]`).length > 0) {
+                    $schemePcsDropdown.val(previousSelectedSchemePcs);
+                } else if ($schemePcsDropdown.find("option:eq(1)").length > 0) {
+                    $schemePcsDropdown.find("option:eq(1)").prop("selected", true);
+                }
 
-//             // Empty existing options and add a placeholder option
-//             $schemeDropdown.empty().append('<option value="">Select</option>');
-//             $schemePcsDropdown.empty().append('<option value="">Select</option>');
+                // Trigger change events
+                $schemeDropdown.trigger('change');
+                $schemePcsDropdown.trigger('change');
 
-//             let schemeOptions = [];
-//             let schemePcsOptions = [];
-
-//             // Populate scheme_product dropdown
-//             $.each(data.scheme_product, function(key, value) {
-//                 let optionValue = value.scheme_id + ',' + value.scheme_data_id;
-//                 let optionText = value.scheme_name + '--qty ' + value.qty;
-                
-//                 let option = `<option value="${optionValue}" data-scheme_amount="${value.scheme_amount}" data-qty="${value.qty}">${optionText}</option>`;
-//                 schemeOptions.push(option);
-//             });
-
-//             // Populate scheme_product_pcs dropdown
-//             $.each(data.scheme_product_pcs, function(key, value) {
-//                 let optionValue = value.scheme_id_pcs + ',' + value.scheme_data_id_pcs;
-//                 let optionText = value.scheme_name + '--qty ' + value.qty;
-                
-//                 let option = `<option value="${optionValue}" data-scheme_pcs_get="${value.qty}" data-scheme_pcs="${value.scheme_Pcs}">${optionText}</option>`;
-//                 schemePcsOptions.push(option);
-//             });
-
-//             // Append all options at once (better performance)
-    
-//         }
-//     });
-// }
-
-// function get_scheme_product(val) {
-
-//     var row = $(val).closest('tr');
-//     var qty = row.find('.data-quantity').val();
-//     var rate = row.find('.data-rate').val();
-//     var product_id = row.find('.product_id').val();
-//     var dcdate = $('#dcdate').val();
-
-//     // Store previous selections BEFORE clearing dropdown
-//     var previousSelectedScheme = row.find('.scheme_product').val() || "";
-//     var previousSelectedSchemePcs = row.find('.scheme_product_pcs').val() || "";
-
-//     $.ajax({
-//         type: "get",
-//         url: '{{ route('get_scheme_product') }}',
-//         data: {
-//             product_id: product_id,
-//             qty: qty,
-//             dcdate: dcdate,
-//             rate: rate,
-//         },
-//         dataType: 'json',
-//         success: function (data) {
-
-//             let $schemeDropdown = row.find('.scheme_product');
-//             let $schemePcsDropdown = row.find('.scheme_product_pcs');
-//             let $schDInput = row.find('.sch_d'); // SCH D input
-
-//             // Reset old options
-//             $schemeDropdown.empty().append('<option value="">Select</option>');
-//             $schemePcsDropdown.empty().append('<option value="">Select</option>');
-
-//             let schemeOptions = [];
-//             let schemePcsOptions = [];
-
-//             // Populate scheme_product dropdown
-//             $.each(data.scheme_product, function (key, value) {
-//                 let option =
-//                     `<option value="${value.scheme_id},${value.scheme_data_id}"
-//                         data-scheme_amount="${value.scheme_amount}"
-//                         data-qty="${value.qty}">
-//                         ${value.scheme_name} -- qty ${value.qty}
-//                     </option>`;
-//                 schemeOptions.push(option);
-//             });
-
-//             // Populate scheme_product_pcs dropdown
-//             $.each(data.scheme_product_pcs, function (key, value) {
-//                 let option =
-//                     `<option value="${value.scheme_id_pcs},${value.scheme_data_id_pcs}"
-//                         data-scheme_pcs_get="${value.qty}"
-//                         data-scheme_pcs="${value.scheme_Pcs}">
-//                         ${value.scheme_name} -- qty ${value.qty}
-//                     </option>`;
-//                 schemePcsOptions.push(option);
-//             });
-
-//             // Append options
-//             $schemeDropdown.append(schemeOptions.join(''));
-//             $schemePcsDropdown.append(schemePcsOptions.join(''));
-
-//             // ------------------------------
-//             // Auto Restore OR Auto Select First
-//             // ------------------------------
-
-//             // SCHEME PRODUCT
-//             if (previousSelectedScheme &&
-//                 $schemeDropdown.find(`option[value="${previousSelectedScheme}"]`).length > 0) {
-//                 $schemeDropdown.val(previousSelectedScheme);
-//             } else if ($schemeDropdown.find("option:eq(1)").length > 0) {
-//                 $schemeDropdown.find("option:eq(1)").prop("selected", true);
-//             }
-
-//             // SCHEME PRODUCT PCS
-//             if (previousSelectedSchemePcs &&
-//                 $schemePcsDropdown.find(`option[value="${previousSelectedSchemePcs}"]`).length > 0) {
-//                 $schemePcsDropdown.val(previousSelectedSchemePcs);
-//             } else if ($schemePcsDropdown.find("option:eq(1)").length > 0) {
-//                 $schemePcsDropdown.find("option:eq(1)").prop("selected", true);
-//             }
-
-//             // ------------------------------
-//             // Update SCH D column
-//             // ------------------------------
-//             if(data.scheme_amount_pcs !== undefined){
-//                 $schDInput.val(parseFloat(data.scheme_amount_pcs).toFixed(2));
-//             } else {
-//                 $schDInput.val(0);
-//             }
-
-//             // Trigger change events
-//             $schemeDropdown.trigger('change');
-//             $schemePcsDropdown.trigger('change');
-//         }
-//     });
-// }
-
-
-function get_scheme_product(val) {
-
-    
-    var row = $(val).closest('tr');
-    var qty = row.find('.data-quantity').val();
-    var rate = row.find('.data-rate').val();
-    var product_id = row.find('.product_id').val();
-    var dcdate = $('#dcdate').val();
-
-    // Store previous selections BEFORE clearing dropdowns
-    var previousSelectedScheme = row.find('.scheme_product').val() || "";
-    var previousSelectedSchemePcs = row.find('.scheme_product_pcs').val() || "";
-
-    $.ajax({
-        type: "get",
-        url: '{{ route('get_scheme_product') }}',
-        data: {
-            product_id: product_id,
-            qty: qty,
-            dcdate: dcdate,
-            rate: rate,
-        },
-        dataType: 'json',
-        success: function(data) {
-            console.log('AJAX Response:', data); // Debug log
-
-            let $schemeDropdown = row.find('.scheme_product');
-            let $schemePcsDropdown = row.find('.scheme_product_pcs');
-            let $schDInput = row.find('.sch_d');
-            // let $schemepcs = row.find('.scheme_pcs');
-
-
-let $schemepcs = row.find('.scheme_pcs');
-let freePcsValue = 0;
-
-if (data.total_free_pcs !== undefined && data.total_free_pcs !== null) {
-    freePcsValue = parseInt(data.total_free_pcs);
-    if (isNaN(freePcsValue)) freePcsValue = 0;
-}
-
-console.log('Setting scheme_pcs to:', freePcsValue);
-
-// Method 1: Remove readonly, set value, then restore
-$schemepcs.prop('readonly', false);
-$schemepcs.val(freePcsValue);
-$schemepcs.prop('readonly', true);
-
-// Method 2: Use native JavaScript
-$schemepcs[0].value = freePcsValue;
-
-// Method 3: Force DOM update
-setTimeout(function() {
-    $schemepcs.val(freePcsValue);
-}, 10);
-
-console.log('Current scheme_pcs value:', $schemepcs.val());
-
-           
-            // alert(data.total_free_pcs);
-
-            // Reset old options
-            $schemeDropdown.empty().append('<option value="">Select</option>');
-            $schemePcsDropdown.empty().append('<option value="">Select</option>');
-
-            let schemeOptions = [];
-            let schemePcsOptions = [];
-
-            // Populate scheme_product dropdown
-            $.each(data.scheme_product, function(key, value) {
-                let option = `<option value="${value.scheme_id},${value.scheme_data_id}"
-                        data-scheme_amount="${value.scheme_amount}"
-                        data-qty="${value.qty}">
-                        ${value.scheme_name} -- qty ${value.qty}
-                    </option>`;
-                schemeOptions.push(option);
-            });
-
-            // Populate scheme_product_pcs dropdown
-            $.each(data.scheme_product_pcs, function(key, value) {
-                let option = `<option value="${value.scheme_id_pcs},${value.scheme_data_id_pcs}"
-                        data-scheme_pcs_get="${value.qty}"
-                        data-scheme_pcs="${value.scheme_Pcs}">
-                        ${value.scheme_name} -- qty ${value.qty}
-                    </option>`;
-                schemePcsOptions.push(option);
-            });
-
-            // Append options
-            $schemeDropdown.append(schemeOptions.join(''));
-            $schemePcsDropdown.append(schemePcsOptions.join(''));
-
-          
-// alert(data.total_free_pcs);
-
-// Set SCHEME PCS value as integer
-// if (data.total_free_pcs !== undefined && data.total_free_pcs !== null) {
-//     $schemepcs.val(parseInt(data.total_free_pcs)); // Convert to integer
-// } else {
-//     $schemepcs.val(0);
-// }
-
-
-            // Set SCH D value
-            if (data.scheme_amount_pcs !== undefined) {
-                $schDInput.val(parseFloat(data.scheme_amount_pcs).toFixed(2));
-            } else {
-                $schDInput.val(0);
+                // Recalculate after setting values
+                calc(val);
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', error);
             }
+        });
+    }
 
-            // ------------------------------
-            // Auto Restore OR Auto Select First
-            // ------------------------------
+    function validateSchemeSelection(selectBox) {
+        var row = $(selectBox).closest('tr');
+        var schemeProduct = row.find('.scheme_product');
+        var schemePcs = row.find('.scheme_product_pcs');
 
-            // SCHEME PRODUCT
-            if (previousSelectedScheme &&
-                $schemeDropdown.find(`option[value="${previousSelectedScheme}"]`).length > 0) {
-                $schemeDropdown.val(previousSelectedScheme);
-            } else if ($schemeDropdown.find("option:eq(1)").length > 0) {
-                $schemeDropdown.find("option:eq(1)").prop("selected", true);
-            }
+        if (schemeProduct.val() && schemePcs.val()) {
+            alert("You can select only one scheme at a time!");
+            $(selectBox).val('').trigger('change');
+            return false;
+        }
+        return true;
+    }
 
-            // SCHEME PRODUCT PCS
-            if (previousSelectedSchemePcs &&
-                $schemePcsDropdown.find(`option[value="${previousSelectedSchemePcs}"]`).length > 0) {
-                $schemePcsDropdown.val(previousSelectedSchemePcs);
-            } else if ($schemePcsDropdown.find("option:eq(1)").length > 0) {
-                $schemePcsDropdown.find("option:eq(1)").prop("selected", true);
-            }
-
-            // Trigger change events
-            $schemeDropdown.trigger('change');
-            $schemePcsDropdown.trigger('change');
-
-            // Recalculate after setting values
-            calc(val);
-        },
-        error: function(xhr, status, error) {
-            console.error('AJAX Error:', error);
+    $(document).on('change', '.scheme_product', function() {
+        if (validateSchemeSelection(this)) {
+            // Additional logic if needed
         }
     });
-}
 
-// function get_scheme_product(val) {
-
-//     var row = $(val).closest('tr');
-//     var qty = row.find('.data-quantity').val();
-//     var rate = row.find('.data-rate').val();
-//     var product_id = row.find('.product_id').val();
-//     var dcdate = $('#dcdate').val();
-
-//     // Store previous selections BEFORE clearing dropdown
-//     var previousSelectedScheme = row.find('.scheme_product').val() || "";
-//     var previousSelectedSchemePcs = row.find('.scheme_product_pcs').val() || "";
-
-//     $.ajax({
-//         type: "get",
-//         url: '{{ route('get_scheme_product') }}',
-//         data: {
-//             product_id: product_id,
-//             qty: qty,
-//             dcdate: dcdate,
-//             rate: rate,
-//         },
-//         dataType: 'json',
-//         success: function (data) {
-
-//             let $schemeDropdown = row.find('.scheme_product');
-//             let $schemePcsDropdown = row.find('.scheme_product_pcs');
-
-//             // Reset old options
-//             $schemeDropdown.empty().append('<option value="">Select</option>');
-//             $schemePcsDropdown.empty().append('<option value="">Select</option>');
-
-//             let schemeOptions = [];
-//             let schemePcsOptions = [];
-
-//             // Populate scheme_product dropdown
-//             $.each(data.scheme_product, function (key, value) {
-
-//                 let option =
-//                     `<option value="${value.scheme_id},${value.scheme_data_id}"
-//                         data-scheme_amount="${value.scheme_amount}"
-//                         data-qty="${value.qty}">
-//                         ${value.scheme_name} -- qty ${value.qty}
-//                     </option>`;
-
-//                 schemeOptions.push(option);
-//             });
-
-//             // Populate scheme_product_pcs dropdown
-//             $.each(data.scheme_product_pcs, function (key, value) {
-
-//                 let option =
-//                     `<option value="${value.scheme_id_pcs},${value.scheme_data_id_pcs}"
-//                         data-scheme_pcs_get="${value.qty}"
-//                         data-scheme_pcs="${value.scheme_Pcs}">
-//                         ${value.scheme_name} -- qty ${value.qty}
-//                     </option>`;
-
-//                 schemePcsOptions.push(option);
-//             });
-
-//             // Append options
-//             $schemeDropdown.append(schemeOptions.join(''));
-//             $schemePcsDropdown.append(schemePcsOptions.join(''));
-
-//             // ------------------------------
-//             // Auto Restore OR Auto Select First
-//             // ------------------------------
-
-//             // SCHEME PRODUCT
-//             if (previousSelectedScheme &&
-//                 $schemeDropdown.find(`option[value="${previousSelectedScheme}"]`).length > 0) {
-
-//                 $schemeDropdown.val(previousSelectedScheme);
-
-//             } else if ($schemeDropdown.find("option:eq(1)").length > 0) {
-
-//                 // Auto-select first real option
-//                 $schemeDropdown.find("option:eq(1)").prop("selected", true);
-//             }
-
-//             // SCHEME PRODUCT PCS
-//             if (previousSelectedSchemePcs &&
-//                 $schemePcsDropdown.find(`option[value="${previousSelectedSchemePcs}"]`).length > 0) {
-
-//                 $schemePcsDropdown.val(previousSelectedSchemePcs);
-
-//             } else if ($schemePcsDropdown.find("option:eq(1)").length > 0) {
-
-//                 // Auto-select first real option
-//                 $schemePcsDropdown.find("option:eq(1)").prop("selected", true);
-//             }
-
-//             // Trigger change events
-//             $schemeDropdown.trigger('change');
-//             $schemePcsDropdown.trigger('change');
-//         }
-//     });
-// }
-
-
-function validateSchemeSelection(selectBox) {
-    var row = $(selectBox).closest('tr');
-    var schemeProduct = row.find('.scheme_product');
-    var schemePcs = row.find('.scheme_product_pcs');
-
-   
-    if (schemeProduct.val() && schemePcs.val()) {
-        alert("You can select only one scheme at a time!");
-
-        $(selectBox).val('').trigger('change'); 
-        return false; 
-    }
-    return true; 
-}
-
-
-$(document).on('change', '.scheme_product', function() {
-    if (validateSchemeSelection(this)) {
-       
-    }
-});
-
-$(document).on('change', '.scheme_product_pcs', function() {
-    if (validateSchemeSelection(this)) {
-       
-    }
-});
-
-    //    function get_scheme_amount(val)
-    //    {
-    //     var scheme_amount = $(val).closest('tr').find('.scheme_product option:selected').data('scheme_amount');
-    //     console.log(scheme_amount);
-        
-
-    //     $(val).closest('tr').find('.scheme_amount').val(scheme_amount ?? 0);
-
-    //     calc(val);
-    //    }
+    $(document).on('change', '.scheme_product_pcs', function() {
+        if (validateSchemeSelection(this)) {
+            // Additional logic if needed
+        }
+    });
 
     function get_scheme_amount(val) {
-    // Find the closest row
-    const row = $(val).closest('tr');
+        const row = $(val).closest('tr');
+        const selectedOption = row.find('.scheme_product option:selected');
+        const scheme_amount = selectedOption.attr('data-scheme_amount') || 0;
+        const qty = selectedOption.attr('data-qty') || 0;
 
-    // Get the selected option for scheme_product and scheme_product_pcs
-    const selectedOption = row.find('.scheme_product option:selected');
-   
+        console.log('Selected Scheme Amount:', scheme_amount);
+        console.log('Selected Qty:', qty);
 
-    // Get the scheme_amount, qty, and qty2 from attributes
-    const scheme_amount = selectedOption.attr('data-scheme_amount') || 0;
-    const qty = selectedOption.attr('data-qty') || 0; 
+        row.find('.scheme_amount').val(scheme_amount);
+        row.find('.scheme_qty').val(qty);
 
+        calc(val);
+    }
 
-    // Debugging: Log the values to check
-    console.log('Selected Scheme Amount:', scheme_amount);
-    console.log('Selected Qty:', qty);
-  
-
-    // Set the values in the input fields
-    row.find('.scheme_amount').val(scheme_amount);
-    row.find('.scheme_qty').val(qty);
-   
-
-    calc(val);
-}
-
-
-       function get_scheme_pcs(val)
-       {
+    function get_scheme_pcs(val) {
         var scheme_pcs = $(val).closest('tr').find('.scheme_product_pcs option:selected').data('scheme_pcs');
         const row = $(val).closest('tr');
         const scheme_product_pcs = row.find('.scheme_product_pcs option:selected');
-        const qty2 = scheme_product_pcs.attr('data-scheme_pcs_get') || 0; 
+        const qty2 = scheme_product_pcs.attr('data-scheme_pcs_get') || 0;
 
         row.find('.scheme_pcs_total').val(qty2);
         console.log(scheme_pcs);
@@ -1631,50 +1043,63 @@ $(document).on('change', '.scheme_product_pcs', function() {
         $(val).closest('tr').find('.scheme_pcs').val(scheme_pcs ?? 0);
 
         calc(val);
-      
-       }
+    }
 
-    //    function get_total_caton_and_qty()
-    //    {
-    //         let total_carton = 0;
-    //         $('.product_id').each(function( index ) {
-    //             carton_size = $(this).find('option:selected').data('carton_size');
-    //             qty = $(this).closest('tr').find('.data-quantity').val();
-    //             carton_qty = parseFloat(qty / carton_size);
-    //             total_carton += carton_qty;
-    //             console.log(carton_size , qty , carton_qty , 'carton_size ');
+    function get_total_caton_and_qty() {
+        let total_carton = 0;
+        let total_qty = 0;
+        $('.product_id').each(function(index) {
+            carton_size = $(this).find('option:selected').data('carton_size');
+            qty = $(this).closest('tr').find('.data-quantity').val();
+            sale_type = $(this).closest('tr').find('.sale_type').val();
+            if (sale_type == 7) {
+                total_carton += parseFloat(qty);
+            } else {
+                total_qty += parseFloat(qty);
+            }
+        });
+        $('#total_carton').val(total_carton.toFixed(2) ?? 0);
+        $('#total_pcs').val(total_qty.toFixed(2) ?? 0);
+    }
 
-    //         });
-    //         $('#total_carton').val(total_carton.toFixed(2) ?? 0);
-
-    //    }
-
-       function get_total_caton_and_qty()
-       {
-            let total_carton = 0;
-            let total_qty = 0;
-            $('.product_id').each(function( index ) {
-                carton_size = $(this).find('option:selected').data('carton_size');
-                qty = $(this).closest('tr').find('.data-quantity').val();
-                sale_type = $(this).closest('tr').find('.sale_type').val();
-                if (sale_type == 7) {
-                    total_carton += parseFloat(qty);
+    // Form submit handler to collect all removed IDs
+    $('#subm_rest').on('submit', function(e) {
+        console.log('Form submitting...');
+        console.log('Current remove_id:', $('.remove_id').val());
+        
+        // Get all original IDs from page
+        const originalIds = [];
+        @foreach ($record->saleOrderData as $data)
+            originalIds.push('{{ $data->id }}');
+        @endforeach
+        
+        // Get all currently visible IDs
+        const currentIds = [];
+        $('.data_id').each(function() {
+            const id = $(this).val();
+            if (id && id !== '0') {
+                currentIds.push(id);
+            }
+        });
+        
+        // Find IDs that are in original but not in current (removed)
+        const removedIds = originalIds.filter(id => !currentIds.includes(id));
+        
+        if (removedIds.length > 0) {
+            const currentRemoveIds = $('.remove_id').val();
+            const removeIdsArray = currentRemoveIds ? currentRemoveIds.split(',') : [];
+            
+            // Add removed IDs to remove_id field
+            removedIds.forEach(id => {
+                if (!removeIdsArray.includes(id)) {
+                    removeIdsArray.push(id);
                 }
-                else
-                {
-                    total_qty += parseFloat(qty);
-                }
-                // carton_qty = parseFloat(qty / carton_size);
-                // total_carton += carton_qty;
-                // console.log(carton_size , qty , carton_qty , 'carton_size ');
-
             });
-            $('#total_carton').val(total_carton.toFixed(2) ?? 0);
-            $('#total_pcs').val(total_qty.toFixed(2) ?? 0);
-
-       }
-    </script>
-
-
+            
+            $('.remove_id').val(removeIdsArray.join(','));
+            console.log('Final remove_id:', $('.remove_id').val());
+        }
+    });
+</script>
 
 @endsection
