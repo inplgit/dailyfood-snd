@@ -107,8 +107,8 @@ html.full-screen .content.app-content{height:100%;overflow:scroll;overflow-x:hid
 }
 @media (max-width:991.98px){.sidebar-detached .sidebar{width:100%;}
 }
-footer.footer{padding:0.8rem 2rem;min-height:3.35rem;transition:300ms ease all;margin-left:264px;}
-footer.footer span i,footer.footer span svg{height:1.51rem;width:1.51rem;font-size:1.51rem;margin-left:0.5rem;color:#ea5455;}
+
+footer.footer{padding:0.8rem 2rem;min-height:3.35rem;transition:300ms ease all;margin-left:264px;display:flex;height:0px !important;background:linear-gradient(135deg,#f35e2921,#ffffff,#619bf7b0)!important;justify-content:center;color:#000000;font-weight:bold;border:1px solid #ddd;}footer.footer span i,footer.footer span svg{height:1.51rem;width:1.51rem;font-size:1.51rem;margin-left:0.5rem;color:#ea5455;}
 footer.footer .scroll-top{padding:0.81rem 0.83rem;}
 footer.footer-shadow{box-shadow:0 4px 24px 0 rgba(34,41,47,0.1);}
 footer.footer-border{border-top:1px solid #ebe9f1;}

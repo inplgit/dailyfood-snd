@@ -15,6 +15,10 @@ input[type=number]{-moz-appearance:textfield;}
 .padl{padding-left:29px;}
 /* Remove input arraw */
 textarea{resize:none;}
+
+footer.footer{padding:0.8rem 2rem;min-height:3.35rem;transition:300ms ease all;margin-left:264px;display:flex;height:0px !important;background:linear-gradient(135deg,#f35e2921,#ffffff,#619bf7b0)!important;justify-content:center;color:#000000;font-weight:bold;border:1px solid #ddd;}
+
+
 .well th{background-color:#f3f2f7;text-transform:uppercase;font-size:0.857rem;}
 .mb{margin-bottom:10px;}
 .ptb{padding:15px 15px;}
