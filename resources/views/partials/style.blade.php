@@ -59,3 +59,7 @@
 
 </head>
 <!-- END: Head-->
+<style>
+ .content-body{padding-bottom:30px;}
+
+</style>

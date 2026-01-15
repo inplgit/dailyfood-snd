@@ -85,7 +85,7 @@ body{padding:0;margin:0;overflow-x:hidden;font-family:'Montserrat';background-co
 .dropdown .action_cursor{border:2px solid #4b4848;padding:10px 15px;border-radius:60px;}
 .dropdown .action_cursor:hover{background-color:#000000;color:#fff;transition:all 0.5s;}
 button#delete-user{margin-top:5px;}
-.card{box-shadow:1px 1px 6px rgb(34 41 47 / 19%);padding:24px 20px;border-radius:15px;height:auto;margin-top:-14px;background:#fff;margin-left:-8px;    margin-bottom: 65px !important;}
+.card{box-shadow:1px 1px 6px rgb(34 41 47 / 19%);padding:24px 20px;border-radius:15px;height:auto;margin-top:-14px;background:#fff;margin-left:-8px;margin-bottom:65px !important;}
 .card-title{font-size:18px !important;font-weight:bold !important;color:#000;line-height:normal;padding:16px 0px;border:none !important;position:relative;}
 .card .card-header{position:relative;display:flex;align-items:center;flex-wrap:wrap;justify-content:space-between;border-bottom:2px solid #ddd;padding:0 !important;background-color:transparent;margin-bottom:40px;}
 label{font-size:13px !important;color:#767676 !important;font-weight:500;}
@@ -253,7 +253,6 @@ ul.tmenu-list>li>a:hover{background-color:#d3d3d3;}
 /* .headerwrap.nav.navbar-nav .tmenu-list li .primary_nav{width:116px !important;display:inline-block !important;}
 .headerwrap .primary_nav{width:200px !important;display:inline-block !important;}
 */
-
 footer.footer{padding:0.8rem 2rem;min-height:3.35rem;transition:300ms ease all;margin-left:264px;display:flex;height:0px !important;background:linear-gradient(135deg,#f35e2921,#ffffff,#619bf7b0)!important;justify-content:center;color:#000000;font-weight:bold;border:1px solid #ddd;}
 .nav.navbar-nav ul.tmenu-list li.active a.primary_nav{border-bottom:2px solid #ff8546 !important;}
 /* toggle-icon */
@@ -460,13 +459,8 @@ header .main-header ul.menu>li a:before{display:none;}
  .head_free h4{color:#000 !important;font-weight:bold !important;}
 .logo_snd img{width:28% !important;}
 .head_main h1{text-align:center !important;color:#000 !important;font-weight:bold !important;font-weight:600 !important;}
-
- @page{size:A4 landscape;margin:0.5em;}
+@page{size:A4 landscape;margin:0.5em;}
 .sale-list.table-bordered > thead > tr > th,.sale-list.table-bordered > tbody > tr > th,.sale-list.table-bordered > tfoot > tr > th,.sale-list.userlittab > thead > tr > td,.sale-list.userlittab > tbody > tr > td,.sale-list.userlittab > tfoot > tr > td{vertical-align:inherit !important;text-align:left !important;padding:3px 3px !important;font-size:9px !important;}
 .dates-info-head p{text-align:center !important;margin-bottom:10px !important;color:#000 !important;}
 strong{font-weight:bold !important;color:#000 !important;}
-
-
-
-
 }

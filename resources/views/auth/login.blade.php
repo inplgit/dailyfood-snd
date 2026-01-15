@@ -39,6 +39,11 @@ body::before{content:"";position:absolute;inset:0;background-image: url('{{ url(
  border-radius:16px;border:1px solid #CBD5E1;outline:none;background:#F1F5F9;color:#1F2937;font-size:14px;}
 .toggle-eye{position:absolute;right:15px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:18px;opacity:0.7;transition:0.2s;}
 .toggle-eye:hover{opacity:1;}
+
+.invalid-feedback{color:red;font-size:13px;margin-top:5px;display:block;}
+.is-invalid{border:1px solid red;}
+
+
 /* Mobile */
 @media(max-width:480px){.core{width:92%;padding:35px 25px;}
 }
@@ -187,13 +192,22 @@ body::before{content:"";position:absolute;inset:0;background-image: url('{{ url(
             <input
                 type="password"
                 name="password"
-                placeholder="Password"
                 id="password"
-                required
+                placeholder="Password"
+                
                 autocomplete="current-password"
-            >
+                class="@error('password') is-invalid @enderror"
+            required/>
+
             <span class="toggle-eye" onclick="togglePassword()">👁️</span>
+
+            @error('password')
+                <span class="invalid-feedback" role="alert">
+                    <strong>{{ $message }}</strong>
+                </span>
+            @enderror
         </div>
+
 
         <script>
         function togglePassword(){
