@@ -42,13 +42,12 @@ body::before{content:"";position:absolute;inset:0;background-image: url('{{ url(
 
 .invalid-feedback{color:red;font-size:13px;margin-top:5px;display:block;}
 .is-invalid{border:1px solid red;}
-
-
 /* Mobile */
 @media(max-width:480px){.core{width:92%;padding:35px 25px;}
 }
 
 </style>
+
 <body class="vertical-layout vertical-menu-modern blank-page navbar-floating footer-static  " data-open="click" data-menu="vertical-menu-modern" data-col="blank-page">
 
 <div class="core">
@@ -90,8 +89,9 @@ body::before{content:"";position:absolute;inset:0;background-image: url('{{ url(
             <button type="submit">Send Reset Link</button>
         </div>
 
-        <div class="meta" style="justify-content:center;">
+        <div class="meta" style="justify-content:center;gap:20px;">
             <a href="{{ route('login') }}">← Back to Login</a>
+            <a href="{{ route('register') }}">Register ←</a>
         </div>
     </form>
 </div>

@@ -135,7 +135,7 @@ body::before{content:"";position:absolute;inset:0;background-image: url('{{ url(
             </span>
         </a>
     </div>
-    <h1>Welcome Back</h1>
+    <h1>Welcome</h1>
     <p>Multi-company enterprise dashboard</p>
 
     <!-- <form>
