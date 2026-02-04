@@ -651,10 +651,28 @@ class TSOController extends Controller
     public function activity(Request $request)
     {
         if ($request->ajax()) {
-            $user = TSO::findOrFail($request->tso_id)->user_id;
-            $tsoActivities = UsersLocation::where('user_id', $user)->whereDate('created_at', $request->date)
+            $tso = TSO::where('status', 1)
+                ->where('active', 1)
+                ->when($request->city, function ($query) use ($request) {
+                    return $query->where('city', $request->city);
+                })
+                ->when($request->distributor_id, function ($query) use ($request) {
+                    return $query->where('distributor_id', $request->distributor_id);
+                })
+                ->when($request->tso_id, function ($query) use ($request) {
+                    return $query->where('id', $request->tso_id);
+                })
+                ->get();
+            // dd($tso);
+            if ($tso->isEmpty()) {
+                return response()->json(['error' => 'TSO not found'], 404);
+            }
+            $userId = $tso->pluck('user_id')->toArray();
+            $tsoActivities = UsersLocation::whereIn('user_id', $userId)->whereDate('created_at', $request->date)
             // ->select('users_locations.id as u_id','users_locations.latitude','users_locations.longitude','users_locations.location_title','users_locations.table_name','users_locations.created_at')
-            ->orderBy('created_at','asc')->with('location')->get();
+            ->orderBy('created_at','asc')
+            ->with('location')
+            ->get();
             // dd($tsoActivities);
             return view($this->page . 'Activity.activityAjax', compact('tsoActivities'));
         }

@@ -40,9 +40,12 @@
                                     $distributor_name = htmlspecialchars($tsoActivity->location->distributor->distributor_name ?? $tsoActivity->location->shop->distributor->distributor_name ?? '--' , ENT_QUOTES);
                                   //  $tso_name = $tsoActivity->location->tso->name ?? $tsoActivity->location->shop->tso->name ?? '--';
                                   
-                                  $tso_name = optional(optional($tsoActivity->location)->tso)->first()->name
-    ?? optional(optional(optional($tsoActivity->location)->shop)->tso)->first()->name
-    ?? '--';
+                                  // Try different relationship names based on model type
+                                  $tso_name = optional($tsoActivity->location)->TSO->name 
+                                    ?? optional($tsoActivity->location)->tso->name
+                                    ?? optional(optional($tsoActivity->location)->shop)->TSO->name
+                                    ?? optional(optional($tsoActivity->location)->shop)->tso->name
+                                    ?? '--';
 
                                   
                                   $location []= [
