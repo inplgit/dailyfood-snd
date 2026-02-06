@@ -251,7 +251,7 @@
                                             </th>
                                             <th colspan="7"
                                                 style="background:transparent;border-bottom:3px solid #000 !important;font-size:15px !important;color:#000;font-weight:700;">
-                                                ({{ $formattedDate }} ~ {{ $formattedEndDate }}) / {{ $today_day }}
+                                                ({{ $formattedDate }} ~ {{ $formattedEndDate }})
                                             </th>
                                             <th colspan="2"
                                                 style="background:transparent;font-size:15px !important;color:#000;font-weight:700;">
