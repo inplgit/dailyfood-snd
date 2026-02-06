@@ -261,6 +261,7 @@
                                                     $total_route_hours = floor($total_route_seconds / 3600);
                                                     $total_route_minutes = floor(($total_route_seconds % 3600) / 60);
                                                 @endphp
+                                            <th colspan="4" style="background:transparent;font-size:15px !important;color:#000;font-weight:700;">
                                                 Total Hours: {{ $total_route_hours }} hours {{ $total_route_minutes }} minutes
                                             </th>
                                         </tr>
