@@ -339,6 +339,7 @@ Route::delete('/destroy_pcs/{id}', 'SchemeProductController@destroy_pcs')->name(
         Route::get('attendence_report','ReportController@attendence_report')->name('attendence_report');
         Route::get('attendence_report_detail','ReportController@attendence_report_detail')->name('attendence_report_detail');
         Route::get('day_wise_attendence_report','ReportController@day_wise_attendence_report')->name('day_wise_attendence_report');
+        Route::get('order_booker_productive_report','ReportController@order_booker_productive_report')->name('order_booker_productive_report');
 
         Route::get('item_wise_sale','ReportController@item_wise_sale')->name('item_wise_sale');
   	Route::get('stock_report_new','ReportController@stock_report_new')->name('stock_report_new');

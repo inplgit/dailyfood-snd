@@ -429,16 +429,22 @@ $master = new MasterFormsHelper();
                                                     <span>Order Booker Daily Activity Report</span>
                                                 </a>
                                             </li>
-                                             <li>
+                                            <li>
                                                 <a href="{{ route('order_booker_daily_activity_location_report') }}">
                                                     <i class="fas fa-circle"></i>
                                                     <span>Order Booker Daily Activity Timestamp Report</span>
                                                 </a>
                                             </li>
-                                             <li>
+                                            <li>
                                                 <a href="{{ route('sales_return_report') }}">
                                                     <i class="fas fa-circle"></i>
                                                     <span>Sales Return Report</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="{{ route('order_booker_productive_report') }}">
+                                                    <i class="fas fa-circle"></i>
+                                                    <span>Order Booker Productive Report</span>
                                                 </a>
                                             </li>
                                             @endcan
