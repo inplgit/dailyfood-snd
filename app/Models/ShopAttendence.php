@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ShopAttendence extends Model
 {
-    protected $fillable = ['distributor_id','tso_id','shop_id','check_in','check_out','sync_date_time'];
+    protected $fillable = ['distributor_id','tso_id','shop_id','check_in','check_out','sync_date_time','local_id'];
     use HasFactory;
 
     public function tso()
