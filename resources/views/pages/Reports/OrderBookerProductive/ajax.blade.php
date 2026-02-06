@@ -256,9 +256,13 @@
                                             <th colspan="2"
                                                 style="background:transparent;font-size:15px !important;color:#000;font-weight:700;">
                                             </th>
-                                            <th colspan="4"
-                                                style="background:transparent;font-size:15px !important;color:#000;font-weight:700;">
-                                                Total Hours: 0 hours 0 minutes</th>
+                                                @php
+                                                    $total_route_seconds = array_sum(array_column($shops, 'diff_seconds'));
+                                                    $total_route_hours = floor($total_route_seconds / 3600);
+                                                    $total_route_minutes = floor(($total_route_seconds % 3600) / 60);
+                                                @endphp
+                                                Total Hours: {{ $total_route_hours }} hours {{ $total_route_minutes }} minutes
+                                            </th>
                                         </tr>
 
                                         @foreach ($shops as $key => $shop)

@@ -4430,7 +4430,7 @@ public function distributer_product_sales_value_report(Request $request)
 
                 ->leftJoin('cities', 'cities.id', '=', 'tso.city')
 
-                ->where('users_distributors.distributor_id', $request->distributor_id)
+                // ->where('users_distributors.distributor_id', $request->distributor_id)
                 ->whereIn('users_distributors.distributor_id', $this->master->get_users_distributors(Auth::user()->id))
 
                 ->select(
@@ -4488,6 +4488,7 @@ public function distributer_product_sales_value_report(Request $request)
                 // ->groupBy('shops.id')
                 ->get()
                 ->toArray();
+                // dd($maxAttendenceSub->get(), $saleOrdersSub->get(), $productive);
                 // $attendance = DB::table('shop_attendences')
                 //     ->where('shop_id', 22552)
                 //     // ->where('tso_id', 32)
