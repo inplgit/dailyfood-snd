@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Validator;
 
 use Carbon\Carbon;
 use App\Models\TSO;
+use App\Models\ShopAttendence;
 use App\Models\Rack;
 
 use App\Models\Stock;
@@ -684,6 +685,7 @@ public function userWiseShopList(Request $request)
     ]);
 
     $tsoId = Auth::user()->tso->id;
+    $distributor_id = Auth::user()->tso->distributor_id;
     $today = date('Y-m-d');
 
     $shops = Shop::join('shop_tso', 'shop_tso.shop_id', '=', 'shops.id')
@@ -698,6 +700,7 @@ public function userWiseShopList(Request $request)
         ->leftJoin('shops_outstandings', 'shops_outstandings.shop_id', '=', 'shops.id')
         ->where('shop_tso.tso_id', $tsoId)
         ->where('shops.route_id', $request->route_id)
+        ->where('shops.distributor_id', $distributor_id)
         ->where('shops.status', 1)    // ✅ shop enabled
         ->where('shops.active', 1)    // ✅ active shop only
         ->when($request->search, function ($query) use ($request) {
@@ -907,6 +910,58 @@ public function visitShopAddBulk(Request $request)
     return response()->json($response);
 }
 
+public function ShopAttendenceBulk(Request $request)
+{
+    $attendances = $request->all(); // Direct array, no json_decode needed
+    $response = [
+        'success' => [],
+        'failed'  => []
+    ];
+
+    foreach ($attendances as $attendance) {
+        try {
+            // Validate each attendance
+            $validator = Validator::make($attendance, [
+                'distributor_id' => 'required|integer|exists:distributors,id',
+                'tso_id'         => 'required|integer|exists:tso,id',
+                'shop_id'        => 'required|integer|exists:shops,id',
+                'check_in'       => 'required|date_format:Y-m-d H:i:s',
+                'check_out'      => 'required|date_format:Y-m-d H:i:s|after_or_equal:check_in',
+            ]);
+
+            if ($validator->fails()) {
+                $response['failed'][] = [
+                    'local_id' => $attendance['local_id'] ?? null,
+                    'errors'   => $validator->errors()->all()
+                ];
+                continue;
+            }
+
+            // Save attendance
+            $att = ShopAttendence::create([
+                'distributor_id' => $attendance['distributor_id'],
+                'tso_id'         => $attendance['tso_id'],
+                'shop_id'        => $attendance['shop_id'],
+                'check_in'       => $attendance['check_in'],
+                'check_out'      => $attendance['check_out'],
+                'sync_date_time' => now(),
+            ]);
+
+            $response['success'][] = [
+                'local_id'      => $attendance['local_id'] ?? null,
+                'attendance_id' => $att->id
+            ];
+
+        } catch (\Exception $e) {
+            $response['failed'][] = [
+                'local_id' => $attendance['local_id'] ?? null,
+                'error'    => $e->getMessage()
+            ];
+        }
+    }
+
+    return response()->json($response, 201);
+}
 
 
     public function updateCordinates(Request $request , $id)

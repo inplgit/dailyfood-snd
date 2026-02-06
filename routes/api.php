@@ -69,6 +69,8 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'API\V1'], functi
 
       Route::post('update/location','update_location');
 
+       Route::post('ShopAttendenceBulk', 'ShopAttendenceBulk');
+
       Route::get('shop_wise_sales_report', 'shop_wise_sales_report');
       Route::get('order_booker_daily_activity_location_report', 'order_booker_daily_activity_location_report');
       Route::get('order_booker_daily_activity_location_report_new', 'order_booker_daily_activity_location_report_new');
