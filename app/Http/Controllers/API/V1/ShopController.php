@@ -909,10 +909,10 @@ public function visitShopAddBulk(Request $request)
 
     return response()->json($response);
 }
-
 public function ShopAttendenceBulk(Request $request)
 {
-    $attendances = $request->all(); // Direct array, no json_decode needed
+    $attendances = $request->json()->all();
+
     $response = [
         'success' => [],
         'failed'  => []
@@ -920,8 +920,9 @@ public function ShopAttendenceBulk(Request $request)
 
     foreach ($attendances as $attendance) {
         try {
-            // Validate each attendance
+
             $validator = Validator::make($attendance, [
+                'local_id'       => 'required',
                 'distributor_id' => 'required|integer|exists:distributors,id',
                 'tso_id'         => 'required|integer|exists:tso,id',
                 'shop_id'        => 'required|integer|exists:shops,id',
@@ -937,7 +938,6 @@ public function ShopAttendenceBulk(Request $request)
                 continue;
             }
 
-            // Save attendance
             $att = ShopAttendence::create([
                 'distributor_id' => $attendance['distributor_id'],
                 'tso_id'         => $attendance['tso_id'],
@@ -948,7 +948,7 @@ public function ShopAttendenceBulk(Request $request)
             ]);
 
             $response['success'][] = [
-                'local_id'      => $attendance['local_id'] ?? null,
+                'local_id'      => $attendance['local_id'],
                 'attendance_id' => $att->id
             ];
 
