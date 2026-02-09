@@ -945,6 +945,7 @@ public function ShopAttendenceBulk(Request $request)
                 'check_in'       => $attendance['check_in'],
                 'check_out'      => $attendance['check_out'],
                 'sync_date_time' => now(),
+                'local_id'       => $attendance['local_id'] ?? 0,
             ]);
 
             $response['success'][] = [
