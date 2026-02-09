@@ -143,50 +143,54 @@ class TSOTargetController extends Controller
         return response()->json(['error' => $e->getMessage()], 500);
     }
 }
-private function saveTarget($request, $modifiedMonth, $cityId, $distributorId, $tsoId, $month)
-{
-    // First: Delete all previous targets for this city + distributor + tso + month
-    TSOTarget::where('city_id', $cityId)
-        ->where('distributor_id', $distributorId)
-        ->where('tso_id', $tsoId)
-        ->whereMonth('month', $month)
-        ->delete();
+    private function saveTarget($request, $modifiedMonth, $cityId, $distributorId, $tsoId, $month)
+    {
+        // First: Delete all previous targets for this city + distributor + tso + month
+        TSOTarget::where('city_id', $cityId)
+            ->where('distributor_id', $distributorId)
+            ->where('tso_id', $tsoId)
+            ->whereMonth('month', $month)
+            ->delete();
 
-    // Then: Insert total target if given
-    if ($request->filled('total_amount_target')) {
-        TSOTarget::create([
-            'city_id' => $cityId,
-            'distributor_id' => $distributorId,
-            'tso_id' => $tsoId,
-            'month' => $modifiedMonth,
-            'type' => 2,
-            'amount' => $request->total_amount_target,
-        ]);
-    }
-
-    // Now: Insert product-wise/flavor-wise targets
-    if ($request->has('product_id')) {
-        foreach ($request->product_id as $key => $productId) {
-            if (!$productId) {
-                continue; // Skip invalid product
-            }
-
-            $flavorId = $request->flavour_id[$key] ?? null;
-
+        // Then: Insert total target if given
+        if ($request->filled('total_amount_target')) {
             TSOTarget::create([
                 'city_id' => $cityId,
                 'distributor_id' => $distributorId,
                 'tso_id' => $tsoId,
-                'product_id' => $productId,
-                'flavour_id' => $flavorId,
                 'month' => $modifiedMonth,
-                'type' => $request->target_type[$key] == 1 ? 1 : 2,
-                'amount' => $request->target_type[$key] == 2 ? $request->amount[$key] : null,
-                'qty' => $request->target_type[$key] == 1 ? $request->quantity[$key] : null,
+                'type' => 2,
+                'amount' => $request->total_amount_target,
             ]);
         }
+
+        // Now: Insert product-wise/flavor-wise targets
+        if ($request->has('product_id')) {
+            foreach ($request->product_id as $key => $productId) {
+                if (!$productId) {
+                    continue; // Skip invalid product
+                }
+
+                $flavorId   = $request->flavour_id[$key] ?? null;
+                $targetType = $request->target_type[$key] ?? 2; // Default to 2 (amount) safely
+
+                $amount     = $request->amount[$key] ?? null;
+                $quantity   = $request->quantity[$key] ?? null;
+
+                TSOTarget::create([
+                    'city_id' => $cityId,
+                    'distributor_id' => $distributorId,
+                    'tso_id' => $tsoId,
+                    'product_id' => $productId,
+                    'flavour_id' => $flavorId,
+                    'month' => $modifiedMonth,
+                    'type' => ($targetType == 1) ? 1 : 2,
+                    'amount' => ($targetType == 2) ? $amount : null,
+                    'qty' => ($targetType == 1) ? $quantity : null,
+                ]);
+            }
+        }
     }
-}
 
     /**
      * Display the specified resource.
