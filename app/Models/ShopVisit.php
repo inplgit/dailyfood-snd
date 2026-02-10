@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Storage;
 class ShopVisit extends Model
 {
     use HasFactory;
-    protected $fillable = ['user_id', 'shop_id', 'visit_reason_id', 'merchandising_image','remark','visit_date','longitude','latitude','type','created_at'];
+    protected $fillable = ['user_id', 'shop_id', 'visit_reason_id', 'merchandising_image','remark','visit_date','longitude','latitude','type','created_at','local_id'];
 
     public function user()
     {

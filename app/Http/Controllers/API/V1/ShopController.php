@@ -819,15 +819,106 @@ if ($request->has('visit_time') && !empty($request->visit_time)) {
         ->latest()->paginate($request->limit??5);
         return $this->sendResponse([$shopVisit], 'Shop Type List Successfully Retrive.');
     }
+
+// public function visitShopAddBulk(Request $request)
+// {
+//     date_default_timezone_set("Asia/Karachi");
+
+//     // Decode visits JSON from form-data
+//     $visits = json_decode($request->visits, true);
+//     $images = $request->file('merchandising_image', []);
+//     $userId = Auth::id();
+
+//     $response = [
+//         'success' => [],
+//         'failed'  => []
+//     ];
+
+//     foreach ($visits as $index => $visit) {
+
+//         // Optional local_id for mobile sync
+//         $visit['local_id'] = (string) ($visit['local_id'] ?? '');
+
+//         // Validation
+//         $validator = Validator::make($visit, [
+//             'shop_id'    => 'required|exists:shops,id',
+//             'remark'     => 'required',
+//             'visit_date' => 'required|date',
+//         ]);
+
+//         if ($validator->fails()) {
+//             $response['failed'][] = [
+//                 'local_id' => $visit['local_id'],
+//                 'errors'   => $validator->errors()->all()
+//             ];
+//             continue;
+//         }
+
+//         DB::beginTransaction();
+
+//         try {
+//             // Handle merchandising image for this visit
+//             $merchandisingImage = null;
+//             if (isset($images[$index])) {
+//                 $file = $images[$index];
+//                 $merchandisingImage = time() . "-{$index}-" . $file->getClientOriginalName();
+//                 $file->storeAs('visitshope', $merchandisingImage, 'public');
+//             }
+
+//             // Prepare visit data
+//             $data = [
+//                 'user_id'             => $userId,
+//                 'shop_id'             => $visit['shop_id'],
+//                 'visit_reason_id'     => $visit['visit_reason_id'] ?? null,
+//                 'remark'              => $visit['remark'],
+//                 'visit_date'          => $visit['visit_date'],
+//                 'latitude'            => $visit['latitude'] ?? null,
+//                 'longitude'           => $visit['longitude'] ?? null,
+//                 'type'                => $visit['type'] ?? null,
+//                 'merchandising_image' => $merchandisingImage,
+//                 'created_at'          => $visit['visit_time'] ?? now(),
+//             ];
+
+//             // Create visit
+//             $shopVisit = ShopVisit::create($data);
+
+//             // Save user location
+//             MasterFormsHelper::users_location_submit(
+//                 $shopVisit,
+//                 $visit['latitude'] ?? null,
+//                 $visit['longitude'] ?? null,
+//                 'shop_visits',
+//                 'Shop Visit'
+//             );
+
+//             DB::commit();
+
+//             $response['success'][] = [
+//                 'local_id' => $visit['local_id'],
+//                 'visit_id' => $shopVisit->id
+//             ];
+
+//         } catch (\Exception $e) {
+//             DB::rollBack();
+
+//             $response['failed'][] = [
+//                 'local_id' => $visit['local_id'],
+//                 'error'    => $e->getMessage() . ' on line ' . $e->getLine()
+//             ];
+//         }
+//     }
+
+//     return response()->json($response);
+// }
+
 public function visitShopAddBulk(Request $request)
 {
     date_default_timezone_set("Asia/Karachi");
 
-    // Decode visits JSON from form-data
     $visits = json_decode($request->visits, true);
     $images = $request->file('merchandising_image', []);
     $userId = Auth::id();
-
+    
     $response = [
         'success' => [],
         'failed'  => []
@@ -835,14 +926,33 @@ public function visitShopAddBulk(Request $request)
 
     foreach ($visits as $index => $visit) {
 
-        // Optional local_id for mobile sync
+        // force local_id as string
         $visit['local_id'] = (string) ($visit['local_id'] ?? '');
 
-        // Validation
+        /* ================= DUPLICATE LOCAL ID CHECK ================= */
+
+        if (!empty($visit['local_id'])) {
+
+            $existingVisit = ShopVisit::where('local_id', $visit['local_id'])->first();
+
+            if ($existingVisit) {
+                $response['success'][] = [
+                    'local_id' => $visit['local_id'],
+                    'visit_id' => $existingVisit->id,
+                    'message'  => 'Visit with this local_id already exists'
+                ];
+                continue; // 🔥 skip insert
+            }
+        }
+
+        /* ================= VALIDATION ================= */
+
         $validator = Validator::make($visit, [
             'shop_id'    => 'required|exists:shops,id',
             'remark'     => 'required',
             'visit_date' => 'required|date',
+            'latitude'   => 'required',
+            'longitude'  => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -856,36 +966,44 @@ public function visitShopAddBulk(Request $request)
         DB::beginTransaction();
 
         try {
-            // Handle merchandising image for this visit
+
+            /* ================= IMAGE HANDLING ================= */
+
             $merchandisingImage = null;
-            if (isset($images[$index])) {
+
+            if (!empty($images[$index])) {
                 $file = $images[$index];
-                $merchandisingImage = time() . "-{$index}-" . $file->getClientOriginalName();
+
+                $merchandisingImage =
+                    time() . "-{$index}-" . uniqid() . '.' . $file->getClientOriginalExtension();
+
                 $file->storeAs('visitshope', $merchandisingImage, 'public');
             }
 
-            // Prepare visit data
-            $data = [
+            /* ================= CREATE VISIT ================= */
+
+            $shopVisit = ShopVisit::create([
                 'user_id'             => $userId,
                 'shop_id'             => $visit['shop_id'],
                 'visit_reason_id'     => $visit['visit_reason_id'] ?? null,
                 'remark'              => $visit['remark'],
                 'visit_date'          => $visit['visit_date'],
-                'latitude'            => $visit['latitude'] ?? null,
-                'longitude'           => $visit['longitude'] ?? null,
+                'latitude'            => $visit['latitude'],
+                'longitude'           => $visit['longitude'],
                 'type'                => $visit['type'] ?? null,
                 'merchandising_image' => $merchandisingImage,
-                'created_at'          => $visit['visit_time'] ?? now(),
-            ];
 
-            // Create visit
-            $shopVisit = ShopVisit::create($data);
+                // 🔥 local_id save
+                'local_id'   => $visit['local_id'],
+                'created_at' => $visit['visit_time'] ?? now(),
+            ]);
 
-            // Save user location
+            /* ================= LOCATION LOG ================= */
+
             MasterFormsHelper::users_location_submit(
                 $shopVisit,
-                $visit['latitude'] ?? null,
-                $visit['longitude'] ?? null,
+                $visit['latitude'],
+                $visit['longitude'],
                 'shop_visits',
                 'Shop Visit'
             );
@@ -894,21 +1012,24 @@ public function visitShopAddBulk(Request $request)
 
             $response['success'][] = [
                 'local_id' => $visit['local_id'],
-                'visit_id' => $shopVisit->id
+                'visit_id' => $shopVisit->id,
+                'message'  => 'Visit inserted successfully'
             ];
 
         } catch (\Exception $e) {
+
             DB::rollBack();
 
             $response['failed'][] = [
                 'local_id' => $visit['local_id'],
-                'error'    => $e->getMessage() . ' on line ' . $e->getLine()
+                'error'    => $e->getMessage() . ' line ' . $e->getLine()
             ];
         }
     }
 
     return response()->json($response);
 }
+
 public function ShopAttendenceBulk(Request $request)
 {
     $attendances = $request->json()->all();
