@@ -84,7 +84,7 @@ class ProductController extends Controller
 
             $product = Product::create($input);
             $product_id = $product->id;
-// dd($product_id);
+            // dd($product_id);
             $flavour_data= $request->input('flavour_name');
             foreach ($flavour_data as $flavour_name) {
                 ProductFlavour::create([
@@ -246,7 +246,8 @@ class ProductController extends Controller
         return view($this->page .'ImportProduct');
     }
 
-    public function import_product_store(Request $request){
+    public function import_product_store(Request $request)
+    {
 
         DB::beginTransaction();
             try {
@@ -440,5 +441,53 @@ class ProductController extends Controller
             }
     }
 
+
+    public function update_product_prices()
+    {
+        $products = Product::status()->get();
+        return  view($this->page.'update_product_prices', compact('products'));
+    }
+
+    public function updateProductPrice(Request $request)
+    {
+        DB::beginTransaction();
+
+        try {
+
+            $request->validate([
+                'product_id.*' => 'required|integer',
+                'start_date.*' => 'required|date',
+                'uom_id.*' => 'required|integer',
+                'retail_price.*' => 'required|numeric',
+                'trade_price.*' => 'required|numeric',
+                'pcs_per_carton.*' => 'required|numeric',
+            ]);
+
+            foreach ($request->trade_price as $key => $price) {
+
+                $product = ProductPrice::updateOrCreate(
+                    [
+                        'product_id' => $request->product_id[$key],
+                        'uom_id' => $request->uom_id[$key],
+                    ],
+                    [
+                        'start_date' => $request->start_date[$key],
+                        'retail_price' => $request->retail_price[$key],
+                        'trade_price' => $price,
+                        'pcs_per_carton' => $request->pcs_per_carton[$key],
+                    ]
+                );
+                // dd($product);
+            }
+
+            DB::commit();
+
+            return response()->json(['success' => 'Updated successfully.']);
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json(['error' => $th->getMessage()]);
+        }
+    }
 
 }

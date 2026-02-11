@@ -437,6 +437,10 @@ public static function get_sale_qty2_excute_suumary_details_with_city($from , $t
     
     
 
+    public static function get_all_product_with_prices()
+    {
+        return Product::get_all_product_with_prices();
+    }
     public static function get_all_product()
     {
         return Product::status()->get();

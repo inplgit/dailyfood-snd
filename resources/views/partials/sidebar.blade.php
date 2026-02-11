@@ -254,6 +254,16 @@
                                 </a>
                             </li>
                         @endcan
+                        @can('update_product_prices')
+                            <li>
+                                <a class="d-flex align-items-center" href="{{ route('product.update_product_prices') }}">
+                                    <i data-feather="circle"></i>
+                                    <span class="menu-item text-truncate">
+                                        Update Product Prices
+                                    </span>
+                                </a>
+                            </li>
+                        @endcan
                         @can('import_product')
                             <li>
                                 <a class="d-flex align-items-center" href="{{ route('product.import_product') }}">
