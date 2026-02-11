@@ -319,7 +319,8 @@
                             </li>
                         @endcan -->
 
-   <li>
+                        @can('Scheme_Product_Pcs')
+                            <li>
                                 <a class="d-flex align-items-center" href="#">
                                     <i data-feather="circle"></i>
                                     <span class="menu-item text-truncate">
@@ -327,7 +328,6 @@
                                     </span>
                                 </a>
                                 <ul class="menu-content">
-                                  
                                         <li>
                                             <a class="d-flex align-items-center" href="{{ url('product/scheme_product_create_pcs') }}">
                                                 <span class="menu-item text-truncate">
@@ -343,11 +343,10 @@
                                                 </span>
                                             </a>
                                         </li>
-                                  
                                 </ul>
                             </li>
-                     	
-
+                        @endcan
+                        @can('slab')
                             <li>
                                 <a class="d-flex align-items-center" href="#">
                                     <i data-feather="circle"></i>
@@ -376,7 +375,7 @@
                                     
                                 </ul>
                             </li>
-
+                        @endcan
                         @can('Create_Category', 'Category_List')
                             <li>
                                 <a class="d-flex align-items-center" href="#">
