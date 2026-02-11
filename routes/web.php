@@ -161,6 +161,10 @@ Route::delete('/destroy_pcs/{id}', 'SchemeProductController@destroy_pcs')->name(
 	    Route::resource('product', 'ProductController');
 	    Route::get('/import_product', 'ProductController@import_product')->name('product.import_product');
 	    Route::post('/import_product_store', 'ProductController@import_product_store')->name('product.import_product_store');
+        Route::get('update_product_prices', 'ProductController@update_product_prices')->name('product.update_product_prices');
+        Route::post('update_product_prices_store', 'ProductController@updateProductPrice')->name('product.update_product_prices_store');
+        Route::get('export_product_prices', 'ProductController@exportProductPrices')->name('product.export_product_prices');
+        Route::post('import_product_prices_store', 'ProductController@importProductPricesStore')->name('product.import_product_prices_store');
 	    Route::get('/ProductMasterData', 'ProductController@ProductMasterData');
         Route::get('/topRank','UserController@topRank')->name('topRank');
         Route::get('/dashboarData','DashboardController@dashboarData')->name('dashboarData');

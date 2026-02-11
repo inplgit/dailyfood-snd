@@ -244,12 +244,22 @@
                                 </a>
                             </li>
                         @endcan
-                        @can('Create_Product')
+                        @can('Product_List')
                             <li>
                                 <a class="d-flex align-items-center" href="{{ route('product.index') }}">
                                     <i data-feather="circle"></i>
                                     <span class="menu-item text-truncate">
                                         Product List
+                                    </span>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('update_product_prices')
+                            <li>
+                                <a class="d-flex align-items-center" href="{{ route('product.update_product_prices') }}">
+                                    <i data-feather="circle"></i>
+                                    <span class="menu-item text-truncate">
+                                        Update Product Prices
                                     </span>
                                 </a>
                             </li>
@@ -319,7 +329,8 @@
                             </li>
                         @endcan -->
 
-   <li>
+                        @can('Scheme_Product_Pcs')
+                            <li>
                                 <a class="d-flex align-items-center" href="#">
                                     <i data-feather="circle"></i>
                                     <span class="menu-item text-truncate">
@@ -327,7 +338,6 @@
                                     </span>
                                 </a>
                                 <ul class="menu-content">
-                                  
                                         <li>
                                             <a class="d-flex align-items-center" href="{{ url('product/scheme_product_create_pcs') }}">
                                                 <span class="menu-item text-truncate">
@@ -343,11 +353,10 @@
                                                 </span>
                                             </a>
                                         </li>
-                                  
                                 </ul>
                             </li>
-                     	
-
+                        @endcan
+                        @can('slab')
                             <li>
                                 <a class="d-flex align-items-center" href="#">
                                     <i data-feather="circle"></i>
@@ -376,7 +385,7 @@
                                     
                                 </ul>
                             </li>
-
+                        @endcan
                         @can('Create_Category', 'Category_List')
                             <li>
                                 <a class="d-flex align-items-center" href="#">

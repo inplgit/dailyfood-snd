@@ -118,7 +118,9 @@
 
                                 <div class="col-12">
                                     <button type="submit" class="btn btn-primary mr-1">Create Stock</button>
-                                    <button type="reset" class="btn btn-outline-secondary">Reset</button>
+                                    <button type="button" onclick="clearForm()" class="btn btn-outline-secondary">
+                                        Reset
+                                    </button>
                                 </div>
                             </div>
                         </form>
@@ -137,10 +139,12 @@
             var distributor_id = $('#distributor_id').val();
             window.location.href = "{{url('opening/add_opening_form?id=')}}"+distributor_id;
         }
+        function clearForm() {
+            $('#subm').find('input[type="number"]').val('');
+        }
 
         $(document).ready(function() {
           $('#distributor_id').select2();
-
         });
     </script>
 

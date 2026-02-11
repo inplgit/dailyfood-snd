@@ -161,6 +161,16 @@ public function retailPrice()
 
      }
 
+    public static function get_all_product_with_prices()
+    {
+        return Product::with(['product_price' => function ($query) {
+            $query->where('start_date', '<=',date('Y-m-d'))
+                ->orderBy('start_date', 'desc')
+                ->groupBy('product_id', 'uom_id', 'start_date');
+        }])
+        ->status()
+        ->get();
+    }
      public function tsoTargetType($tso_id, $month)
      {
         $month = date("m",strtotime($month));

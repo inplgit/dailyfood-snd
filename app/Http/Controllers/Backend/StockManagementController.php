@@ -194,16 +194,22 @@ class StockManagementController extends Controller
         }
 
     }
-
     public function import_stock_list(Request $request)
     {
-        // dd('adsa');
         $distributors = MasterFormsHelper::get_all_distributor_user_wise();
-        if ($request->ajax()):
-            $stocks = Distributor::find($request->distributor_id)->stocks()->where('stock_type' , 0)->where('status' , 1)->select('voucher_date','product_id','distributor_id' , 'flavour_id' , 'uom_id' , 'qty')->get();
-            // dd($stocks->toArray());
-            return  view($this->page.'import_stock_list_ajax',compact('stocks'));
-         endif;
-        return view($this->page. 'import_stock_list',compact('distributors'));
+        if ($request->ajax()) {
+            $query = Distributor::find($request->distributor_id)->stocks()->where('stock_type', 0)->where('status', 1);
+            if ($request->from && $request->to) {
+                $query->whereBetween('voucher_date', [$request->from, $request->to]);
+            }
+            if ($request->product_id) {
+                $query->where('product_id', $request->product_id);
+            }
+            $stocks = $query->get();
+            return view($this->page . 'import_stock_list_ajax', compact('stocks'));
+        }
+
+        return view($this->page . 'import_stock_list', compact('distributors'));
     }
+
 }
