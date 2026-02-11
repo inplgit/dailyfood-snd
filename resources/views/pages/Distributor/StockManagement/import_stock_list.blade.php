@@ -1,6 +1,10 @@
 @extends('layouts.master')
 @section('title', 'Stock List')
 @section('content')
+@php
+    use App\Helpers\MasterFormsHelper;
+    $master = new MasterFormsHelper();
+@endphp
 
 
     <div class="card">
@@ -9,19 +13,45 @@
 
             <div class="row">
                 <div class="col-md-3">
-                    <select name="distributor_id" class="form-control" id="distributor_id">
-                        <option value="">select one</option>
-                        @foreach ($distributors as $distributor)
-                            <option value="{{ $distributor->id }}">{{ $distributor->distributor_name }}</option>
-                        @endforeach
-                    </select>
+                    <div class="form-group">
+                        <label>From</label>
+                        <input type="date"  name="from" id="date" class="form-control" value="{{ date('Y-m-d') }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>To</label>
+                        <input type="date"  name="to" id="date" class="form-control" value="{{ date('Y-m-d') }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Distributor</label>
+                        <select name="distributor_id" class="form-control" id="distributor_id">
+                            <!-- <option value="">select one</option> -->
+                            @foreach ($distributors as $distributor)
+                                <option value="{{ $distributor->id }}">{{ $distributor->distributor_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Product </label>
+                        <select required onchange="get_tso()" class="form-control" name="product_id"
+                            id="distribuotr_id" required>
+                            <option value="">All</option>
+                            @foreach ($master->get_all_product() as $row)
+                                <option value="{{ $row->id }}">{{ $row->product_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
                 <div class="col-md-2">
                     <div class="Stock List_card">
                         <button type="button" name="submit" value="submit" class="btn btn-primary btn-xs waves-effect waves-float waves-light"  onclick="get_ajax_data()">
                             Genrate
                         </button>
-
                     </div>
                 </div>
             </div>
