@@ -142,8 +142,7 @@ $route_id = (Request::get('route_id'))?? null;
                             <th>Action</th>
                         </tr>
                         </thead>
-                        <tbody id="data">
-                        </tbody>
+                        <tbody id="data"></tbody>
                     </table>
                 </div>
             </div>

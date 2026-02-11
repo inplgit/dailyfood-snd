@@ -80,7 +80,8 @@ class ShopsExport implements  FromQuery, WithHeadings, WithMapping, ShouldQueue
     public function headings(): array
     {
         return [
-            'Shop Code', 'Shop Name', 'City', 'Distributor', 'TSO', 'Route', 'Sub Route', 'Status'
+            // 'Shop Code', 'Shop Name', 'City', 'Distributor', 'TSO', 'Route', 'Sub Route', 'Status'
+            'Shop Code', 'Shop Name', 'Mobile No.', 'Address', 'City', 'Distributor', 'TSO', 'Route', 'Status'
         ];
     }
 
@@ -89,22 +90,24 @@ class ShopsExport implements  FromQuery, WithHeadings, WithMapping, ShouldQueue
         return [
             $shop->shop_code,
             $shop->company_name,
+            $shop->mobile_no ?? '--',
+            $shop->address ?? '--',
             optional($shop->Distributor)->city ?? '--',
             optional($shop->Distributor)->distributor_name ?? '--',
             $shop->tsos->pluck('name')->implode(', ') ?: '--',
             optional($shop->Route)->route_name ?? '--',
-            optional($shop->subroutes)->route_name ?? '--',
+            // optional($shop->subroutes)->route_name ?? '--',
             $this->formatStatus($shop->active),
         ];
         // return [
         //     $shop->shop_code,
         //     $shop->company_name,
-        //     $shop->Distributor->city ?? '--',
-        //     $shop->distributor ? $shop->distributor->distributor_name : '',
-        //     $shop->tso ? $shop->tso->name : '',
-        //     $shop->route ? $shop->route->route_name : '',
-        //     $shop->subroutes ? $shop->subroutes->route_name: '--' ,
-        //     $this->formatStatus($shop->status) // Custom format function for status
+        //     optional($shop->Distributor)->city ?? '--',
+        //     optional($shop->Distributor)->distributor_name ?? '--',
+        //     $shop->tsos->pluck('name')->implode(', ') ?: '--',
+        //     optional($shop->Route)->route_name ?? '--',
+        //     optional($shop->subroutes)->route_name ?? '--',
+        //     $this->formatStatus($shop->active),
         // ];
     }
 
