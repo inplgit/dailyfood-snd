@@ -14,10 +14,29 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <h4 class="card-title">Update Product Prices </h4>
+                        <div>
+                            <a href="{{ route('product.export_product_prices') }}" class="btn btn-success btn-sm">Export CSV</a>
+                        </div>
                     </div>
                     <div class="card-body">
+                        <div class="row mb-2">
+                            <div class="col-md-12">
+                                <form id="importForm" enctype="multipart/form-data">
+                                    @csrf
+                                    <div class="row align-items-center">
+                                        <div class="col-md-4">
+                                            <input type="file" name="file" class="form-control" required>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="submit" class="btn btn-info">Import CSV</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <hr>
                         <form method="post" action="{{ route('product.update_product_prices_store') }}" id="subm" class="form">
                             @csrf
                             <div class="row">
@@ -186,5 +205,50 @@
         });
 
 
+        $(document).on('submit', '#importForm', function(e) {
+            e.preventDefault();
+            let formData = new FormData(this);
+            $.ajax({
+                url: "{{ route('product.import_product_prices_store') }}",
+                method: "POST",
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success(response.success);
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        toastr.error(response.error);
+                    }
+                },
+                error: function(xhr) {
+                    toastr.error('Something went wrong!');
+                }
+            });
+        });
+
+        // $(document).on('submit', '#subm', function(e) {
+        //     e.preventDefault();
+        //     let formData = $(this).serialize();
+        //     $.ajax({
+        //         url: $(this).attr('action'),
+        //         method: "POST",
+        //         data: formData,
+        //         success: function(response) {
+        //             if (response.success) {
+        //                 toastr.success(response.success);
+        //                 // Optional: reload or reset
+        //             } else {
+        //                 toastr.error(response.error);
+        //             }
+        //         },
+        //         error: function(xhr) {
+        //             toastr.error('Something went wrong!');
+        //         }
+        //     });
+        // });
     </script>
 @endsection

@@ -490,4 +490,22 @@ class ProductController extends Controller
         }
     }
 
+    public function exportProductPrices()
+    {
+        return Excel::download(new \App\Exports\ProductPriceExport, 'product_prices.csv');
+    }
+
+    public function importProductPricesStore(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:csv,txt,xlsx'
+        ]);
+
+        try {
+            Excel::import(new \App\Imports\ProductPriceImport, $request->file('file'));
+            return response()->json(['success' => 'Product Prices Imported Successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Import failed: ' . $e->getMessage()]);
+        }
+    }
 }
