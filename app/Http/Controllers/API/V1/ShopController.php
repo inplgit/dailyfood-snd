@@ -36,6 +36,11 @@ use App\Models\ReceiptVoucher;
 use Yajra\DataTables\DataTables;
 
 
+
+use Illuminate\Support\Facades\Storage;
+
+
+
 use Illuminate\Support\Facades\Cache;
 
 
@@ -1030,6 +1035,160 @@ public function visitShopAddBulk(Request $request)
     return response()->json($response);
 }
 
+public function api_shop_update(Request $request, Shop $shop)
+{
+    // Direct validation - only validate fields that are present in the request
+    $validator = Validator::make($request->all(), [
+        'shop_code' => 'nullable|string|max:50|unique:shops,shop_code,' . $shop->id,
+        'custome_code' => 'nullable|string|max:50',
+        'company_name' => 'nullable|string|max:255',
+        'title' => 'nullable|string|max:255',
+        'contact_person' => 'nullable|string|max:255',
+        'email' => 'nullable|email|max:255',
+        'alt_email' => 'nullable|email|max:255',
+        'phone' => 'nullable|string|max:20',
+        'mobile_no' => 'nullable|string|max:20',
+        'alt_phone' => 'nullable|string|max:20',
+        'address' => 'nullable|string|max:500',
+        'address_2' => 'nullable|string|max:500',
+        'city' => 'nullable|integer|exists:cities,id',
+        'state' => 'nullable|string|max:100',
+        'zip_code' => 'nullable|string|max:20',
+        'note' => 'nullable|string',
+        'filer' => 'nullable|in:0,1',
+        'cnic' => 'nullable|string|max:20',
+        'allow_credit_days' => 'nullable|integer|min:0',
+        'allow_credit_amount' => 'nullable|numeric|min:0',
+        'delvery_days' => 'nullable|integer|min:0',
+        'invoice_discount' => 'nullable|numeric|min:0|max:100',
+        'shop_type_id' => 'nullable|integer|exists:shop_types,id',
+        'channel_id' => 'nullable|integer|exists:shop_channels,id',
+        'shop_zone_id' => 'nullable|integer|exists:zones,id',
+        'balance_amount' => 'nullable|numeric|min:0',
+        'debit_credit' => 'nullable|in:1,2',
+        'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'shop_location' => 'nullable|in:0,1',
+        'map' => 'nullable|string|max:255',
+        'latitude' => 'nullable|numeric|between:-90,90',
+        'longitude' => 'nullable|numeric|between:-180,180',
+        'location_radius' => 'nullable|numeric|min:0',
+        'distributor_id' => 'nullable|integer|exists:distributors,id',
+        'tso_id' => 'nullable|array',
+        'tso_id.*' => 'integer|exists:users,id',
+        'route_id' => 'nullable|integer|exists:routes,id',
+        'sub_route_id' => 'nullable|integer|exists:sub_routes,id',
+    ], [
+        'shop_code.unique' => 'This shop code is already taken.',
+        'email.email' => 'Please enter a valid email address.',
+        'alt_email.email' => 'Please enter a valid alternate email address.',
+        'image.image' => 'The file must be an image.',
+        'image.mimes' => 'The image must be a file of type: jpeg, png, jpg, gif.',
+        'image.max' => 'The image may not be greater than 2MB.',
+        'latitude.between' => 'Latitude must be between -90 and 90.',
+        'longitude.between' => 'Longitude must be between -180 and 180.',
+        'tso_id.*.exists' => 'One or more selected TSOs do not exist.',
+        'distributor_id.exists' => 'Selected distributor does not exist.',
+        'shop_type_id.exists' => 'Selected shop category does not exist.',
+        'channel_id.exists' => 'Selected shop channel does not exist.',
+        'shop_zone_id.exists' => 'Selected zone does not exist.',
+        'route_id.exists' => 'Selected route does not exist.',
+        'sub_route_id.exists' => 'Selected sub route does not exist.',
+        'city.exists' => 'Selected city does not exist.',
+        'allow_credit_days.min' => 'Credit days cannot be negative.',
+        'allow_credit_amount.min' => 'Credit amount cannot be negative.',
+        'invoice_discount.max' => 'Invoice discount cannot exceed 100%.',
+    ]);
+
+    // Check if validation fails
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Validation errors',
+            'errors' => $validator->errors()
+        ], 422);
+    }
+
+    DB::beginTransaction();
+    try {
+        // Only take fields that are present in the request
+        $data = $request->except('tso_id', 'shop_location', 'image');
+        
+        // Shop location check - only if shop_location field is present
+        if ($request->has('shop_location')) {
+            if ($request->shop_location != 1) {
+                $data['latitude'] = null;
+                $data['longitude'] = null;
+                $data['location_radius'] = null;
+            }
+        }
+
+        // Phone number correction - only if mobile_no is present
+        if ($request->has('mobile_no') && !empty($request->mobile_no)) {
+            $data['mobile_no'] = MasterFormsHelper::correctPhoneNumber($request->mobile_no);
+        }
+
+        // Image handling - only if image file is present
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $fileName = time() . '-' . preg_replace('/[^a-zA-Z0-9._-]/', '', $file->getClientOriginalName());
+
+            // Delete previous image
+            if ($shop->image && Storage::disk('public')->exists('shop_image/' . $shop->image)) {
+                Storage::disk('public')->delete('shop_image/' . $shop->image);
+            }
+
+            // Store new image
+            $file->storeAs('shop_image', $fileName, 'public');
+            $data['image'] = $fileName;
+        }
+
+        // Update the shop - only with fields that are present
+        if (!empty($data)) {
+            $shop->update($data);
+        }
+
+        // Update TSO relationships - only if tso_id is present
+        if ($request->has('tso_id')) {
+            if ($request->filled('tso_id')) {
+                $tsoIds = is_array($request->tso_id) 
+                        ? array_map('intval', $request->tso_id)
+                        : [(int)$request->tso_id];
+                
+                $shop->tsos()->sync($tsoIds);
+            } else {
+                // If tso_id is present but empty, detach all
+                $shop->tsos()->detach();
+            }
+        }
+
+        DB::commit();
+        
+        // Load only relationships that definitely exist in your Shop model
+        // Remove any relationships that might not exist
+        // $shop->load(['tsos', 'distributor', 'route', 'shopType', 'zone']);
+        
+        // Or if you're not sure which relationships exist, just return the shop without loading
+        // return response()->json([
+        //     'success' => true,
+        //     'message' => 'Shop updated successfully.',
+        //     'data' => $shop
+        // ], 200);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Shop updated successfully.',
+            'data' => $shop
+        ], 200);
+        
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to update shop.',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
 public function ShopAttendenceBulk(Request $request)
 {
     $attendances = $request->json()->all();
@@ -1041,7 +1200,23 @@ public function ShopAttendenceBulk(Request $request)
 
     foreach ($attendances as $attendance) {
         try {
+            // Force local_id as string
+            $attendance['local_id'] = (string) ($attendance['local_id'] ?? '');
 
+            /* ================= DUPLICATE LOCAL ID CHECK ================= */
+            if (!empty($attendance['local_id'])) {
+                $existing = ShopAttendence::where('local_id', $attendance['local_id'])->first();
+                if ($existing) {
+                    $response['success'][] = [
+                        'local_id'      => $attendance['local_id'],
+                        'attendance_id' => $existing->id,
+                        'message'       => 'Attendance with this local_id already exists'
+                    ];
+                    continue; // skip insert
+                }
+            }
+
+            /* ================= VALIDATION ================= */
             $validator = Validator::make($attendance, [
                 'local_id'       => 'required',
                 'distributor_id' => 'required|integer|exists:distributors,id',
@@ -1059,6 +1234,7 @@ public function ShopAttendenceBulk(Request $request)
                 continue;
             }
 
+            /* ================= CREATE ATTENDANCE ================= */
             $att = ShopAttendence::create([
                 'distributor_id' => $attendance['distributor_id'],
                 'tso_id'         => $attendance['tso_id'],
@@ -1066,12 +1242,13 @@ public function ShopAttendenceBulk(Request $request)
                 'check_in'       => $attendance['check_in'],
                 'check_out'      => $attendance['check_out'],
                 'sync_date_time' => now(),
-                'local_id'       => $attendance['local_id'] ?? 0,
+                'local_id'       => $attendance['local_id'],
             ]);
 
             $response['success'][] = [
                 'local_id'      => $attendance['local_id'],
-                'attendance_id' => $att->id
+                'attendance_id' => $att->id,
+                'message'       => 'Attendance inserted successfully'
             ];
 
         } catch (\Exception $e) {
@@ -1084,7 +1261,6 @@ public function ShopAttendenceBulk(Request $request)
 
     return response()->json($response, 201);
 }
-
 
     public function updateCordinates(Request $request , $id)
     {

@@ -61,11 +61,14 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'API\V1'], functi
     Route::controller('ShopController')->prefix('shop')->group(function () {
       Route::post('addShop', 'addShop')->middleware('check_route');
       Route::get('userWiseShopList', 'userWiseShopList');
+
+
       Route::post('visitShopAdd', 'visitShopAdd');
       Route::post('visitShopAddBulk', 'visitShopAddBulk');
       Route::get('visitShopList', 'visitShopList');
       Route::get('shopTypeList', 'shopTypeList');
       Route::put('updateCordinates/{id}', 'updateCordinates');
+      Route::put('shops/update/{shop}', 'api_shop_update');
 
       Route::post('update/location','update_location');
 
