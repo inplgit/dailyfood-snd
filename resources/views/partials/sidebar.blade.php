@@ -244,7 +244,7 @@
                                 </a>
                             </li>
                         @endcan
-                        @can('Create_Product')
+                        @can('Product_List')
                             <li>
                                 <a class="d-flex align-items-center" href="{{ route('product.index') }}">
                                     <i data-feather="circle"></i>
