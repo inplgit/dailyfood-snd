@@ -61,7 +61,7 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'API\V1'], functi
     Route::controller('ShopController')->prefix('shop')->group(function () {
       Route::post('addShop', 'addShop')->middleware('check_route');
       Route::get('userWiseShopList', 'userWiseShopList');
-
+      Route::post('update/{id}','updateShop');
 
       Route::post('visitShopAdd', 'visitShopAdd');
       Route::post('visitShopAddBulk', 'visitShopAddBulk');

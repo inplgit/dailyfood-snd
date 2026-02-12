@@ -682,6 +682,112 @@ public function order_booker_daily_activity_location_report(Request $request)
 // }
 
 
+public function updateShop(Request $request, $id)
+{
+    $shop = Shop::find($id);
+
+    if (!$shop) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Shop not found.'
+        ], 404);
+    }
+
+    $validator = Validator::make($request->all(), [
+        'contact_person' => 'required',
+        'company_name'   => 'required',
+        'mobile_no'      => 'required|unique:shops,mobile_no,' . $shop->id,
+        'latitude'       => 'required',
+        'longitude'      => 'required',
+        'class'          => 'required',
+        'route_id'       => 'required|exists:routes,id',
+        'image'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+    ]);
+
+    if ($validator->fails()) {
+        $allErrors = implode(' | ', collect($validator->errors()->all())->toArray());
+
+        return response()->json([
+            'status' => false,
+            'message' => $allErrors,
+        ], 422);
+    }
+
+    DB::beginTransaction();
+
+    try {
+
+        // Route and TSOs
+        $route = Route::findOrFail($request->route_id);
+
+        $tsoIds = DB::table('route_tso')
+            ->where('route_id', $request->route_id)
+            ->pluck('tso_id')
+            ->toArray();
+
+        if (empty($tsoIds)) {
+            return $this->sendError('No TSO assigned to this route.');
+        }
+
+        // Mobile format
+        $mobile = MasterFormsHelper::correctPhoneNumber($request->mobile_no);
+
+        // Image update (optional)
+        $fileName = $shop->image;
+
+        if ($request->hasFile('image')) {
+
+            // remove old image (optional)
+            if ($shop->image && \Storage::disk('public')->exists('shop_image/' . $shop->image)) {
+                \Storage::disk('public')->delete('shop_image/' . $shop->image);
+            }
+
+            $file = $request->file('image');
+            $fileName = time() . '-' . $file->getClientOriginalName();
+            $file->storeAs('shop_image', $fileName, 'public');
+        }
+
+        // Update shop
+        $shop->update([
+            'distributor_id'  => $route->distributor_id,
+            'note'            => $request->note,
+            'contact_person'  => $request->contact_person,
+            'company_name'    => $request->company_name,
+            'mobile_no'       => $mobile,
+            'phone'           => $request->phone,
+            'alt_phone'       => $request->alt_phone,
+            'cnic'            => $request->cnic,
+            'address'         => $request->address,
+            'latitude'        => $request->latitude,
+            'longitude'       => $request->longitude,
+            'shop_type_id'    => $request->shop_type_id,
+            'email'           => $request->email,
+            'payment_mode'    => $request->payment_mode,
+            'route_id'        => $request->route_id,
+            'class'           => $request->class,
+            'channel_id'      => $request->channel_id,
+            'balance_amount'  => $request->balance_amount ?? 0,
+            'debit_credit'    => $request->debit_credit ?? 1,
+            'image'           => $fileName,
+        ]);
+
+        // Update TSOs
+        $shop->tsos()->sync($tsoIds);
+
+        MasterFormsHelper::users_location_submit($shop, $request->latitude, $request->longitude, 'shops', 'Update Shop');
+
+        DB::commit();
+
+        return $this->sendResponse([], 'Shop updated successfully.');
+
+    } catch (\Exception $e) {
+        DB::rollback();
+
+        return $this->sendError('Server Error.', [
+            'error' => $e->getMessage()
+        ]);
+    }
+}
 
 public function userWiseShopList(Request $request)
 {
