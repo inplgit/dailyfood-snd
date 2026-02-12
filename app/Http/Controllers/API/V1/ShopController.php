@@ -696,7 +696,7 @@ public function updateShop(Request $request, $id)
     $validator = Validator::make($request->all(), [
         'contact_person' => 'required',
         'company_name'   => 'required',
-        'mobile_no'      => 'required|unique:shops,mobile_no,' . $shop->id,
+        'mobile_no'      => 'required',
         'latitude'       => 'required',
         'longitude'      => 'required',
         'class'          => 'required',
@@ -769,6 +769,7 @@ public function updateShop(Request $request, $id)
             'balance_amount'  => $request->balance_amount ?? 0,
             'debit_credit'    => $request->debit_credit ?? 1,
             'image'           => $fileName,
+            'update_api'           => 1,
         ]);
 
         // Update TSOs
