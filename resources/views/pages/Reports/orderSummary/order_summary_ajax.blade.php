@@ -85,7 +85,16 @@ $user_allocate = $master->get_assign_user()->toArray();
 
             @foreach ($tsos as $tso)
                 @if (in_array($tso['user_id'], $user_allocate) && !empty($tso['attendence']))
-                    @foreach ($tso['attendence'] as $row)
+
+
+                @php
+    $uniqueAttendence = collect($tso['attendence'])
+        ->unique(function ($item) {
+            return \Carbon\Carbon::parse($item['in'])->format('Y-m-d');
+        })
+        ->values();
+@endphp
+                    @foreach ($uniqueAttendence as $row)
                         @php
                             $date = \Carbon\Carbon::parse($row['created_at'])->format('Y-m-d');
                             $day = \Carbon\Carbon::parse($row['created_at'])->format('l');
