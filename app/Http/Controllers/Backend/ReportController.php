@@ -4453,7 +4453,7 @@ public function distributer_product_sales_value_report(Request $request)
                     'tso.name as employee_name',
                     DB::raw('GROUP_CONCAT(so.id) as sale_order_no'), // Combine multiple orders for same shop/day
                     'shops.company_name as customer',
-                    DB::raw('SUM(so.total_pcs) as net_amount'),
+                    DB::raw('SUM(so.total_amount) as net_amount'),
                     
                     // Take max/first attendance for that day (since we group by shop/day)
                     DB::raw('MAX(max_sa.check_in) as time_in'),
