@@ -4451,7 +4451,7 @@ public function distributer_product_sales_value_report(Request $request)
                 ->select(
                     'so.dc_date as dated',
                     'tso.name as employee_name',
-                    DB::raw('GROUP_CONCAT(so.id) as sale_order_no'), // Combine multiple orders for same shop/day
+                    DB::raw('GROUP_CONCAT(so.invoice_no) as sale_order_no'), // Combine multiple orders for same shop/day
                     'shops.company_name as customer',
                     DB::raw('SUM(so.total_amount) as net_amount'),
                     
