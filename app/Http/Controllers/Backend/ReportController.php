@@ -393,7 +393,7 @@ class ReportController extends Controller
     }
  
       
-  public function shop_wise_sales_report(Request $request) // Aliiiiiiiiii
+   public function shop_wise_sales_report(Request $request) // Aliiiiiiiiii
     {
         $tso_id = $request->tso_id;
         $distributor_id = $request->distributor_id;
@@ -481,6 +481,65 @@ class ReportController extends Controller
             return view($this->page . 'shopWiseSalesReport.shop_wise_sales_ajax', compact('data', 'from', 'to', 'distributor_id', 'tso_id', 'city'));
         endif;
         return view($this->page . 'shopWiseSalesReport.shop_wise_sales');
+    }
+
+    public function shops_amount_wise_report(Request $request)
+    {
+        $tso_id = $request->tso_id;
+        $distributor_id = $request->distributor_id;
+        $from = $request->from;
+        $to = $request->to;
+        $amount_range = $request->amount_range;
+
+        if ($request->ajax()) :
+            $query = DB::table('sale_orders as so')
+                ->join('shops as s', 's.id', '=', 'so.shop_id')
+                ->join('tso', 'tso.id', '=', 'so.tso_id')
+                ->join('distributors as d', 'd.id', '=', 'so.distributor_id')
+                ->leftJoin('users_distributors', 'users_distributors.distributor_id', '=', 'so.distributor_id')
+                ->where('users_distributors.user_id', \Auth::id())
+                ->where('so.status', 1)
+                ->whereBetween('so.dc_date', [$from, $to])
+                
+                ->when($distributor_id, function ($q) use ($distributor_id) {
+                    $q->where('so.distributor_id', $distributor_id);
+                })
+                ->when($tso_id, function ($q) use ($tso_id) {
+                    $q->where('so.tso_id', $tso_id);
+                })
+                ->when($request->shop_id, function ($q) use ($request) {
+                    $q->where('so.shop_id', $request->shop_id);
+                })
+                
+                ->groupBy('so.shop_id', 's.shop_code', 's.company_name', 'tso.name', 'd.distributor_name')
+                ->select(
+                    's.shop_code',
+                    's.company_name as shop_name',
+                    'tso.name as tso_name',
+                    'd.distributor_name',
+                    DB::raw('SUM(so.total_amount) as total_amount'),
+                    DB::raw('COUNT(so.id) as total_orders')
+                );
+
+            if ($amount_range) {
+                $range = explode('-', $amount_range);
+                $min = (float) trim($range[0]);
+                $max = isset($range[1]) && trim($range[1]) !== 'max' ? (float) trim($range[1]) : null;
+
+                $query->having('total_amount', '>=', $min);
+                if ($max !== null) {
+                    $query->having('total_amount', '<=', $max);
+                }
+            }
+
+            $data = $query->get();
+            $totalAmount = $data->sum('total_amount');
+            $totalOrders = $data->sum('total_orders');
+
+            return view($this->page . 'ShopsAmountWise.ajax', compact('data', 'totalAmount', 'totalOrders', 'from', 'to', 'distributor_id', 'tso_id'));
+        endif;
+
+        return view($this->page . 'ShopsAmountWise.view');
     }
 
 
@@ -4337,128 +4396,49 @@ public function distributer_product_sales_value_report(Request $request)
     public function order_booker_productive_report(Request $request)
     {
         $date = $request->from;
+        $from = $date;
         $to = $request->to;
-            if ($request->ajax()) :
-
-            // $sales_count = DB::table('sale_orders')
-            //     ->whereBetween('sale_orders.dc_date', [$date, $to])
-            //     ->where('tso_id', $request->tso_id)
-            //     ->where('sale_orders.status', 1)
-            //     ->where('distributor_id', $request->distributor_id);
-            // $maxAttendenceSub = DB::raw("
-            //     (
-            //         SELECT sa.*
-            //         FROM shop_attendences sa
-            //         INNER JOIN (
-            //             SELECT shop_id, tso_id, distributor_id,
-            //                 MAX(TIME_TO_SEC(TIMEDIFF(check_out, check_in))) AS max_diff
-            //             FROM shop_attendences
-            //             WHERE sync_date_time BETWEEN '{$date} 00:00:00' AND '{$to} 23:59:59'
-            //             GROUP BY shop_id, tso_id, distributor_id
-            //         ) AS m
-            //         ON sa.shop_id = m.shop_id
-            //         AND sa.tso_id = m.tso_id
-            //         AND sa.distributor_id = m.distributor_id
-            //         AND TIME_TO_SEC(TIMEDIFF(sa.check_out, sa.check_in)) = m.max_diff
-            //     ) AS max_sa
-            // ");
-            $maxAttendenceSub = DB::table('shop_attendences as sa')
-                ->select('sa.shop_id','sa.tso_id','sa.distributor_id','sa.check_in','sa.check_out','sa.sync_date_time')
-                ->join(DB::raw("(SELECT shop_id, tso_id, distributor_id, MAX(TIME_TO_SEC(TIMEDIFF(check_out, check_in))) AS max_diff
-                                FROM shop_attendences
-                                WHERE sync_date_time BETWEEN '{$date} 00:00:00' AND '{$to} 23:59:59'
-                                GROUP BY shop_id, tso_id, distributor_id) as m"),
-                    function($join){
-                        $join->on('sa.shop_id','=','m.shop_id')
-                                ->on('sa.tso_id','=','m.tso_id')
-                                ->on('sa.distributor_id','=','m.distributor_id')
-                                ->on(DB::raw('TIME_TO_SEC(TIMEDIFF(sa.check_out, sa.check_in))'), '=', 'm.max_diff');
-                    });
-            // $saleOrdersSub = DB::table('sale_orders')
-            //     ->select(
-            //         'shop_id',
-            //         'tso_id',
-            //         DB::raw('SUM(total_pcs) as total_pcs')
-            //     )
-            //     ->where('status', 1)
-            //     ->whereBetween('dc_date', [$date, $to])
-            //     ->groupBy('shop_id', 'tso_id');
-            $saleOrdersSub = DB::table('sale_orders')
-                ->select('shop_id','tso_id', DB::raw('SUM(total_pcs) as total_pcs'))
-                ->where('status', 1)
-                ->whereBetween('dc_date', [$date, $to])
-                ->groupBy('shop_id', 'tso_id');
-
-            $productive = TSO::where('tso.status', 1)
-                ->where('tso.active', 1)
-                ->join('users_distributors', 'users_distributors.user_id', '=', 'tso.user_id')
-                ->join('routes', 'routes.tso_id', '=', 'tso.id')
-                ->join('shops', 'shops.route_id', '=', 'routes.id')
-
-                ->leftJoin('shop_visits', 'shops.id', '=', 'shop_visits.shop_id')
-
-                ->leftJoinSub($saleOrdersSub, 'so', function ($join) {
-                    $join->on('so.shop_id', '=', 'shops.id')
-                        ->on('so.tso_id', '=', 'tso.id');
-                })
-
-
-                // FIX: aggregate sale order items to avoid duplicates
-                // ->leftJoin(DB::raw('(SELECT so_id, SUM(qty) as total_qty FROM sale_order_data GROUP BY so_id) sod'),
-                //     'sale_orders.id',
-                //     '=',
-                //     'sod.so_id'
-                // )
-
-                ->leftJoin('distributors', 'distributors.id', '=', 'users_distributors.distributor_id')
-
-                // ->leftJoin($maxAttendenceSub, function ($join) {
-                //     $join->on('max_sa.shop_id', '=', 'shops.id')
-                //         ->on('max_sa.tso_id', '=', 'tso.id')
-                //         ->on('max_sa.distributor_id', '=', 'distributors.id');
-                // })
-                ->leftJoinSub($maxAttendenceSub, 'max_sa', function($join){
-                    $join->on('max_sa.shop_id','=','shops.id')
-                        ->on('max_sa.tso_id','=','tso.id')
-                        ->on('max_sa.distributor_id','=','distributors.id');
-                })
-                // ->leftJoin('shop_attendences', function ($join) {
-                //     $join->on('shop_attendences.shop_id', '=', 'shops.id')
-                //         ->on('shop_attendences.tso_id', '=', 'tso.id')
-                //         ->on('shop_attendences.distributor_id', '=', 'distributors.id');
-                // })
-
-                ->leftJoin('cities', 'cities.id', '=', 'tso.city')
-
-                // ->where('users_distributors.distributor_id', $request->distributor_id)
-                ->whereIn('users_distributors.distributor_id', $this->master->get_users_distributors(Auth::user()->id))
-
-                ->select(
-                    'tso.id', 'tso.id as tso_id', 'tso.name as tso_name', 'tso.tso_code',
-                    'users_distributors.distributor_id', 'tso.designation_id', 'tso.city',
-                    'users_distributors.user_id',
-                    'routes.id as route_id', 'routes.route_name',
-                    'shops.id as shop_id', 'shops.company_name as shop_name',
-                    'shops.latitude as Outlet_Latitude', 'shops.longitude as Outlet_Longitude',
-                    'shop_visits.id as visit_id', 'shop_visits.visit_date',
-                    'shop_visits.shop_id', 'shop_visits.visit_reason_id', 'shop_visits.remark',
-                    'shop_visits.latitude as Visit_Latitude', 'shop_visits.longitude as Visit_Longitude',
-                    'distributors.distributor_name', 'cities.name as city_name',
-                    DB::raw("max_sa.check_in as check_in"),
-                    DB::raw("max_sa.check_out as check_out"),
-                    DB::raw("TIME_TO_SEC(TIMEDIFF(max_sa.check_out, max_sa.check_in)) as diff_seconds"),
-                    DB::raw("SEC_TO_TIME(TIME_TO_SEC(TIMEDIFF(max_sa.check_out, max_sa.check_in))) as diff_hhmmss"),
-                    DB::raw("DATE(max_sa.sync_date_time) as sync_date_time"),
-                    DB::raw('IFNULL(so.total_pcs, 0) as total_qty'),
-                    // 'sod.total_qty as total_qty',
-                    // 'sale_orders.*'
-                )
-                
+        $distributor_id = $request->distributor_id;
+        $tso_id = $request->tso_id;
+        if ($request->ajax()) :
+            // 1. Prepare Attendance Subquery (Max Duration per shop/tso/day)
+            // We use a simplified approach: just get the attendance for the range.
+            // Ideally should match the "Max Duration" logic if multiple attendances exist.
+            // For performance and simplicity matching previous logic's intent:
+             $maxAttendenceSub = DB::table('shop_attendences as sa')
+                ->whereBetween('sa.sync_date_time', [$date . ' 00:00:00', $to . ' 23:59:59'])
                 ->when($request->distributor_id, function ($query) use ($request) {
-                    $query->where('users_distributors.distributor_id', $request->distributor_id);
+                    $query->where('sa.distributor_id', $request->distributor_id);
                 })
                 ->when($request->tso_id, function ($query) use ($request) {
-                    $query->where('tso.id', $request->tso_id);
+                    $query->where('sa.tso_id', $request->tso_id);
+                })
+                ->select('sa.shop_id', 'sa.tso_id', 'sa.distributor_id', 'sa.check_in', 'sa.check_out', 'sa.sync_date_time');
+
+
+            // 2. Main Query driven by Sale Orders
+            // This ensures we get ALL Productive Shops (shops with orders) regardless of Route configuration.
+            $productivityQuery = DB::table('sale_orders as so')
+                ->join('tso', 'tso.id', '=', 'so.tso_id')
+                ->join('shops', 'shops.id', '=', 'so.shop_id')
+                // Join Attendance: match Shop, TSO, and Date
+                ->leftJoinSub($maxAttendenceSub, 'max_sa', function($join) {
+                    $join->on('max_sa.shop_id', '=', 'so.shop_id')
+                         ->on('max_sa.tso_id', '=', 'so.tso_id')
+                         // Ensure attendance is on the same day as the order
+                         ->whereRaw('DATE(max_sa.sync_date_time) = so.dc_date');
+                })
+                ->leftJoin('users_distributors', 'users_distributors.distributor_id', '=', 'so.distributor_id')
+                ->where('users_distributors.user_id', \Auth::id()) // Security check if needed, or use $this->master helper
+                ->where('so.status', 1)
+                ->whereBetween('so.dc_date', [$date, $to])
+                
+                // Filters
+                ->when($request->distributor_id, function ($query) use ($request) {
+                    $query->where('so.distributor_id', $request->distributor_id);
+                })
+                ->when($request->tso_id, function ($query) use ($request) {
+                    $query->where('so.tso_id', $request->tso_id);
                 })
                 ->when($request->designation, function ($query) use ($request) {
                     $query->where('tso.designation_id', $request->designation);
@@ -4466,63 +4446,129 @@ public function distributer_product_sales_value_report(Request $request)
                 ->when($request->city, function ($query) use ($request) {
                     $query->where('tso.city', $request->city);
                 })
-                // ->when($date, function ($query) use ($date) {
-                //     $query->where('shop_attendences.sync_date_time', '>=', $date . ' 00:00:00');
-                // })
-                // ->when($to, function ($query) use ($to) {
-                //     $query->where('shop_attendences.sync_date_time', '<=', $to . ' 23:59:59');
-                // })
-                ->when($date && $to, function ($query) use ($date, $to) {
-                    $query->whereBetween('max_sa.sync_date_time', [
-                        $date . ' 00:00:00', $to . ' 23:59:59'
-                    ]);
-                })
-                ->whereNotNull('so.total_pcs')
-                ->orderBy('tso.id')
-                ->orderBy('routes.id')
-                ->orderBy('shops.id')
+                
+                ->groupBy('so.dc_date', 'so.tso_id', 'so.shop_id')
+                ->select(
+                    'so.dc_date as dated',
+                    'tso.name as employee_name',
+                    DB::raw('GROUP_CONCAT(so.id) as sale_order_no'), // Combine multiple orders for same shop/day
+                    'shops.company_name as customer',
+                    DB::raw('SUM(so.total_pcs) as net_amount'),
+                    
+                    // Take max/first attendance for that day (since we group by shop/day)
+                    DB::raw('MAX(max_sa.check_in) as time_in'),
+                    DB::raw('MAX(max_sa.check_out) as time_out'),
+                    
+                    'shops.latitude as shop_lat',
+                    'shops.longitude as shop_lng'
+                )
+                ->orderBy('so.dc_date')
+                ->orderBy('max_sa.check_in')
+                ->orderBy('tso.name');
 
-                // ->groupBy('sale_orders.id')
-                // ->groupBy(DB::raw("DATE(shop_attendences.sync_date_time)"))
-                ->groupBy('shops.id', 'routes.id', 'tso.id')
-                // ->groupBy('shops.id')
-                ->get()
-                ->toArray();
-                // dd($maxAttendenceSub->get(), $saleOrdersSub->get(), $productive);
-                // $attendance = DB::table('shop_attendences')
-                //     ->where('shop_id', 22552)
-                //     // ->where('tso_id', 32)
-                //     ->where('distributor_id', 60)
-                //     ->whereBetween('sync_date_time', [$date . ' 00:00:00', $to . ' 23:59:59'])
-                //     ->get();
+            $productivity = $productivityQuery->get();
 
-                // dd($attendance);
+            // 3. Post-processing (Time Diff, Distance)
+            $productivity = $productivity->sortBy([
+                ['dated', 'asc'],
+                ['employee_name', 'asc'],
+                ['time_in', 'asc']
+            ])->values();
 
+            $productivity->map(function($item, $index) use ($productivity) {
 
-            // dd($productive, $sales_count->get(), $attendance);
-            // dd($productive);
+                /*
+                |--------------------------------------------------------------------------
+                | 1. TIME SPENT (inside shop)
+                |--------------------------------------------------------------------------
+                */
+                $item->time_spent_sec = 0;
+                $item->time_spent_min = 0;
+                $item->time_spent = '-';
 
-            $d_data = [];
-            foreach ($productive as $p) {
-                // $distributor = $p['distributor_name'] ?? 'Unknown Distributor'; 
-                // $route = $p['route_name'] ?? 'Unknown Route';
-                // $tso_name = $p['tso_name'] ?? 'Unknown TSO';
-               
-                // $d_data[$distributor][$route][$tso_name][] = $p;
-                if (!empty($p['total_qty']) && $p['total_qty'] > 0) {
+                if ($item->time_in && $item->time_out) {
+                    $start = \Carbon\Carbon::parse($item->time_in);
+                    $end   = \Carbon\Carbon::parse($item->time_out);
 
-                    $distributor = $p['distributor_name'] ?? 'Unknown Distributor';
-                    $route       = $p['route_name'] ?? 'Unknown Route';
-                    $tso_name    = $p['tso_name'] ?? 'Unknown TSO';
-
-                    $d_data[$distributor][$route][$tso_name][] = $p;
+                    $diff = $end->diffInSeconds($start);
+                    $item->time_spent_sec = $diff;
+                    $item->time_spent_min = floor($diff / 60);
+                    $item->time_spent = gmdate('H:i:s', $diff);
                 }
-            }
-                return view($this->page . 'OrderBookerProductive.ajax',compact('d_data','date','to'));
-            else :
-                return view($this->page . 'OrderBookerProductive.view');
-            endif;
 
+                /*
+                |--------------------------------------------------------------------------
+                | 2. TIME DIFFERENCE (travel time between shops)
+                |--------------------------------------------------------------------------
+                */
+                $item->time_diff = '-';
+                $item->time_diff_sec = 0;
+
+                if ($index > 0) {
+                    $previous = $productivity[$index - 1];
+
+                    // Only calculate if same employee and same date
+                    if ($previous->employee_name == $item->employee_name && $previous->dated == $item->dated) {
+                        if ($previous->time_out && $item->time_in) {
+                            $prevOut = \Carbon\Carbon::parse($previous->time_out);
+                            $currentIn = \Carbon\Carbon::parse($item->time_in);
+
+                            $diff = $currentIn->diffInSeconds($prevOut);
+
+                            $item->time_diff_sec = $diff;
+                            $item->time_diff = gmdate('H:i:s', $diff);
+                        }
+                    }
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | 3. DISTANCE (between previous shop & current shop)
+                |--------------------------------------------------------------------------
+                */
+                $item->distance = 0;
+
+                if ($index > 0) {
+
+                    $previous = $productivity[$index - 1];
+
+                    // Only calculate if same employee and same date
+                    if ($previous->employee_name == $item->employee_name && $previous->dated == $item->dated) {
+                        if ($previous->shop_lat && $previous->shop_lng &&
+                            $item->shop_lat && $item->shop_lng) {
+
+                            $lat1 = (float) $previous->shop_lat;
+                            $lon1 = (float) $previous->shop_lng;
+                            $lat2 = (float) $item->shop_lat;
+                            $lon2 = (float) $item->shop_lng;
+
+                            $earthRadius = 6371; // KM
+
+                            $dLat = deg2rad($lat2 - $lat1);
+                            $dLon = deg2rad($lon2 - $lon1);
+
+                            $a = sin($dLat/2) * sin($dLat/2) +
+                                cos(deg2rad($lat1)) *
+                                cos(deg2rad($lat2)) *
+                                sin($dLon/2) * sin($dLon/2);
+
+                            $c = 2 * atan2(sqrt($a), sqrt(1-$a));
+
+                            $item->distance = round($earthRadius * $c, 2);
+                        }
+                    }
+                }
+
+                return $item;
+            });
+            $totalNet = $productivity->sum('net_amount');
+            $totalSeconds = $productivity->sum('time_spent_sec');
+            $totalTimeSpent = sprintf('%02d:%02d:%02d', ($totalSeconds/3600),($totalSeconds/60%60), $totalSeconds%60);
+            
+            return view($this->page . 'OrderBookerProductive.ajax', compact('productivity', 'totalNet', 'totalTimeSpent', 'from', 'to', 'distributor_id', 'tso_id'));
+        else :
+            return view($this->page . 'OrderBookerProductive.view');
+        endif;
     }
 
     public function unproductive_shop_report(Request $request) //-----------------------------------------------

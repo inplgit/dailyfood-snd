@@ -447,6 +447,12 @@ $master = new MasterFormsHelper();
                                                     <span>Order Booker Productive Report</span>
                                                 </a>
                                             </li>
+                                            <li>
+                                                <a href="{{ route('shops_amount_wise_report') }}">
+                                                    <i class="fas fa-circle"></i>
+                                                    <span>Shops Amount Wise Report</span>
+                                                </a>
+                                            </li>
                                             @endcan
                                         </ul>
                                     </div>

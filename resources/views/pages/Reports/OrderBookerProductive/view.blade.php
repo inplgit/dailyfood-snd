@@ -63,7 +63,7 @@
                                     <div class="form-group w-100">
                                         <div class="d-flex justify-content-between">
                                             <button onclick="get_ajax_data()" type="button" class="btn btn-primary" style="width: 49%; white-space: nowrap;">Generate</button>
-                                            <button id="printBtn" type="button" class="btn btn-secondary" style="width: 49%; white-space: nowrap;">Print</button>
+                                            <button type="button" onclick="printTableNew('.printBody')" class="btn btn-primary text-right"> Print </button>
                                         </div>
                                     </div>
                                 </div>
@@ -82,14 +82,8 @@
         </div>
     </section>
 @endsection
+@section('script')
 <script>
-    function printTable(tableId) {
-        var printContents = document.getElementById(tableId).outerHTML;
-        var originalContents = document.body.innerHTML;
-
-        document.body.innerHTML = printContents;
-        window.print();
-
-        document.body.innerHTML = originalContents;
-    }
+    $( document ).ready(function() {$('select').select2();});
 </script>
+@endsection
