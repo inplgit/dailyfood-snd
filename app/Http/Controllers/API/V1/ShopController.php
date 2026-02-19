@@ -812,7 +812,7 @@ public function userWiseShopList(Request $request)
         ->leftJoin('shops_outstandings', 'shops_outstandings.shop_id', '=', 'shops.id')
         ->where('shop_tso.tso_id', $tsoId)
         ->where('shops.route_id', $request->route_id)
-        ->where('shops.distributor_id', $distributor_id)
+        // ->where('shops.distributor_id', $distributor_id)
         ->where('shops.status', 1)    // ✅ shop enabled
         ->where('shops.active', 1)    // ✅ active shop only
         ->when($request->search, function ($query) use ($request) {

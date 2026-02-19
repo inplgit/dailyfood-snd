@@ -71,10 +71,13 @@ class DashboardController extends BaseController
     $data['total_shop'] = DB::table('shops')
         ->join('shop_tso', 'shops.id', '=', 'shop_tso.shop_id')
         ->where('shop_tso.tso_id', $user->tso->id)
+        //  ->where('shops.distributor_id', $user->tso->distributor_id) // 👈 distributor filter
         ->where('shops.status', 1)
         ->where('shops.active', 1)
         ->where('shops.route_id', $request->route_id)
         ->count();
+
+        // dd($request->route_id ,$user->tso->id, $user->tso->distributor_id , $data['total_shop']);
 
     $data['total_product'] = Product::Status()->count();
 
