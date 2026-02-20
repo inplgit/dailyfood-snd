@@ -532,7 +532,7 @@ class ReportController extends Controller
                 }
             }
 
-            $data = $query->get();
+            $data = $query->orderBy('total_amount')->get();
             $totalAmount = $data->sum('total_amount');
             $totalOrders = $data->sum('total_orders');
 

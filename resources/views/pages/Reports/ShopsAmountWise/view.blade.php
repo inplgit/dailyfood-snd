@@ -64,12 +64,13 @@
                                         <label>Amount Range</label>
                                         <select class="form-control select2" name="amount_range" id="amount_range">
                                             <option value="">All</option>
-                                            <option value="0 - 600">0 - 600</option>
-                                            <option value="600 - 1200">600 - 1200</option>
-                                            <option value="1200 - 1800">1200 - 1800</option>
-                                            <option value="1800 - 3000">1800 - 3000</option>
-                                            <option value="3000 - 4000">3000 - 4000</option>
-                                            <option value="4000 - max">4000 - max</option>
+                                            <option value="0 - 700">0 - 700</option>
+                                            <option value="701 - 1200">701 - 1200</option>
+                                            <option value="1201 - 2000">1201 - 2000</option>
+                                            <option value="2001 - 3000">2001 - 3000</option>
+                                            <option value="3001 - 4000">3001 - 4000</option>
+                                            <option value="4001 - 5000">4001 - 5000</option>
+                                            <option value="5001 - max">5001 - max</option>
                                         </select>
                                     </div>
                                 </div>
