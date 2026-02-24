@@ -61,6 +61,15 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
+                                        <label>Type</label>
+                                        <select class="form-control select2" name="type" id="type">
+                                            <option value="amount" selected>Amount Wise</option>
+                                            <option value="time">Time Wise</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3" id="amount_range_div">
+                                    <div class="form-group">
                                         <label>Amount Range</label>
                                         <select class="form-control select2" name="amount_range" id="amount_range">
                                             <option value="">All</option>
@@ -71,6 +80,20 @@
                                             <option value="3001 - 4000">3001 - 4000</option>
                                             <option value="4001 - 5000">4001 - 5000</option>
                                             <option value="5001 - max">5001 - max</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3" id="time_range_div" style="display:none;">
+                                    <div class="form-group">
+                                        <label>Time Spent Range</label>
+                                        <select class="form-control select2" name="time_range" id="time_range">
+                                            <option value="">All</option>
+                                            <option value="0 - 1">0 - 1 min</option>
+                                            <option value="1 - 2">1 min - 2 min</option>
+                                            <option value="2 - 3">2 min - 3 min</option>
+                                            <option value="3 - 4">3 min - 4 min</option>
+                                            <option value="4 - 5">4 min - 5 min</option>
+                                            <option value="5 - max">5 min - max</option>
                                         </select>
                                     </div>
                                 </div>
@@ -99,9 +122,18 @@
 @endsection
 
 @section('script')
-<script>
-    $(document).ready(function() {
-        $('.select2').select2();
-    });
-</script>
+    <script>
+        $(document).ready(function() {
+            $('.select2').select2();
+            $('#type').on('change', function() {
+                if ($(this).val() === 'amount') {
+                    $('#amount_range_div').show();
+                    $('#time_range_div').hide();
+                } else {
+                    $('#amount_range_div').hide();
+                    $('#time_range_div').show();
+                }
+            }).trigger('change'); // trigger on load to set correct initial state
+        });
+    </script>
 @endsection

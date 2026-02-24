@@ -444,7 +444,7 @@ $master = new MasterFormsHelper();
                                             <li>
                                                 <a href="{{ route('order_booker_productive_report') }}">
                                                     <i class="fas fa-circle"></i>
-                                                    <span>Order Booker Productive Report</span>
+                                                    <span>Daily Report</span>
                                                 </a>
                                             </li>
                                             <li>

@@ -485,58 +485,132 @@ class ReportController extends Controller
 
     public function shops_amount_wise_report(Request $request)
     {
-        $tso_id = $request->tso_id;
+        $tso_id        = $request->tso_id;
         $distributor_id = $request->distributor_id;
-        $from = $request->from;
-        $to = $request->to;
-        $amount_range = $request->amount_range;
+        $from          = $request->from;
+        $to            = $request->to;
+        $type          = $request->type ?? 'amount'; // 'amount' or 'time'
+        $amount_range  = $request->amount_range;
+        $time_range    = $request->time_range;
 
         if ($request->ajax()) :
-            $query = DB::table('sale_orders as so')
-                ->join('shops as s', 's.id', '=', 'so.shop_id')
-                ->join('tso', 'tso.id', '=', 'so.tso_id')
-                ->join('distributors as d', 'd.id', '=', 'so.distributor_id')
-                ->leftJoin('users_distributors', 'users_distributors.distributor_id', '=', 'so.distributor_id')
-                ->where('users_distributors.user_id', \Auth::id())
-                ->where('so.status', 1)
-                ->whereBetween('so.dc_date', [$from, $to])
-                
-                ->when($distributor_id, function ($q) use ($distributor_id) {
-                    $q->where('so.distributor_id', $distributor_id);
-                })
-                ->when($tso_id, function ($q) use ($tso_id) {
-                    $q->where('so.tso_id', $tso_id);
-                })
-                ->when($request->shop_id, function ($q) use ($request) {
-                    $q->where('so.shop_id', $request->shop_id);
-                })
-                
-                ->groupBy('so.shop_id', 's.shop_code', 's.company_name', 'tso.name', 'd.distributor_name')
-                ->select(
-                    's.shop_code',
-                    's.company_name as shop_name',
-                    'tso.name as tso_name',
-                    'd.distributor_name',
-                    DB::raw('SUM(so.total_amount) as total_amount'),
-                    DB::raw('COUNT(so.id) as total_orders')
-                );
 
-            if ($amount_range) {
-                $range = explode('-', $amount_range);
-                $min = (float) trim($range[0]);
-                $max = isset($range[1]) && trim($range[1]) !== 'max' ? (float) trim($range[1]) : null;
+            // ─── AMOUNT MODE ─────────────────────────────────────────────────────────
+            if ($type === 'amount') {
 
-                $query->having('total_amount', '>=', $min);
-                if ($max !== null) {
-                    $query->having('total_amount', '<=', $max);
+                $query = DB::table('sale_orders as so')
+                    ->join('shops as s', 's.id', '=', 'so.shop_id')
+                    ->join('tso', 'tso.id', '=', 'so.tso_id')
+                    ->join('distributors as d', 'd.id', '=', 'so.distributor_id')
+                    ->leftJoin('users_distributors', 'users_distributors.distributor_id', '=', 'so.distributor_id')
+                    ->where('users_distributors.user_id', \Auth::id())
+                    ->where('so.status', 1)
+                    ->whereBetween('so.dc_date', [$from, $to])
+                    ->when($distributor_id, fn($q) => $q->where('so.distributor_id', $distributor_id))
+                    ->when($tso_id,         fn($q) => $q->where('so.tso_id', $tso_id))
+                    ->when($request->shop_id, fn($q) => $q->where('so.shop_id', $request->shop_id))
+                    ->groupBy('so.shop_id', 's.shop_code', 's.company_name', 'tso.name', 'd.distributor_name')
+                    ->select(
+                        's.shop_code',
+                        's.company_name as shop_name',
+                        'tso.name as tso_name',
+                        'd.distributor_name',
+                        DB::raw('SUM(so.total_amount) as total_amount'),
+                        DB::raw('COUNT(so.id) as total_orders')
+                    );
+
+                if ($amount_range) {
+                    $parts = explode('-', $amount_range);
+                    $min = (float) trim($parts[0]);
+                    $max = isset($parts[1]) && trim($parts[1]) !== 'max' ? (float) trim($parts[1]) : null;
+                    $query->having('total_amount', '>=', $min);
+                    if ($max !== null) {
+                        $query->having('total_amount', '<=', $max);
+                    }
                 }
+
+                $data = $query->orderBy('total_amount')->get();
+                $totalAmount = $data->sum('total_amount');
+                $totalOrders = $data->sum('total_orders');
+                $totalTimeSpent = null;
+
+                // ─── TIME MODE ────────────────────────────────────────────────────────────
+            } else {
+
+                // Join shop_attendences to get check_in/check_out per shop per TSO per date
+                // SUM the time spent in seconds across all visits in the date range
+                $query = DB::table('shop_attendences as sa')
+                    ->join('shops as s', 's.id', '=', 'sa.shop_id')
+                    ->join('tso', 'tso.id', '=', 'sa.tso_id')
+                    ->join('distributors as d', 'd.id', '=', 'sa.distributor_id')
+                    ->leftJoin('users_distributors', 'users_distributors.distributor_id', '=', 'sa.distributor_id')
+                    ->where('users_distributors.user_id', \Auth::id())
+                    ->whereBetween('sa.sync_date_time', [$from . ' 00:00:00', $to . ' 23:59:59'])
+                    ->whereNotNull('sa.check_in')
+                    ->whereNotNull('sa.check_out')
+                    ->when($distributor_id, fn($q) => $q->where('sa.distributor_id', $distributor_id))
+                    ->when($tso_id,         fn($q) => $q->where('sa.tso_id', $tso_id))
+                    ->when($request->shop_id, fn($q) => $q->where('sa.shop_id', $request->shop_id))
+                    ->groupBy('sa.shop_id', 's.shop_code', 's.company_name', 'tso.name', 'd.distributor_name')
+                    ->select(
+                        's.shop_code',
+                        's.company_name as shop_name',
+                        'tso.name as tso_name',
+                        'd.distributor_name',
+                        DB::raw('COUNT(sa.id) as total_visits'),
+                        // Total time spent in seconds across all visits
+                        DB::raw('SUM(TIMESTAMPDIFF(SECOND, sa.check_in, sa.check_out)) as time_spent_sec')
+                    );
+
+                // Filter by time_range (in minutes)
+                if ($time_range) {
+                    $parts = explode('-', $time_range);
+                    $minMin = (float) trim($parts[0]);
+                    $maxMin = isset($parts[1]) && trim($parts[1]) !== 'max' ? (float) trim($parts[1]) : null;
+
+                    // Convert minutes to seconds for HAVING clause
+                    $query->having('time_spent_sec', '>=', $minMin * 60);
+                    if ($maxMin !== null) {
+                        $query->having('time_spent_sec', '<=', $maxMin * 60);
+                    }
+                }
+
+                $data = $query->orderBy('time_spent_sec', 'desc')->get();
+
+                // Format time_spent for display
+                $data = $data->map(function ($row) {
+                    $sec = (int) $row->time_spent_sec;
+                    $row->time_spent_formatted = sprintf(
+                        '%02d:%02d:%02d',
+                        floor($sec / 3600),
+                        floor(($sec % 3600) / 60),
+                        $sec % 60
+                    );
+                    return $row;
+                });
+
+                $totalOrders = $data->sum('total_visits');
+                $totalAmount = null;
+                $totalSeconds = $data->sum('time_spent_sec');
+                $totalTimeSpent = sprintf(
+                    '%02d:%02d:%02d',
+                    floor($totalSeconds / 3600),
+                    floor(($totalSeconds % 3600) / 60),
+                    $totalSeconds % 60
+                );
             }
 
-            $data = $query->orderBy('total_amount')->get();
-            $totalAmount = $data->sum('total_amount');
-            $totalOrders = $data->sum('total_orders');
-
-            return view($this->page . 'ShopsAmountWise.ajax', compact('data', 'totalAmount', 'totalOrders', 'from', 'to', 'distributor_id', 'tso_id'));
+            return view($this->page . 'ShopsAmountWise.ajax', compact(
+                'data',
+                'totalAmount',
+                'totalOrders',
+                'totalTimeSpent',
+                'from',
+                'to',
+                'distributor_id',
+                'tso_id',
+                'type'
+            ));
         endif;
 
         return view($this->page . 'ShopsAmountWise.view');

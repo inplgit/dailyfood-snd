@@ -11,7 +11,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="card-title">Order Booker Productive Status Report</h4>
+                        <h4 class="card-title">Daily Report</h4>
                         <button type="button" onclick="downloadCSV()"class="btn btn-success">Export Excel</button>
                     </div>
                     <div class="card-body">
