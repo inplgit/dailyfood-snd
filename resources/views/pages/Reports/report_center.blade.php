@@ -450,7 +450,7 @@ $master = new MasterFormsHelper();
                                             <li>
                                                 <a href="{{ route('shops_amount_wise_report') }}">
                                                     <i class="fas fa-circle"></i>
-                                                    <span>Shops Amount Wise Report</span>
+                                                    <span>Shops Wise Report</span>
                                                 </a>
                                             </li>
                                             @endcan

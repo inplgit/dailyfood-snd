@@ -5,7 +5,7 @@
 
 @extends('layouts.master')
 
-@section('title', 'Shops Amount Wise Report')
+@section('title', 'Shops Wise Report')
 
 @section('content')
     <section id="multiple-column-form">
@@ -13,8 +13,8 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header border-bottom">
-                        <h4 class="card-title">Shops Amount Wise Report</h4>
-                        <button type="button" class="btn btn-success" onclick="exportBtn('Shops Amount Wise Report')">Export Excel</button>
+                        <h4 class="card-title">Shops Wise Report</h4>
+                        <button type="button" class="btn btn-success" onclick="exportBtn('Shops Wise Report')">Export Excel</button>
                     </div>
                     <div class="card-body mt-2">
                         <form method="get" action="{{ route('shops_amount_wise_report') }}" id="list_data" class="form">
