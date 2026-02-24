@@ -220,7 +220,7 @@ $master = new MasterFormsHelper();
                                                 <tr>
 
                                                     <td>
-                                                        <select style="width: 315px !important;"  name="product_id[]" tabindex="-1" onchange="get_product_price(this); get_flavour(this); get_scheme_product(this); get_total_caton_and_qty();" required class="product_id combobox form-control" aria-hidden="true">
+                                                        <select style="width: 315px !important;"  name="product_id[]" tabindex="-1" onchange="get_product_price(this); get_flavour(this); get_scheme_product(this); get_total_caton_and_qty();" required class="product_id combobox form-control select2" aria-hidden="true">
                                                             <option value="">Select a Product</option>
                                                             @foreach ($products as $product)
                                                                 <option data-carton_size="{{$product->carton_size}}" data-product_price="{{$master->get_product_price($product->id)}}" data-flavour="{{$product->product_flavour}}" data-url="{{ route('sale-order.table-row', $product->id) }}" value="{{ $product->id }}">{{ $product->product_name }}</option>
