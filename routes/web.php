@@ -196,6 +196,8 @@ Route::delete('/destroy_pcs/{id}', 'SchemeProductController@destroy_pcs')->name(
     });
     Route::group(['namespace' => 'Backend', 'prefix'=>'kpo'],function () {
         Route::resource('sale', 'SaleOrderController');
+        Route::get('create_shop', 'SalesReturnController@create_shop')->name('sales_return.create_shop');
+        Route::post('/sales-return-submit','SalesReturnController@submitReturn')->name('sales_return.submit');
         // Route::delete('sale/{id}' , 'SaleOrderController@destroy' )->name('sale.destroy');
         Route::resource('receipt-voucher', 'ReceiptVoucherController');
         Route::get('product-table-row/{product_id}', 'SaleOrderController@productTableRow')->name('sale-order.table-row');

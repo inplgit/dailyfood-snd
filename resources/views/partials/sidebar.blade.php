@@ -114,7 +114,7 @@
                                 <a class="d-flex align-items-center" href="{{ route('sales_return.sales_return_list_shop_wise', 1) }}">
                                     <i data-feather="circle"></i>
                                     <span class="menu-item text-truncate">
-                                        Sales Return V2
+                                        Sales Return
                                     </span>
                                 </a>
                             </li>
@@ -161,6 +161,14 @@
                                     </span>
                                 </a>
                             </li>
+                            <li>
+                                <a class="d-flex align-items-center" href="{{ route('sales_return.create_shop') }}">
+                                    <i data-feather="circle"></i>
+                                    <span class="menu-item text-truncate">
+                                        Create Sales Return
+                                    </span>
+                                </a>
+                            </li>
                         @endcan
                         @can('Sales_Order_List')
                             <li>
@@ -196,7 +204,7 @@
                                 <a class="d-flex align-items-center" href="{{ route('sales_return.index_return') }}">
                                     <i data-feather="circle"></i>
                                     <span class="menu-item text-truncate">
-                                        Sales Return List V2
+                                        Sales Return List
                                     </span>
                                 </a>
                             </li>
@@ -550,7 +558,7 @@
                                        <li>
                                             <a class="d-flex align-items-center" href="{{ route('index_Add_multi') }}">
                                                 <span class="menu-item text-truncate">
-                                                    Shop List v2
+                                                    Shop List
                                                 </span>
                                             </a>
                                         </li>
@@ -559,7 +567,7 @@
                                          <li>
                                             <a class="d-flex align-items-center" href="{{ route('create_create_multi') }}">
                                                 <span class="menu-item text-truncate">
-                                                    Add Shop v2
+                                                    Add Shop
                                                 </span>
                                             </a>
                                         </li>
@@ -997,7 +1005,7 @@
                                 <a class="d-flex align-items-center" href="{{ route('route_create_tso_multi') }}">
                                     <i data-feather="circle"></i>
                                     <span class="menu-item text-truncate">
-                                        Add Route V2
+                                        Add Route
                                     </span>
                                 </a>
                             </li>
@@ -1007,7 +1015,7 @@
                                 <a class="d-flex align-items-center" href="{{ route('AddRouteMultiTso_index') }}">
                                     <i data-feather="circle"></i>
                                     <span class="menu-item text-truncate">
-                                        Route List V2
+                                        Route List
                                     </span>
                                 </a>
                             </li>

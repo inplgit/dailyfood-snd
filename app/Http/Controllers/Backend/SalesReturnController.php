@@ -19,7 +19,9 @@ use App\Http\Requests\UpdateProductRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\MasterFormsHelper;
+use App\Models\Shop;
 use Auth;
+use Illuminate\Support\Facades\Validator;
 
 class SalesReturnController extends Controller
 {
@@ -48,6 +50,92 @@ class SalesReturnController extends Controller
     return view($this->page . 'SalesReturnList');
 }
 
+public function create_shop(Request $request)
+{
+
+        $shops = Shop::Status()->get();
+        $products = Product::status()->get();
+
+    
+    return view($this->page . 'AddSalesReturnShop', compact('shops','products'));
+}
+public function submitReturn(Request $request)
+{
+    $rules = [
+        'distributor_id' => 'required|integer',
+        'tso_id' => 'required|integer',
+        'shop_id' => 'required|integer',
+        'details' => 'required|array|min:1',
+        'details.*.product_id' => 'required|integer',
+        'details.*.qty' => 'required|integer|min:1',
+        'details.*.reason' => 'nullable|string',
+        'details.*.remarks' => 'nullable|string',
+        'details.*.damage_photo' => 'nullable|file|image|mimes:jpg,jpeg,png|max:2048',
+    ];
+
+    $validator = Validator::make($request->all(), $rules);
+
+    if ($validator->fails()) {
+        return back()->withErrors($validator)->withInput();
+    }
+
+    try {
+        DB::beginTransaction();
+
+        // 1. Insert Main Return
+        $orderId = DB::table('sale_order_returns')->insertGetId([
+            'user_id' => Auth::id(),
+            'distributor_id' => $request->distributor_id,
+            'tso_id' => $request->tso_id,
+            'shop_id' => $request->shop_id,
+            'return_date' => now()->toDateString(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Generate Return No
+        $returnNo = 'SR-' . str_pad($orderId, 4, '0', STR_PAD_LEFT);
+
+        DB::table('sale_order_returns')->where('id', $orderId)->update([
+            'return_no' => $returnNo
+        ]);
+
+        // 2. Insert Details
+        foreach ($request->details as $i => $detail) {
+
+            $path = null;
+            if ($request->hasFile("details.$i.damage_photo")) {
+                $path = $request->file("details.$i.damage_photo")
+                                ->store('damage_photos', 'public');
+            }
+
+            DB::table('sale_order_return_details')->insert([
+                'sale_order_return_id' => $orderId,
+                'product_id' => $detail['product_id'],
+                'quantity' => $detail['qty'],
+                'reason' => $detail['reason'] ?? null,
+                'remarks' => $detail['remarks'] ?? null,
+                'damage_photo' => $path,
+
+                'user_id' => Auth::id(),
+                'distributor_id' => $request->distributor_id,
+                'tso_id' => $request->tso_id,
+                'shop_id' => $request->shop_id,
+
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        DB::commit();
+
+        return back()->with('success', 'Sales Return Created Successfully!');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->with('error', $e->getMessage());
+    }
+}
 
  public function index_return(Request $request)
 {
