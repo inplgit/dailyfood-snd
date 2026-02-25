@@ -19,7 +19,7 @@
     @endif
 
     <table class="table table-bordered filterTable" id="dataTable">
-        <thead>
+        <thead class="bg-light">
             <tr class="text-center">
                 <th>S.NO</th>
                 <th>Distributor</th>

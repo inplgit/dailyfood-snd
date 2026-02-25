@@ -4045,5 +4045,130 @@ public function distributer_product_sales_value_report(Request $request)
 
     }
 
+    public function shop_summary_report(Request $request)
+    {
+        $distributor_id = $request->distributor_id;
+        $tso_id        = $request->tso_id;
+        $route_id      = $request->route_id;
+        $shop_id       = $request->shop_id;
+        $type          = $request->type ?? 'category'; // 'category' or 'class'
+
+        if ($request->ajax()) :
+            $query = DB::table('shops as s')
+                ->join('routes as r', 's.route_id', 'r.id')
+                ->join('route_days as rd', 'rd.route_id', 'r.id')
+                ->when($distributor_id, fn($q) => $q->where('s.distributor_id', $distributor_id))
+                ->when($tso_id, function ($q) use ($tso_id) {
+                    $q->whereExists(function ($sub) use ($tso_id) {
+                        $sub->from('shop_tso')
+                            ->whereColumn('shop_tso.shop_id', 's.id')
+                            ->where('shop_tso.tso_id', $tso_id);
+                    });
+                })
+                ->when($route_id, fn($q) => $q->where('s.route_id', $route_id))
+                ->when($shop_id, fn($q) => $q->where('s.id', $shop_id))
+                ->where('s.status', 1);
+
+            if ($type === 'category') {
+                $query->leftJoin('shop_types as st', 's.shop_type_id', 'st.id')
+                    ->select('rd.day', 'st.shop_type_name as group_name', DB::raw('count(s.id) as shop_count'))
+                    ->groupBy('rd.day', 'st.shop_type_name');
+
+                $summaryQuery = DB::table('shops as s')
+                    ->join('routes as r', 's.route_id', 'r.id')
+                    ->when($distributor_id, fn($q) => $q->where('s.distributor_id', $distributor_id))
+                    ->when($tso_id, function ($q) use ($tso_id) {
+                        $q->whereExists(function ($sub) use ($tso_id) {
+                            $sub->from('shop_tso')
+                                ->whereColumn('shop_tso.shop_id', 's.id')
+                                ->where('shop_tso.tso_id', $tso_id);
+                        });
+                    })
+                    ->when($route_id, fn($q) => $q->where('s.route_id', $route_id))
+                    ->when($shop_id, fn($q) => $q->where('s.id', $shop_id))
+                    ->where('s.status', 1)
+                    ->leftJoin('shop_types as st', 's.shop_type_id', 'st.id');
+
+                $summaryData = $summaryQuery->groupBy('st.shop_type_name')
+                    ->select('st.shop_type_name as group_name', DB::raw('count(DISTINCT s.id) as shop_count'))
+                    ->get();
+            } else {
+                $query->select('rd.day', 's.class as group_name', DB::raw('count(s.id) as shop_count'))
+                    ->groupBy('rd.day', 's.class');
+
+                $summaryQuery = DB::table('shops as s')
+                    ->join('routes as r', 's.route_id', 'r.id')
+                    ->when($distributor_id, fn($q) => $q->where('s.distributor_id', $distributor_id))
+                    ->when($tso_id, function ($q) use ($tso_id) {
+                        $q->whereExists(function ($sub) use ($tso_id) {
+                            $sub->from('shop_tso')
+                                ->whereColumn('shop_tso.shop_id', 's.id')
+                                ->where('shop_tso.tso_id', $tso_id);
+                        });
+                    })
+                    ->when($route_id, fn($q) => $q->where('s.route_id', $route_id))
+                    ->when($shop_id, fn($q) => $q->where('s.id', $shop_id))
+                    ->where('s.status', 1);
+
+                $summaryData = $summaryQuery->groupBy('s.class')
+                    ->select('s.class as group_name', DB::raw('count(DISTINCT s.id) as shop_count'))
+                    ->get();
+            }
+
+            $results = $query->get();
+
+            // Prepare data matrix for the view
+            $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            $groupNames = $results->pluck('group_name')->unique()->filter()->values()->toArray();
+            if (empty($groupNames)) {
+                $groupNames = $summaryData->pluck('group_name')->unique()->filter()->values()->toArray();
+            }
+
+            // Check if any results have null group names and add 'OTHERS' to groupNames
+            if ($results->contains(fn($r) => is_null($r->group_name))) {
+                if (!in_array('OTHERS', $groupNames)) {
+                    $groupNames[] = 'OTHERS';
+                }
+            }
+            sort($groupNames);
+
+            $matrix = [];
+            foreach ($days as $day) {
+                $matrix[$day] = ['Total' => 0];
+                foreach ($groupNames as $name) {
+                    $matrix[$day][$name] = 0;
+                }
+            }
+
+            foreach ($results as $row) {
+                if (isset($matrix[$row->day])) {
+                    $groupName = $row->group_name ?? 'OTHERS';
+                    $matrix[$row->day][$groupName] = $row->shop_count;
+                    $matrix[$row->day]['Total'] += $row->shop_count;
+                }
+            }
+
+            $from = date('Y-m-d');
+            $to = date('Y-m-d');
+
+            return view($this->page . 'ShopSummary.ajax', compact(
+                'results',
+                'matrix',
+                'days',
+                'groupNames',
+                'summaryData',
+                'distributor_id',
+                'tso_id',
+                'route_id',
+                'shop_id',
+                'type',
+                'from',
+                'to'
+            ));
+        endif;
+
+        return view($this->page . 'ShopSummary.view');
+    }
+
 
 }

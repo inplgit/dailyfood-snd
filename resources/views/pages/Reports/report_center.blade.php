@@ -453,6 +453,12 @@ $master = new MasterFormsHelper();
                                                     <span>Shops Wise Report</span>
                                                 </a>
                                             </li>
+                                            <li>
+                                                <a href="{{ route('shop_summary_report') }}">
+                                                    <i class="fas fa-circle"></i>
+                                                    <span>Shop Summary</span>
+                                                </a>
+                                            </li>
                                             @endcan
                                         </ul>
                                     </div>

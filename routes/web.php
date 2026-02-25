@@ -384,6 +384,7 @@ Route::get('product_wise_sale','ReportController@product_wise_sale')->name('prod
         Route::get('unit_sold_report','ReportController@unit_sold_report')->name('unit_sold_report');
         Route::get('top_shop_balance_report','ReportController@top_shop_balance_report')->name('top_shop_balance_report');
         Route::get('shops_amount_wise_report','ReportController@shops_amount_wise_report')->name('shops_amount_wise_report');
+        Route::get('shop_summary_report','ReportController@shop_summary_report')->name('shop_summary_report');
 
     });
 
