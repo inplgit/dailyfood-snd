@@ -2,9 +2,10 @@
 <?php
 use App\Helpers\MasterFormsHelper;
 $master = new MasterFormsHelper();
-?>
+use Illuminate\Support\Facades\DB;
+ echo MasterFormsHelper::PrintHead($from,$to,'Load Sheet',$tso_id);
 
-    <?php echo MasterFormsHelper::PrintHead($from,$to,'Load Sheet',$tso_id);?>
+?>
 
 @if(count($so_data)>0)
 @php
@@ -12,6 +13,8 @@ $i =1;
 $total = 0;
 $total_qty = 0;
 $grand_total_qty = [];
+$total_foc = 0;
+$total_product_price = 0;
 @endphp
 <div class="row">
 <div class="col-1 offset-11">
@@ -28,6 +31,7 @@ $grand_total_qty = [];
         <th style="text-align: center;">Product Name</th>
         <th style="text-align: center;">Flavour Name</th>
         <th style="text-align: center;">Total Sale Unit</th>
+        <th style="text-align: center;">FOC</th>
         <th style="text-align: center;">T.P Rate</th>
         <th style="text-align: center;">Total Amount</th>
     </tr>
@@ -49,8 +53,9 @@ $grand_total_qty = [];
         }
         // dump($qty ,$stock->product->id, $stock->flavour_id , $productPrice->uom_id ,Request::get('distributor_id'));
         $product_price .= ($product_price ? ' , ' : '') . number_format($productPrice->trade_price , 2);
-
     }
+    $focTable = DB::table('scheme_product_data_pcs')->where('product_id', $data->product_id)->where('status', 1);
+    $foc = $focTable?->first()?->scheme_Pcs ?? 0;
 @endphp
 <tr>
 
@@ -58,6 +63,7 @@ $grand_total_qty = [];
     <td style="text-align: center;">{{$data->product_name}}</td>
     <td style="text-align: center;">{{ MasterFormsHelper::get_flavour_name($data->flavour_id) ?? '--'}}</td>
     <td style="text-align: center;">{{$get_qty ?? '--'}}</td>
+    <td style="text-align: center;">{{(int) $foc ?? '-'}}</td>
     <td style="text-align: center;">{{$product_price}}</td>
     {{-- <td style="text-align: center;">{{$data->qty_summary}}</td> --}}
     <td style="text-align: center;">{{number_format($data->amount , 2)}}</td>
@@ -65,6 +71,8 @@ $grand_total_qty = [];
 @php
 $i++;
 $total_qty += $data->qty;
+$total_foc += (int) $foc;
+$total_product_price += (int) $product_price;
 $total += $data->amount;
 @endphp
 @endforeach
@@ -75,7 +83,8 @@ $total += $data->amount;
         $total_qty_sum = array_sum($grand_total_qty);
     @endphp
     <td style="text-align: center;">{{ number_format($total_qty_sum) }}</td>
-    <td style="text-align: center;"></td>
+    <td style="text-align: center;">{{ number_format($total_foc) }}</td>
+    <td style="text-align: center;">{{ number_format($total_product_price, 2) }}</td>
     <td style="text-align: center;">{{ number_format($total, 2) }}</td>
 </tr>
 
@@ -101,6 +110,7 @@ $total += $data->amount;
         <th style="text-align: center;">Shop Name</th>
        <th style="text-align: center;">Order Booker Name</th>
         <th style="text-align: center;">Total Order Qty</th>
+        <th style="text-align: center;">FOC</th>
         <th style="text-align: center;">Amount</th>
     </tr>
 </thead>
@@ -108,6 +118,7 @@ $total += $data->amount;
     @php
         $s = 1;
         $summary_total_qty = 0;
+        $summary_total_foc = 0;
         $summary_total_amount = 0;
     @endphp
     @foreach($summary_data as $row)
@@ -118,16 +129,19 @@ $total += $data->amount;
             <td style="text-align: center;">{{ $row->company_name }}</td>
             <td style="text-align: center;">{{ $row->tso_name }}</td>
             <td style="text-align: center;">{{ number_format($row->total_qty) }}</td>
+            <td style="text-align: center;">{{ number_format($row->total_foc) }}</td>
             <td style="text-align: center;">{{ number_format($row->total_amount, 2) }}</td>
         </tr>
         @php
             $summary_total_qty += $row->total_qty;
+            $summary_total_foc += $row->total_foc;
             $summary_total_amount += $row->total_amount;
         @endphp
     @endforeach
     <tr style="background:#f2f2f2">
         <th colspan="5">Grand Total</th>
         <th style="text-align: center;">{{ number_format($summary_total_qty) }}</th>
+        <th style="text-align: center;">{{ number_format($summary_total_foc) }}</th>
         <th style="text-align: center;">{{ number_format($summary_total_amount, 2) }}</th>
     </tr>
 </tbody>

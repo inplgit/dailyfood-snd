@@ -2096,37 +2096,33 @@ if (count($qo_summary) > 0) {
             }
             $so_data  = $so_data->get();
 
-
-           
-$summary_data = DB::table('sale_orders')
-    ->join('shops', 'shops.id', '=', 'sale_orders.shop_id')
-    ->join('tso', 'tso.id', '=', 'sale_orders.tso_id') // ✅ added
-    ->join('sale_order_data', 'sale_orders.id', '=', 'sale_order_data.so_id')
-    ->where('sale_orders.status', 1)
-    ->whereBetween('sale_orders.dc_date', [$from, $to])
-    ->select(
-        'sale_orders.id as so_id',
-        'sale_orders.invoice_no as invoice_no',
-        'sale_orders.dc_date',
-        'shops.company_name',
-        'tso.name as tso_name', // ✅ added
-        DB::raw('SUM(sale_order_data.qty) as total_qty'),
-        DB::raw('SUM(sale_order_data.total) as total_amount')
-    )
-    ->when($tso_id, fn($q) => $q->where('sale_orders.tso_id', $tso_id))
-    ->when($distributor_id, fn($q) => $q->where('sale_orders.distributor_id', $distributor_id))
-    ->when(isset($execution), fn($q) => $q->where('sale_orders.excecution', $execution))
-    ->groupBy(
-        'sale_orders.id',
-        'sale_orders.dc_date',
-        'shops.company_name',
-        'tso.name' // ✅ group by
-    )
-    ->orderBy('sale_orders.invoice_no', 'ASC')
-    ->get();
-
-
-
+            $summary_data = DB::table('sale_orders')
+                ->join('shops', 'shops.id', '=', 'sale_orders.shop_id')
+                ->join('tso', 'tso.id', '=', 'sale_orders.tso_id') // ✅ added
+                ->join('sale_order_data', 'sale_orders.id', '=', 'sale_order_data.so_id')
+                ->where('sale_orders.status', 1)
+                ->whereBetween('sale_orders.dc_date', [$from, $to])
+                ->select(
+                    'sale_orders.id as so_id',
+                    'sale_orders.invoice_no as invoice_no',
+                    'sale_orders.dc_date',
+                    'shops.company_name',
+                    'tso.name as tso_name', // ✅ added
+                    DB::raw('SUM(sale_order_data.qty) as total_qty'),
+                    DB::raw('SUM(sale_order_data.scheme_data_pcs) as total_foc'),
+                    DB::raw('SUM(sale_order_data.total) as total_amount')
+                )
+                ->when($tso_id, fn($q) => $q->where('sale_orders.tso_id', $tso_id))
+                ->when($distributor_id, fn($q) => $q->where('sale_orders.distributor_id', $distributor_id))
+                ->when(isset($execution), fn($q) => $q->where('sale_orders.excecution', $execution))
+                ->groupBy(
+                    'sale_orders.id',
+                    'sale_orders.dc_date',
+                    'shops.company_name',
+                    'tso.name' // ✅ group by
+                )
+                ->orderBy('sale_orders.invoice_no', 'ASC')
+                ->get();
             return view($this->page . 'loadsheet.load_sheet_ajax', compact('so_data', 'from', 'to','tso_id','distributor_id','execution','summary_data'));
         endif;
         return view($this->page . 'loadsheet.load_sheet', compact('from', 'to'));
