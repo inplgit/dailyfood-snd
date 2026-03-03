@@ -8,6 +8,7 @@ $master = new MasterFormsHelper();
 
 @section('content')
 
+
     <section id="multiple-column-form">
         <div class="row">
             <div class="col-12">
@@ -15,8 +16,6 @@ $master = new MasterFormsHelper();
 
                     <div class="card-header d-flex justify-content-between">
                         <h4 class="card-title">ADD Sales Return</h4>
-
-                        <button type="button" class="btn btn-success btn-sm" id="add_row_btn"> + Add More </button>
                     </div>
 
                     <div class="card-body">
@@ -80,7 +79,11 @@ $master = new MasterFormsHelper();
 
                             {{-- PRODUCT TABLE --}}
                             <div class="table-responsive mt-3">
-                                <table class="table table-bordered">
+                                <div class="add-button text-right mb-2">
+
+                                    <button type="button" class="btn btn-success btn-sm " id="add_row_btn"> + Add More </button>
+                                </div>
+                                <table class="table table-bordered"S>
                                     <thead>
                                         <tr>
                                             <th>Product</th>
