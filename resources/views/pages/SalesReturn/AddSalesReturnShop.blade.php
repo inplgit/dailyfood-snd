@@ -2,30 +2,20 @@
 use App\Helpers\MasterFormsHelper;
 $master = new MasterFormsHelper();
 ?>
-
 @extends('layouts.master')
 @section('title', 'SND || Add Sales Return')
-
 @section('content')
-
-
     <section id="multiple-column-form">
         <div class="row">
             <div class="col-12">
                 <div class="card">
-
                     <div class="card-header d-flex justify-content-between">
                         <h4 class="card-title">ADD Sales Return</h4>
                     </div>
-
                     <div class="card-body">
-
-                        <form method="POST" action="{{ route('sales_return.submit') }}" enctype="multipart/form-data"
-                            id="returnForm">
+                        <form method="POST" action="{{ route('sales_return.submit') }}" enctype="multipart/form-data"id="returnForm">
                             @csrf
-
                             <div class="row">
-
                                 {{-- Distributor --}}
                                 <div class="col-md-3">
                                     <label class="control-label">Distributor</label>
@@ -38,7 +28,6 @@ $master = new MasterFormsHelper();
                                         @endforeach
                                     </select>
                                 </div>
-
                                 {{-- TSO --}}
                                 <div class="col-md-4">
                                     <div class="form-group">
@@ -54,7 +43,6 @@ $master = new MasterFormsHelper();
                                         <option value="">Select a TSO</option>
                                     </select>
                                 </div> --}}
-
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Route</label>
@@ -63,7 +51,6 @@ $master = new MasterFormsHelper();
                                         </select>
                                     </div>
                                 </div>
-
                                 {{-- Shop --}}
                                 <div class="col-md-3">
                                     <div class="form-group">
@@ -74,13 +61,10 @@ $master = new MasterFormsHelper();
                                     </div>
                                 </div>
                             </div>
-
                             <hr>
-
                             {{-- PRODUCT TABLE --}}
                             <div class="table-responsive mt-3">
                                 <div class="add-button text-right mb-2">
-
                                     <button type="button" class="btn btn-success btn-sm " id="add_row_btn"> + Add More </button>
                                 </div>
                                 <table class="table table-bordered"S>
@@ -96,7 +80,6 @@ $master = new MasterFormsHelper();
                                         </tr>
                                     </thead>
                                     <tbody id="sales_return_body">
-
                                         <tr class="item-row">
 
                                             <td>
@@ -143,63 +126,45 @@ $master = new MasterFormsHelper();
                                             </td>
 
                                         </tr>
-
                                     </tbody>
-
                                 </table>
+                                <div class="add-button text-right mb-2">
+                                    <button type="submit" class="btn btn-primary mt-2">Submit</button>
+                                </div>
                             </div>
-
-                            <button type="submit" class="btn btn-primary mt-2">
-                                Submit
-                            </button>
-
                         </form>
-
                     </div>
                 </div>
             </div>
         </div>
     </section>
-
 @endsection
-
 @section('script')
     <script>
         $(document).ready(function() {$('select').select2();});
      document.getElementById('add_row_btn').addEventListener('click', function() {
-
     let tbody = document.getElementById('sales_return_body');
     let first = document.querySelector('.item-row');
-
     // Destroy select2 before cloning
     $(first).find('select').select2('destroy');
-
     let clone = first.cloneNode(true);
     let index = document.querySelectorAll('.item-row').length;
-
     clone.querySelectorAll('select, input').forEach(function(el) {
-
         let name = el.getAttribute('name');
-
         if (name) {
             name = name.replace(/\[\d+\]/, "[" + index + "]");
             el.setAttribute("name", name);
         }
-
         // Reset values
         if (el.type !== "file") {
             el.value = "";
         }
     });
-
     clone.querySelector('.img-preview').style.display = "none";
     tbody.appendChild(clone);
-
     // Re-init select2 on all selects
     $('select').select2();
 });
-
-
         // Delete Row
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('delete_row_btn')) {
@@ -211,7 +176,6 @@ $master = new MasterFormsHelper();
                 e.target.closest('.item-row').remove();
             }
         });
-
         // Image Preview
         document.addEventListener('change', function(e) {
             if (e.target.classList.contains('img-upload')) {
