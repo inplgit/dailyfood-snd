@@ -21,12 +21,12 @@ $master = new MasterFormsHelper();
 
             <div class="col-md-2 mb-2">
                 <label class="control-label" for="start-date">From</label>
-                <input type="date" value="" class="form-control" name="from" placeholder="Start date"
+                <input type="date" class="form-control" name="from" value="{{ date('Y-m-01') }}"
                     required>
             </div>
             <div class="col-md-2 mb-2">
                 <label class="control-label" for="end-date">To</label>
-                <input type="date" value="" class="form-control" name="to" placeholder="End date"
+                <input type="date" class="form-control" name="to" value="{{ date('Y-m-d') }}"
                     required>
             </div>
 
