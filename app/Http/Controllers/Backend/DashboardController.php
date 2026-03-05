@@ -9,9 +9,10 @@ use App\Models\Shop;
 use App\Models\TSO;
 use App\Models\Product;
 use Carbon\Carbon;
-use DB;
+use Illuminate\Support\Facades\DB;
 use DateTime;
 use App\Helpers\MasterFormsHelper;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -25,8 +26,9 @@ class DashboardController extends Controller
         return view('pages.dashboard.index');
     }
 
-    public function dashboarData()
+    public function dashboarData(Request $request)
     {
+        $city = $request->city;
         $currentMonthStart = Carbon::now()->startOfMonth();
         $currentMonthEnd = Carbon::now()->endOfMonth();
         $previousMonthStart = Carbon::now()->subMonth()->startOfMonth();
@@ -38,15 +40,33 @@ class DashboardController extends Controller
         $yesterdayDate = Carbon::yesterday();
 
 
-        $active_shop_count = $this->master->get_shop_distribuor_wise_count()->where('active' , 1)->count();
-        $inactive_shop_count =  $this->master->get_shop_distribuor_wise_count()->where('active' , 0)->count();
-        $pending_shop_count =  $this->master->get_shop_distribuor_wise_count()->whereIn('active' , [2,3,4])->count();
+        $active_shop_count = $this->master->get_shop_distribuor_wise_count()
+            ->when($city, function ($q) use ($city) {
+                return $q->where('shops.city', $city);
+            })
+            ->where('active', 1)->count();
+        $inactive_shop_count =  $this->master->get_shop_distribuor_wise_count()
+            ->when($city, function ($q) use ($city) {
+                return $q->where('shops.city', $city);
+            })
+            ->where('active', 0)->count();
+        $pending_shop_count =  $this->master->get_shop_distribuor_wise_count()
+            ->when($city, function ($q) use ($city) {
+                return $q->where('shops.city', $city);
+            })
+            ->whereIn('active', [2, 3, 4])->count();
         // $tso_count = TSO::where('status',1)->count();
-        $tso_active_count = $this->master->get_tso_distribuor_wise()->where('active',1)->count();
-        $tso_inactive_count = $this->master->get_tso_distribuor_wise()->where('active',0)->count();
-        $tso_pending_count =  $this->master->get_tso_distribuor_wise()->whereIn('active' , [2,3,4])->count();
+        $tso_query = TSO::whereIn('user_id', $this->master->get_assign_user())
+            ->when($city, function ($q) use ($city) {
+                return $q->where('city', $city);
+            })
+            ->Status();
+
+        $tso_active_count = (clone $tso_query)->where('active', 1)->count();
+        $tso_inactive_count = (clone $tso_query)->where('active', 0)->count();
+        $tso_pending_count =  (clone $tso_query)->whereIn('active', [2, 3, 4])->count();
         // dd($tso_count);
-        $total_product = Product::where(['status'=>1])->count();
+        $total_product = Product::where(['status' => 1])->count();
         // $current_month_sale_amount = DB::table('sale_orders')
         //     ->join('users_distributors as b', 'b.distributor_id', '=', 'sale_orders.distributor_id')
         //     ->where('b.user_id', auth()->user()->id)
@@ -73,69 +93,86 @@ class DashboardController extends Controller
 
         // Get the total sale amount for the current month
         $current_month_sale_amount = DB::table('sale_orders')
-        ->join('users_distributors as b', 'b.distributor_id', '=', 'sale_orders.distributor_id')
-        ->where('b.user_id', auth()->user()->id)
-        ->join('tso', 'tso.id', 'sale_orders.tso_id')
-        ->select(DB::raw('SUM(total_amount) as amount'))
-        ->whereBetween('sale_orders.dc_date', [$currentMonthStart, $currentMonthEnd])
-        ->where('sale_orders.status', 1)
-        ->where('tso.status', 1)
-        ->where('sale_orders.excecution', 1)
-        ->first();
+            ->join('users_distributors as b', 'b.distributor_id', '=', 'sale_orders.distributor_id')
+            ->where('b.user_id', auth()->user()->id)
+            ->join('tso', 'tso.id', 'sale_orders.tso_id')
+            ->when($city, function ($q) use ($city) {
+                return $q->where('tso.city', $city);
+            })
+            ->select(DB::raw('SUM(total_amount) as amount'))
+            ->whereBetween('sale_orders.dc_date', [$currentMonthStart, $currentMonthEnd])
+            ->where('sale_orders.status', 1)
+            ->where('tso.status', 1)
+            ->where('sale_orders.excecution', 1)
+            ->first();
 
         // Get the total sales return amount for the current month
         $current_month_sale_return_amount = DB::table('sales_returns')
-        ->join('users as b', 'b.id', '=', 'sales_returns.user_id')
-        ->where('b.id', auth()->user()->id)
-        ->select(DB::raw('SUM(amount) as amount'))
-        ->whereBetween('sales_returns.created_at', [$currentMonthStart, $currentMonthEnd])
-        ->where('sales_returns.status', 1)
-        ->where('sales_returns.excute', 1)
-        ->first();
+            ->join('users as b', 'b.id', '=', 'sales_returns.user_id')
+            ->join('sale_orders', 'sale_orders.id', '=', 'sales_returns.so_id')
+            ->join('tso', 'tso.id', '=', 'sale_orders.tso_id')
+            ->where('b.id', auth()->user()->id)
+            ->when($city, function ($q) use ($city) {
+                return $q->where('tso.city', $city);
+            })
+            ->select(DB::raw('SUM(sales_returns.amount) as amount'))
+            ->whereBetween('sales_returns.created_at', [$currentMonthStart, $currentMonthEnd])
+            ->where('sales_returns.status', 1)
+            ->where('sales_returns.excute', 1)
+            ->first();
 
 
         $net_sales = ($current_month_sale_amount->amount ?? 0) - ($current_month_sale_return_amount->amount ?? 0);
 
-  
 
-  
+
+
         $previous_month_sale_amount = DB::table('sale_orders')
             ->join('users_distributors as b', 'b.distributor_id', '=', 'sale_orders.distributor_id')
             ->where('b.user_id', auth()->user()->id)
-            ->join('tso','tso.id','sale_orders.tso_id')
+            ->join('tso', 'tso.id', 'sale_orders.tso_id')
+            ->when($city, function ($q) use ($city) {
+                return $q->where('tso.city', $city);
+            })
             // ->join('sale_order_data', 'sale_order_data.so_id', '=', 'sale_orders.id')
             // ->select(DB::raw('SUM(total) as amount'))
             ->select(DB::raw('SUM(total_amount) as amount'))
             ->whereBetween('sale_orders.dc_date', [$previousMonthStart, $previousMonthEnd])
             ->where('sale_orders.status', 1)
-            ->where('tso.status',1)
-            ->where('sale_orders.excecution' , 1)
+            ->where('tso.status', 1)
+            ->where('sale_orders.excecution', 1)
             ->first();
         $today_sale_amount = DB::table('sale_orders')
             ->join('users_distributors as b', 'b.distributor_id', '=', 'sale_orders.distributor_id')
             ->where('b.user_id', auth()->user()->id)
-            ->join('tso','tso.id','sale_orders.tso_id')
+            ->join('tso', 'tso.id', 'sale_orders.tso_id')
+            ->when($city, function ($q) use ($city) {
+                return $q->where('tso.city', $city);
+            })
             // ->join('sale_order_data', 'sale_order_data.so_id', '=', 'sale_orders.id')
             // ->select(DB::raw('SUM(total) as amount'))
             ->select(DB::raw('SUM(total_pcs) as amount'))
             ->whereDate('sale_orders.dc_date', '=', date('Y-m-d'))
             ->where('sale_orders.status', 1)
-            ->where('tso.status',1)
+            ->where('tso.status', 1)
             // ->where('sale_orders.excecution' , 1)
             ->first();
 
         $yesterday_sale_amount = DB::table('sale_orders')
-                ->join('users_distributors as b', 'b.distributor_id', '=', 'sale_orders.distributor_id')
-                ->where('b.user_id', auth()->user()->id)
-                ->join('tso','tso.id','sale_orders.tso_id')
-                // ->join('sale_order_data', 'sale_order_data.so_id', '=', 'sale_orders.id')
-                // ->select(DB::raw('SUM(total) as amount'))
-                ->select(DB::raw('SUM(total_amount) as amount'))
-                ->whereDate('sale_orders.dc_date', '=', $yesterdayDate->toDateString())
-                ->where('sale_orders.status', 1)
-                ->where('tso.status',1)
-                ->where('sale_orders.excecution' , 1)
-                ->first();
+            ->join('users_distributors as b', 'b.distributor_id', '=', 'sale_orders.distributor_id')
+            ->where('b.user_id', auth()->user()->id)
+            ->join('tso', 'tso.id', 'sale_orders.tso_id')
+            ->when($city, function ($q) use ($city) {
+                return $q->where('tso.city', $city);
+            })
+            // ->join('sale_order_data', 'sale_order_data.so_id', '=', 'sale_orders.id')
+            // ->select(DB::raw('SUM(total) as amount'))
+            ->select(DB::raw('SUM(total_amount) as amount'))
+            ->whereDate('sale_orders.dc_date', '=', $yesterdayDate->toDateString())
+            ->where('sale_orders.status', 1)
+            ->where('tso.status', 1)
+            ->where('sale_orders.excecution', 1)
+            ->first();
 
 
         // $yesterday_sale_amount = DB::table('sale_orders')
@@ -153,75 +190,97 @@ class DashboardController extends Controller
         // ->where('tso.status', 1)
         // ->where('sale_orders.excecution', 1)
         // ->first();
-    
+
 
 
         //         dd($yesterday_sale_amount);
 
         $product_count = DB::table('sale_orders')
-                ->join('users_distributors as b', 'b.distributor_id', '=', 'sale_orders.distributor_id')
-                ->where('b.user_id', auth()->user()->id)
-                ->join('tso','tso.id','sale_orders.tso_id')
-                ->join('sale_order_data', 'sale_order_data.so_id', '=', 'sale_orders.id')
-                ->join('products','products.id','sale_order_data.product_id')
-                ->select('sale_order_data.product_id', DB::raw('sum(sale_order_data.qty) as product_count'),'products.product_name')
-                ->whereBetween('sale_orders.dc_date', [$currentMonthStart, $currentMonthEnd])
-                ->where('sale_orders.status', 1)
-                ->where('tso.status',1)
-                ->where('sale_orders.excecution' , 1)
-                ->first();
+            ->join('users_distributors as b', 'b.distributor_id', '=', 'sale_orders.distributor_id')
+            ->where('b.user_id', auth()->user()->id)
+            ->join('tso', 'tso.id', 'sale_orders.tso_id')
+            ->when($city, function ($q) use ($city) {
+                return $q->where('tso.city', $city);
+            })
+            ->join('sale_order_data', 'sale_order_data.so_id', '=', 'sale_orders.id')
+            ->join('products', 'products.id', 'sale_order_data.product_id')
+            ->select('sale_order_data.product_id', DB::raw('sum(sale_order_data.qty) as product_count'), 'products.product_name')
+            ->whereBetween('sale_orders.dc_date', [$currentMonthStart, $currentMonthEnd])
+            ->where('sale_orders.status', 1)
+            ->where('tso.status', 1)
+            ->where('sale_orders.excecution', 1)
+            ->first();
 
 
 
 
 
-                $product_count_new_return = DB::table('sale_orders')
-    ->join('users_distributors as b', 'b.distributor_id', '=', 'sale_orders.distributor_id')
-    ->where('b.user_id', auth()->user()->id)
-    ->join('tso', 'tso.id', '=', 'sale_orders.tso_id')
-    ->join('sale_order_data', 'sale_order_data.so_id', '=', 'sale_orders.id')
-    ->join('products', 'products.id', '=', 'sale_order_data.product_id')
-    ->leftJoin(DB::raw('
-        (SELECT sales_order_data_id, SUM(qty) as return_qty 
-         FROM sales_return_data 
-         GROUP BY sales_order_data_id) as return_data
-    '), 'return_data.sales_order_data_id', '=', 'sale_order_data.id')
-    ->select(
-        DB::raw('SUM(sale_order_data.qty) as total_product_count'),
-        DB::raw('SUM(COALESCE(return_data.return_qty, 0)) as total_return_count'),
-        DB::raw('SUM(sale_order_data.qty) - SUM(COALESCE(return_data.return_qty, 0)) as net_qty')
-    )
-    ->whereBetween('sale_orders.dc_date', [$currentMonthStart, $currentMonthEnd])
-    ->where('sale_orders.status', 1)
-    ->where('tso.status', 1)
-    ->where('sale_orders.excecution', 1)
-    ->first();
+        $product_count_new_return = DB::table('sale_orders')
+            ->join('users_distributors as b', 'b.distributor_id', '=', 'sale_orders.distributor_id')
+            ->where('b.user_id', auth()->user()->id)
+            ->join('tso', 'tso.id', '=', 'sale_orders.tso_id')
+            ->when($city, function ($q) use ($city) {
+                return $q->where('tso.city', $city);
+            })
+            ->join('sale_order_data', 'sale_order_data.so_id', '=', 'sale_orders.id')
+            ->join('products', 'products.id', '=', 'sale_order_data.product_id')
+            ->leftJoin(DB::raw('
+                (SELECT sales_order_data_id, SUM(qty) as return_qty 
+                FROM sales_return_data 
+                GROUP BY sales_order_data_id) as return_data
+            '), 'return_data.sales_order_data_id', '=', 'sale_order_data.id')
+            ->select(
+                DB::raw('SUM(sale_order_data.qty) as total_product_count'),
+                DB::raw('SUM(COALESCE(return_data.return_qty, 0)) as total_return_count'),
+                DB::raw('SUM(sale_order_data.qty) - SUM(COALESCE(return_data.return_qty, 0)) as net_qty')
+            )
+            ->whereBetween('sale_orders.dc_date', [$currentMonthStart, $currentMonthEnd])
+            ->where('sale_orders.status', 1)
+            ->where('tso.status', 1)
+            ->where('sale_orders.excecution', 1)
+            ->first();
 
-         
-        
+        $productive_shop_count = DB::table('sale_orders')
+            ->join('tso','tso.id','sale_orders.tso_id')
+            ->join('users_distributors', 'users_distributors.user_id', 'tso.user_id')
+            ->join('shops','shops.id','sale_orders.shop_id')
+            ->whereIn('users_distributors.distributor_id', $this->master->get_users_distributors(Auth::user()->id))
+            ->whereBetween('sale_orders.dc_date', [$currentMonthStart, $currentMonthEnd])
+            ->where('sale_orders.status', 1)
+            ->where('tso.status',1)
+            ->where('shops.status',1)
+            ->where('shops.active',1)
+            ->when($city, function ($q) use ($city) {
+                return $q->where('tso.city', $city);
+            })
+            ->distinct()
+            ->count('shops.id');
 
-            $data=[
-                'active_shop_count' =>$active_shop_count,
-                'inactive_shop_count' =>$inactive_shop_count,
-                'pending_shop_count' =>$pending_shop_count,
-                'tso_active_count' =>$tso_active_count,
-                'tso_inactive_count' =>$tso_inactive_count,
-                'tso_pending_count' =>$tso_pending_count,
-                'current_month_sale_amount' =>$net_sales,
-             
-                'previous_month_sale_amount' =>$previous_month_sale_amount,
-                'previousMonthFormatted' =>$previousMonthFormatted,
-                'today_sale_amount'=>$today_sale_amount,
-                'yesterday_sale_amount'=>$yesterday_sale_amount,
-                'product_count'=>$product_count,
-                'product_count_new_return'=>$product_count_new_return,
-                'total_product'=>$total_product,
-                
-            ];
+        $non_productive_shop_count = $active_shop_count - $productive_shop_count;
 
-            return $data;
+        $data = [
+            'active_shop_count' => $active_shop_count,
+            'inactive_shop_count' => $inactive_shop_count,
+            'pending_shop_count' => $pending_shop_count,
+            'tso_active_count' => $tso_active_count,
+            'tso_inactive_count' => $tso_inactive_count,
+            'tso_pending_count' => $tso_pending_count,
+            'current_month_sale_amount' => $net_sales,
+
+            'previous_month_sale_amount' => $previous_month_sale_amount,
+            'previousMonthFormatted' => $previousMonthFormatted,
+            'today_sale_amount' => $today_sale_amount,
+            'yesterday_sale_amount' => $yesterday_sale_amount,
+            'product_count' => $product_count,
+            'product_count_new_return' => $product_count_new_return,
+            'total_product' => $total_product,
+            'productive_shop_count'=>$productive_shop_count,
+            'non_productive_shop_count'=>$non_productive_shop_count,
+
+        ];
+
+        return $data;
     }
-
 
     public function notification_redirect($id)
     {

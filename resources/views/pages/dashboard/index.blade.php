@@ -4,7 +4,9 @@
 <section id="apexchart">
     <?php
         use App\Models\UserAttendence;
+        use App\Helpers\MasterFormsHelper;
         $attendence = UserAttendence::where(['user_id'=>Auth::user()->id,'date'=>date('Y-m-d')])->first();
+        $master = new MasterFormsHelper();
     ?>
     <style>
         .overview-wrap{display:-webkit-box;display:-webkit-flex;display:-moz-box;display:-ms-flexbox;display:flex;-webkit-box-pack:justify;-webkit-justify-content:space-between;-moz-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between;-webkit-box-align:center;-webkit-align-items:center;-moz-box-align:center;-ms-flex-align:center;align-items:center}
@@ -20,6 +22,7 @@
         .overview-item--c2{background-image:-moz-linear-gradient(90deg,#11998e 0%,#38ef7d 100%);background-image:-webkit-linear-gradient(90deg,#11998e 0%,#38ef7d 100%);background-image:-ms-linear-gradient(90deg,#11998e 0%,#38ef7d 100%)}
         .overview-item--c3{background-image:-moz-linear-gradient(90deg,#ee0979 0%,#ff6a00 100%);background-image:-webkit-linear-gradient(90deg,#ee0979 0%,#ff6a00 100%);background-image:-ms-linear-gradient(90deg,#ee0979 0%,#ff6a00 100%)}
         .overview-item--c4{background-image:-moz-linear-gradient(90deg,#45b649 0%,#dce35b 100%);background-image:-webkit-linear-gradient(90deg,#45b649 0%,#dce35b 100%);background-image:-ms-linear-gradient(90deg,#45b649 0%,#dce35b 100%)}
+        .overview-item_green{background-image:-moz-linear-gradient(90deg,#0b5f57 0%,#1f9f4a 100%);background-image:-webkit-linear-gradient(90deg,#0b5f57 0%,#1f9f4a 100%);background-image:-ms-linear-gradient(90deg,#0b5f57 0%,#1f9f4a 100%)}
         .overview-box .icon{display:inline-block;vertical-align:top;margin-right:15px}
         .overview-box .icon i{font-size:37px;color:#fff}
         @media(min-width:992px) and (max-width:1199px){.overview-box .icon{margin-right:3px}
@@ -46,6 +49,44 @@
         align-items:center!important;}
         .f-w-600{font-weight:600;}
         .col-4{-ms-flex:0 0 33.333333%;flex:0 0 33.333333%;max-width:33.333333%;}
+        
+        /* Professional Select Styles */
+        .professional-select {
+            background-color: #fff !important;
+            border: 1px solid #d1d9e6 !important;
+            border-radius: 10px !important;
+            box-shadow: inset 2px 2px 5px #b8b9be, inset -3px -3px 7px #fff !important;
+            transition: all 0.3s ease !important;
+            height: 48px !important;
+            padding: 0 15px !important;
+            cursor: pointer !important;
+            color: #44476a !important;
+            font-weight: 600 !important;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        .professional-select:focus {
+            box-shadow: inset 1px 1px 2px #b8b9be, inset -1px -1px 2px #fff !important;
+            outline: none !important;
+            border-color: #3f5efb !important;
+        }
+        .filter-group {
+            margin-bottom: 20px;
+        }
+        .filter-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 700;
+            color: #31344b;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+        }
+        .filter-label i {
+            margin-right: 8px;
+            color: #3f5efb;
+            font-size: 1rem;
+        }
         .bg-c-yellow{/* background:-webkit-gradient(linear,left top,right top,from(#fe9365),to(#feb798));*/
         background:linear-gradient(to right,#fe9365,#feb798);}
         .card .card-footer{background-color:#fff;border-top:none;}
@@ -80,7 +121,51 @@
     <div class="col-md-12">
         <div class="row">
             <div class="col-md-12">
+                <div class="row mb-2">
+                    <!-- City Filter -->
+                    <div class="col-sm-6 col-md-4">
+                        <div class="filter-group">
+                            <label class="filter-label">
+                                <i class="fas fa-city"></i> City
+                            </label>
+                            <select required class="form-control professional-select select2" name="city" id="city_filter">
+                                <option value="">All Cities</option>
+                                @foreach ($master->cities() as $row)
+                                    <option value="{{ $row->id }}">{{ $row->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Type Filter -->
+                    <div class="col-sm-6 col-md-4">
+                        <div class="filter-group">
+                            <label class="filter-label">
+                                <i class="fas fa-sort-amount-down"></i> Ranking Type
+                            </label>
+                            <select class="form-control professional-select select2" name="Search" id="search">
+                                <option value="desc">Top</option>
+                                <option value="asc">Lower</option>
+                            </select>
+                        </div>
+                    </div>
 
+                    <!-- Range Filter -->
+                    <div class="col-sm-6 col-md-4">
+                        <div class="filter-group">
+                            <label class="filter-label">
+                                <i class="fas fa-list-ol"></i> Result Range
+                            </label>
+                            <select class="form-control professional-select select2" name="limit" id="limit_filter">
+                                <option value="10">10 Results</option>
+                                <option value="20">20 Results</option>
+                                <option value="30">30 Results</option>
+                                <option value="40">40 Results</option>
+                                <option value="50">50 Results</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
                 <!-- Score -->
                 <div class="Score">
                     <div class="row">
@@ -182,8 +267,38 @@
                             {{-- </a> --}}
                         </div>
 
+                        <div class="col-sm-6 col-md-2">
+                            <div class="overview-item_score overview-item_green">
+                                <div class="overview__inner">
+                                    <div class="overview-box">
+                                        <div class="score_head_content">
+                                            <h2>Shop Performance</h2>
+                                        </div>
+                                        <div class="icon">
+                                            <img src="{{ url('/public/assets/images/shop.png') }}" alt="">
+                                        </div>
+                                    </div>
+                                    <div class="overview_imgae">
+                                        <img src="{{ url('/public/assets/images/miniBar.svg') }}" alt="">
+                                    </div>
+                                    <div style="display: flex; align-items: center;" class="overview-box_num">
+                                        <!-- Productive Shop -->
+                                        <div style="display: flex; align-items: center;">
+                                            <h2 style="margin-right: 5px;" class="productive_shop_count">0</h2>
+                                            <i class="fas fa-check-circle" style="color: #4caf50; font-size: 20px;"></i>
+                                        </div>
 
-                        <div class="col-sm-6 col-md-3">
+                                        <!-- Non-Productive Shop -->
+                                        <div style="display: flex; align-items: center; margin-left: 20px;">
+                                            <h2 style="margin-right: 5px;" class="non_productive_shop_count">0</h2>
+                                            <i class="fas fa-times-circle" style="color: #f44336; font-size: 20px;"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-md-2">
                             <a href="{{url('product/product')}}">
                                 <div class="overview-item_score overview-item_pink">
                                     <div class="overview__inner">
@@ -210,7 +325,7 @@
                         </div>
 
 
-                        <div class="col-sm-6 col-md-3">
+                        <div class="col-sm-6 col-md-2">
                             <a href="{{url('report/sales_report?type=current_Month')}}">
                                 <div class="overview-item_score overview-item_blue">
                                     <div class="overview__inner">
@@ -243,14 +358,14 @@
                 <div class="tops">
                     <div class="row mb-2">
                         <!-- Top 4 TSO-->
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="main-card card  card_product_sale">
                                 <div class="card-header card_bor_re">
                                     <div class="btn-actions-pane-right">
-                                        <h4 class="card-title mb-sm-0 mb-1">Top 10 Order Bookers</h4>
+                                        <h4 class="card-title mb-sm-0 mb-1" id="heading_tso">Top 10 Order Bookers</h4>
                                     </div>
                                     <div role="group" class="btn-group-sm btn-group">
-                                        <a href="#" class="btn btn-info2">Over All</a>
+                                        {{-- <a href="#" class="btn btn-info2">Over All</a> --}}
                                         {{-- <button class="active btn btn-info">Last Week</button> --}}
                                     </div>
                                 </div>
@@ -270,15 +385,15 @@
                             </div>
                         </div>
 
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <!-- TOP 3 DISTRIBUTOR-->
                             <div class="main-card card card_product_sale">
                                 <div class="card-header card_bor_re">
                                     <div class="btn-actions-pane-right">
-                                        <h4 class="card-title mb-sm-0 mb-1">TOP 10 DISTRIBUTOR</h4>
+                                        <h4 class="card-title mb-sm-0 mb-1" id="heading_distributor">TOP 10 DISTRIBUTOR</h4>
                                     </div>
                                     <div role="group" class="btn-group-sm btn-group">
-                                        <button class="btn btn-info2">Over All</button>
+                                        {{-- <button class="btn btn-info2">Over All</button> --}}
                                         {{-- <button class="active btn btn-info">Last Week</button> --}}
                                     </div>
                                 </div>
@@ -310,16 +425,16 @@
                                 <div id="radialbar-chart"></div>
                             </div> -->
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <!-- Column Chart Starts -->
                             <div class="main-card mb-3 card card_product_sale">
                                 <div class="card-header card_bor_re">
                                     <div class="btn-actions-pane-right">
-                                        <h4 class="card-title mb-sm-0 mb-1"> Top 10 Product Sale</h4>
+                                        <h4 class="card-title mb-sm-0 mb-1" id="heading_product"> Top 10 Product Sale</h4>
                                     </div>
                                     <div role="group" class="btn-group-sm btn-group">
                                         {{-- <button class="active btn btn-info">Last Week</button> --}}
-                                        <button class="btn btn-info2">Over All</button>
+                                        {{-- <button class="btn btn-info2">Over All</button> --}}
                                     </div>
                                 </div>
                                 <div class="table-responsive">
@@ -337,18 +452,16 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <!-- Column Chart Starts -->
                             <div class="main-card mb-3 card card_product_sale">
                                 <div class="card-header card_bor_re">
                                     <div class="btn-actions-pane-right">
-                                        <h4 class="card-title mb-sm-0 mb-1"> Top 10 Shop Sale</h4>
+                                        <h4 class="card-title mb-sm-0 mb-1" id="heading_shop"> Top 10 Shop Sale</h4>
                                     </div>
                                     <div role="group" class="btn-group-sm btn-group">
                                         {{-- <button class="active btn btn-info">Last Week</button> --}}
-                                        <button class="btn btn-info2">Over All</button>
+                                        {{-- <button class="btn btn-info2">Over All</button> --}}
                                     </div>
                                 </div>
                                 <div class="table-responsive">
@@ -366,7 +479,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             {{-- <div class="main-card mb-3 card card_product_sale">
                                 <div class="card-header card_bor_re">
                                     <div class="btn-actions-pane-right">
@@ -379,24 +492,6 @@
                                 <div class="table-responsive">
                                     <table class="align-middle mb-0 table table-borderless">
                                         <tbody id="topBalanceShop">
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div> --}}
-                        </div>
-                        <div class="col-md-4">
-                            {{-- <div class="main-card mb-3 card card_product_sale">
-                                <div class="card-header card_bor_re">
-                                    <div class="btn-actions-pane-right">
-                                        <h4 class="card-title mb-sm-0 mb-1"> Non Productive Shop </h4>
-                                    </div>
-                                    <div role="group" class="btn-group-sm btn-group">
-                                        <button class="btn btn-info2">Over All</button>
-                                    </div>
-                                </div>
-                                <div class="table-responsive">
-                                    <table class="align-middle mb-0 table table-borderless">
-                                        <tbody id="nonProductiveshop">
                                         </tbody>
                                     </table>
                                 </div>
@@ -758,6 +853,23 @@
         jQuery(document).ready(function($) {
             topTso();
             dashboarData();
+            
+            // Event listeners for filters
+            $('#city_filter, #search, #limit_filter').on('change', function() {
+                var typeText = $('#search option:selected').text();
+                var limit = $('#limit_filter').val();
+                
+                if (typeText != 'Select') {
+                    $('#heading_tso').text(typeText + ' ' + limit + ' Order Bookers');
+                    $('#heading_distributor').text(typeText + ' ' + limit + ' DISTRIBUTOR');
+                    $('#heading_product').text(typeText + ' ' + limit + ' Product Sale');
+                    $('#heading_shop').text(typeText + ' ' + limit + ' Shop Sale');
+                }
+                
+                topTso();
+                dashboarData();
+            });
+
             setInterval(() => {
                 console.log('setinterval');
 
@@ -769,6 +881,9 @@
 
     function topTso()
     {
+            var city = $('#city_filter').val();
+            var search = $('#search').val();
+            var limit = $('#limit_filter').val();
 
             $('#topProduct').html('');
                 $('#topDistributer').html('');
@@ -784,7 +899,7 @@
             $.ajax({
             url:"{{route('topRank')}}",
             method: 'GET',
-            data: {id,id},
+            data: {id:id, city:city, search:search, limit:limit},
             error: function()
             {},
             success: function(response)
@@ -987,11 +1102,12 @@
 
         function dashboarData()
         {
+            var city = $('#city_filter').val();
             var id  =0 ;
             $.ajax({
             url:"{{route('dashboarData')}}",
             method: 'GET',
-            data: {id,id},
+            data: {id:id, city:city},
             error: function()
             {},
             success: function(response)
@@ -1009,6 +1125,8 @@
                 $('.active_shop_count').html(response.active_shop_count);
                 $('.inactive_shop_count').html(response.inactive_shop_count);
                 $('.pending_shop_count').html(response.pending_shop_count);
+                $('.productive_shop_count').html(response.productive_shop_count);
+                $('.non_productive_shop_count').html(response.non_productive_shop_count);
 
                 $('.current_month_sale_amount').html(c_amount.toLocaleString());
                 $('.previous_month_sale_amount').html('Rs. '+p_amount);
