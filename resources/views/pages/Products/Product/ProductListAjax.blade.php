@@ -16,7 +16,7 @@
         
  	<td>{{ number_format($master->get_product_price_item($row->id) ?? 0, 0) }}</td>
 
-        <td>
+        <td class="no-print">
             <div class="dropdown">
                 <i class="fa-solid fa-ellipsis-vertical dropdown-toggle action_cursor" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
                 <div class="dropdown-menu dropdown-menu_sale_order_list" aria-labelledby="dropdownMenuButton">
