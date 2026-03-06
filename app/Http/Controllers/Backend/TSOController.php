@@ -651,6 +651,7 @@ class TSOController extends Controller
     public function activity(Request $request)
     {
         if ($request->ajax()) {
+            ini_set('max_execution_time', 2400);
             $tso = TSO::where('status', 1)
                 ->where('active', 1)
                 ->when($request->city, function ($query) use ($request) {
@@ -663,6 +664,7 @@ class TSOController extends Controller
                     return $query->where('id', $request->tso_id);
                 })
                 ->get();
+            // Test user id = 678
             // dd($tso);
             if ($tso->isEmpty()) {
                 return response()->json(['error' => 'TSO not found'], 404);
@@ -673,6 +675,13 @@ class TSOController extends Controller
             ->orderBy('created_at','asc')
             ->with('location')
             ->get();
+
+            foreach ($tsoActivities as $key => $value) {
+                if (($value['location_title'] == '-' || $value['location_title'] == '' || $value['location_title'] == 'Error fetching address') && ($value['latitude'] != '' && $value['longitude'] != '')){
+                    $tsoActivities[$key]['location_title'] = $this->getAddress($value['latitude'], $value['longitude']) ?? '-';
+                    UsersLocation::where('id', $value['id'])->update(['location_title' => $tsoActivities[$key]['location_title']]);
+                }
+            }
             // dd($tsoActivities);
             return view($this->page . 'Activity.activityAjax', compact('tsoActivities'));
         }
@@ -697,23 +706,27 @@ class TSOController extends Controller
 
     function getAddress($latitude, $longitude)
     {
-        // Nominatim API URL
-        $url = "https://nominatim.openstreetmap.org/reverse?format=json&lat={$latitude}&lon={$longitude}&accept-language=en";
-    
-        // Set HTTP options
-        $options = [
-            'http' => [
-                'header' => "User-Agent: dashi-snd 1.0\r\n"
-            ]
-        ];
-        
-        $context = stream_context_create($options);
-        $response = file_get_contents($url, false, $context);
-        $json = json_decode($response, true);
-        
-        // Extract formatted address
-        $address = isset($json['display_name']) ? $json['display_name'] : '';
-        return $address;
+        try {
+            // Nominatim API URL
+            $url = "https://nominatim.openstreetmap.org/reverse?format=json&lat={$latitude}&lon={$longitude}&accept-language=en";
+
+            // Set HTTP options
+            $options = [
+                'http' => [
+                    'header' => "User-Agent: popular-snd 1.0\r\n"
+                ]
+            ];
+
+            $context = stream_context_create($options);
+            $response = file_get_contents($url, false, $context);
+            $json = json_decode($response, true);
+
+            // Extract formatted address
+            $address = isset($json['display_name']) ? $json['display_name'] : '';
+            return $address;
+        } catch (\Exception $e) {
+            return '-';
+        }
     }
 
     public function tso_log(Request $request)

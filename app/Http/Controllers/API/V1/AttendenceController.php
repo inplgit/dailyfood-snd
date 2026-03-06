@@ -155,16 +155,16 @@ class AttendenceController extends BaseController
      public function findUsersNearby($latitude, $longitude, $tso_id)
 {
     
-    $url = "https://nominatim.openstreetmap.org/reverse?format=json&lat={$latitude}&lon={$longitude}&accept-language=en";
-    $options = [
-        'http' => [
-            'header' => "User-Agent: popular-snd 1.0"
-        ]
-    ];
-    $context = stream_context_create($options);
-    $response = file_get_contents($url, false, $context);
-    $json = json_decode($response, true);
-    $address = $json['display_name'] ?? '';
+    // $url = "https://nominatim.openstreetmap.org/reverse?format=json&lat={$latitude}&lon={$longitude}&accept-language=en";
+    // $options = [
+    //     'http' => [
+    //         'header' => "User-Agent: popular-snd 1.0"
+    //     ]
+    // ];
+    // $context = stream_context_create($options);
+    // $response = file_get_contents($url, false, $context);
+    // $json = json_decode($response, true);
+    // $address = $json['display_name'] ?? '';
 
     // 🔹 Get TSO with all saved locations
     $tso = TSO::with('locations')->find($tso_id);
