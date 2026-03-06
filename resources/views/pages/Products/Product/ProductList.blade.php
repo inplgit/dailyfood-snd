@@ -2,14 +2,18 @@
 @section('title', "Product")
 @section('content')
 
-
+<style>
+    .no-view{
+        display: none !important;
+    }
+</style>
 
 
 
     <form id="list_data"  method="get" action="{{ Request::url('') }}"></form>
     <div class="row" id="table-bordered">
         <div class="col-12">
-            <div class="card" id="product_list">
+            <div class="card" >
                 <div class="card-header">
                     <h4 class="card-title">Product  List</h4>
                     <!-- ✅ Normal Page -->
@@ -18,7 +22,8 @@
                     </div>
                 </div>
                 
-                <div class="table-responsive" >
+                <div class="table-responsive" id="product_list">
+                    <h4 class="card-title no-view">Product  List</h4>
                     <table class="table table-bordered" id="dataTable">
                         <thead>
                         <tr>
