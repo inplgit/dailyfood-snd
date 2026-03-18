@@ -19,7 +19,8 @@ class Kernel extends ConsoleKernel
         //$schedule->command('queue:run-worker')->everyMinute();
         //$schedule->command('generate:product-pdf')->everyMinute();
         // $schedule->command('queue:run-worker')->everyThreeMinutes();
-
+        
+        $schedule->command('app:send-daily-report')->dailyAt('20:00');
     }
 
     /**

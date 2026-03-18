@@ -1573,7 +1573,16 @@
                                 </a>
                             </li>
                         @endcan
-
+                        @can('daily_report_settings')
+                        <li>
+                            <a class="d-flex align-items-center" href="{{ route('settings.daily_report.index') }}">
+                                <i data-feather="circle"></i>
+                                <span class="menu-item text-truncate">
+                                    Daily Report Settings
+                                </span>
+                            </a>
+                        </li>
+                        @endcan
                        
 
 
