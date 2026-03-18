@@ -3,23 +3,52 @@ use App\Helpers\MasterFormsHelper;
 $master = new MasterFormsHelper();
 echo MasterFormsHelper::PrintHead($from, $to, 'New Load Sheet', $tso_id);
 ?>
+<style>
+.table{border-collapse:collapse;width:100%;font-size:13px;}
+.table th{background:#f1f3f5;color:#333;font-weight:600;border:1px solid #dcdcdc;text-align:center;padding:8px;}
+.table td{border:1px solid #e0e0e0;padding:7px;vertical-align:middle;}
+/* Employee Header */
+.employee-row{background:#e6f2ff;font-weight:600;color:#2c3e50;}
+/* Product Rows */
+.product-row:hover td{background:#f9f9f9;}
+/* Indent product name */
+.product-name{padding-left:20px;color:#555;}
+/* Subtotal */
+.subtotal-row{background:#f7f7f7;font-weight:600;}
+/* Grand Total */
+.grand-total-row{background:#dfe6e9;font-weight:bold;font-size:14px;}
+/* Alignment */
+.text-right{text-align:right;}
+.text-center{text-align:center;}
+</style>
 
 @if(count($so_data) > 0)
-    <table class="table table-bordered table-striped" style="font-size: 14px;">
-        <thead style="background:#e9ecef;">
+    <table class="table table-bordered table-striped">
+        <thead>
             <tr>
-                <th style="width:22%; text-align:center;">Employee / TSO Name</th>
-                <th style="width:28%; text-align:center;">Product Name</th>
-                <th style="width:8%;  text-align:center;">Rate</th>
-                <th style="width:6%;  text-align:center;">Qty</th>
-                <th style="width:6%;  text-align:center;">FOC</th>
-                <th style="width:6%;  text-align:center;">Avl</th>
-                <th style="width:8%;  text-align:center;">Sample</th>
-                <th style="width:10%; text-align:center;">Amount</th>
-                <th style="width:6%;  text-align:center;">Remarks</th>
+                <td  style="  border-bottom: none !important;"></td>
+                <td  style=" border-bottom: none !important;"></td>
+                <th style="background:#dfe5ec !important;"></th> 
+                <th style="background:#dfe5ec !important;"></th> 
+                <th style="background:#dfe5ec !important;"></th> 
+                <th colspan="2" style="text-align:center; border-bottom: none !important;background:#dfe5ec !important;">Grand Total</th>
+                <th style="background:#dfe5ec !important;"></th> 
+                <th style="background:#dfe5ec !important;"></th> 
+            </tr>
+            <tr>
+                <td style="width:22%;border: 1px solid #000 !important;">Employee / TSO Name</td>
+                <td style="width:28%; border: 1px solid #000 !important;">Product Name</td>
+                <th style="width:8%; text-align:right;background:#dfe5ec !important;">Rate</th>
+                <th style="width:6%;text-align:right; background:#dfe5ec !important;">Qty</th>
+                <th style="width:6%;text-align:right;background:#dfe5ec !important;">FOC</th>
+                <th style="width:6%; text-align:right;background:#dfe5ec !important;">Avl</th>
+                <th style="width:8%; text-align:right;background:#dfe5ec !important;">Sample</th>
+                <th style="width:10%; text-align:right;background:#dfe5ec !important;">Amount</th>
+                <th style="width:6%; text-align:right;background:#dfe5ec !important;">Remarks</th>
             </tr>
         </thead>
         <tbody>
+
             @php
                 $grand_qty    = 0;
                 $grand_foc    = 0;
@@ -29,10 +58,6 @@ echo MasterFormsHelper::PrintHead($from, $to, 'New Load Sheet', $tso_id);
             @endphp
 
             @foreach($so_data as $employee_name => $products)
-                <!-- Employee Group Header -->
-                <tr style="background:#d4e6f1; font-weight:bold;">
-                    <td colspan="9">{{ $employee_name }}</td>
-                </tr>
 
                 @php
                     $emp_qty    = 0;
@@ -40,19 +65,28 @@ echo MasterFormsHelper::PrintHead($from, $to, 'New Load Sheet', $tso_id);
                     $emp_avl    = 0;
                     $emp_sample = 0;
                     $emp_amount = 0;
+                    $rowspan = count($products) + 1; // products + total row
+                    $first = true;
                 @endphp
 
                 @foreach($products as $product)
                     <tr>
-                        <td style="padding-left: 30px; color:#555;"> <!-- indent under employee --></td>
-                        <td>{{ $product->product_name }}</td>
-                        <td style="text-align:right;">{{ number_format($product->rate, 2) }}</td>
-                        <td style="text-align:center;">{{ number_format($product->qty) }}</td>
-                        <td style="text-align:center;">{{ number_format($product->foc) }}</td>
-                        <td style="text-align:center;">{{ number_format($product->avl) }}</td>
-                        <td style="text-align:center;">{{ number_format($product->sample) }}</td>
-                        <td style="text-align:right;">{{ number_format($product->amount, 2) }}</td>
-                        <td style="text-align:center;">{{ $product->remarks ?? '0' }}</td>
+                        @if($first)
+                            <!-- Employee Name (ROWSPAN) -->
+                            <td rowspan="{{ $rowspan }}" style="font-weight:600; vertical-align: middle;border: 1px solid #000 !important;">
+                                {{ $employee_name }}
+                            </td>
+                            @php $first = false; @endphp
+                        @endif
+
+                        <td style="border: 1px solid #000 !important;">{{ $product->product_name }}</td>
+                        <td class="text-right" style="border-bottom: 1px solid #000 !important;">{{ number_format($product->rate, 2) }}</td>
+                        <td class="text-right" style="border-bottom: 1px solid #000 !important;">{{ number_format($product->qty) }}</td>
+                        <td class="text-right" style="border-bottom: 1px solid #000 !important;">{{ number_format($product->foc) }}</td>
+                        <td class="text-right" style="border-bottom: 1px solid #000 !important;">{{ number_format($product->avl) }}</td>
+                        <td class="text-right" style="border-bottom: 1px solid #000 !important;">{{ number_format($product->sample) }}</td>
+                        <td class="text-right" style="border-bottom: 1px solid #000 !important;">{{ number_format($product->amount, 2) }}</td>
+                        <td class="text-right" style="border-bottom: 1px solid #000 !important;">{{ $product->remarks ?? '0' }}</td>
                     </tr>
 
                     @php
@@ -64,17 +98,17 @@ echo MasterFormsHelper::PrintHead($from, $to, 'New Load Sheet', $tso_id);
                     @endphp
                 @endforeach
 
-                <!-- Subtotal per Employee -->
-                <tr style="background:#f8f9fa; font-weight:600;">
-                    <td style="text-align:right; padding-right:15px;">{{ $employee_name }} Total</td>
+                <!-- Employee Total -->
+                <tr style=" font-weight:600;">
+                    <!-- <td>{{ $employee_name }} Total</td> -->
+                    <!-- <td></td>
                     <td></td>
-                    <td></td>
-                    <td style="text-align:center;">{{ number_format($emp_qty) }}</td>
-                    <td style="text-align:center;">{{ number_format($emp_foc) }}</td>
-                    <td style="text-align:center;">{{ number_format($emp_avl) }}</td>
-                    <td style="text-align:center;">{{ number_format($emp_sample) }}</td>
-                    <td style="text-align:right;">{{ number_format($emp_amount, 2) }}</td>
-                    <td></td>
+                    <td class="text-right">{{ number_format($emp_qty) }}</td>
+                    <td class="text-right">{{ number_format($emp_foc) }}</td>
+                    <td class="text-right">{{ number_format($emp_avl) }}</td>
+                    <td class="text-right">{{ number_format($emp_sample) }}</td>
+                    <td class="text-right">{{ number_format($emp_amount, 2) }}</td>
+                    <td></td> -->
                 </tr>
 
                 @php
@@ -87,19 +121,23 @@ echo MasterFormsHelper::PrintHead($from, $to, 'New Load Sheet', $tso_id);
             @endforeach
 
             <!-- Grand Total -->
-            <tr style="background:#dee2e6; font-weight:bold; font-size:15px;">
-                <td style="text-align:right; padding-right:15px;">Grand Total</td>
-                <td></td>
-                <td></td>
-                <td style="text-align:center;">{{ number_format($grand_qty) }}</td>
-                <td style="text-align:center;">{{ number_format($grand_foc) }}</td>
-                <td style="text-align:center;">{{ number_format($grand_avl) }}</td>
-                <td style="text-align:center;">{{ number_format($grand_sample) }}</td>
-                <td style="text-align:right;">{{ number_format($grand_amount, 2) }}</td>
-                <td></td>
+            <tr style=" font-weight:bold;">
+                <!-- <td colspan="2" style="text-align:left;">Grand Total</td> -->
+                <th  style="text-align:left;border: 1px solid #000 !important; border-right: none !important;background:#dfe5ec !important;">{{ $employee_name }} Total</th>
+                <th style="text-align:left;border: 1px solid #000 !important;  border-left: none !important;background:#dfe5ec !important;"></th>
+                   <td style="border-top: 1px solid #000 !important;"></td>
+                <td class="text-right" style="border-top: 1px solid #000 !important;">{{ number_format($grand_qty) }}</td>
+                <td class="text-right" style="border-top: 1px solid #000 !important;">{{ number_format($grand_foc) }}</td>
+                <td class="text-right" style="border-top: 1px solid #000 !important;">{{ number_format($grand_avl) }}</td>
+                <td class="text-right" style="border-top: 1px solid #000 !important;">{{ number_format($grand_sample) }}</td>
+                <td class="text-right" style="border-top: 1px solid #000 !important;">{{ number_format($grand_amount, 2) }}</td>
+                <td style="border-top: 1px solid #000 !important;"></td>
             </tr>
+
         </tbody>
     </table>
+
+
 
 @else
     <div class="alert alert-danger text-center">
