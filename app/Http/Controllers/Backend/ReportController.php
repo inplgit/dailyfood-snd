@@ -2128,6 +2128,56 @@ if (count($qo_summary) > 0) {
         return view($this->page . 'loadsheet.load_sheet', compact('from', 'to'));
     }
 
+    public function new_load_sheet(Request $request)
+    {
+        $from = $request->from ?? date('Y-m-d');
+        $to =  $request->to ?? date('Y-m-d');
+
+        if ($request->ajax()) :
+            $tso_id =  $request->tso_id;
+            $distributor_id =  $request->distributor_id;
+            $execution = $request->execution;
+
+            $so_data = DB::table('sale_orders')
+                ->join('sale_order_data', 'sale_order_data.so_id', 'sale_orders.id')
+                ->join('products', 'products.id', 'sale_order_data.product_id')
+                ->join('tso', 'tso.id', 'sale_orders.tso_id')
+                ->where('sale_orders.status', 1)
+                ->whereBetween('sale_orders.dc_date', [$from, $to])
+                ->when($tso_id, function ($query) use ($tso_id) {
+                    return $query->where('sale_orders.tso_id', $tso_id);
+                })
+                ->when($distributor_id, function ($query) use ($distributor_id) {
+                    return $query->where('sale_orders.distributor_id', $distributor_id);
+                })
+                ->when(isset($execution), function ($query) use ($execution) {
+                    return $query->where('sale_orders.excecution', $execution);
+                })
+                ->select(
+                    'tso.id as tso_id',
+                    'tso.name as tso_name',
+                    'products.id as product_id',
+                    'products.product_name',
+                    'sale_order_data.rate',
+                    DB::raw('SUM(sale_order_data.qty) as qty'),
+                    DB::raw('SUM(sale_order_data.scheme_data_pcs) as foc'),
+                    DB::raw('SUM(sale_order_data.availability) as avl'),
+                    DB::raw('SUM(sale_order_data.offer_qty) as sample'),
+                    DB::raw('SUM(sale_order_data.total) as amount'),
+                    DB::raw('GROUP_CONCAT(DISTINCT sale_orders.notes) as remarks')
+                )
+                ->groupBy('tso.id', 'tso.name', 'products.id', 'products.product_name', 'sale_order_data.rate')
+                ->orderBy('tso.name')
+                ->orderBy('products.product_name')
+                ->get()
+                ->groupBy('tso_name');
+
+            return view($this->page . 'loadsheet.new_load_sheet_ajax', compact('so_data', 'from', 'to', 'tso_id', 'distributor_id', 'execution'));
+        endif;
+
+        return view($this->page . 'loadsheet.new_load_sheet', compact('from', 'to'));
+    }
+
 
 
     public function order_vs_execution(Request $request)

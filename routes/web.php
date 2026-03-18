@@ -339,6 +339,7 @@ Route::delete('/destroy_pcs/{id}', 'SchemeProductController@destroy_pcs')->name(
         Route::get('product_avail', 'ReportController@product_avail')->name('product_avail');
         Route::get('product_productivity', 'ReportController@product_productivity')->name('product_productivity');
         Route::get('load_Sheet', 'ReportController@load_Sheet')->name('load_Sheet');
+        Route::get('new_load_sheet', 'ReportController@new_load_sheet')->name('new_load_sheet');
         Route::get('order_vs_execution', 'ReportController@order_vs_execution')->name('order_vs_execution');
  	Route::get('order_vs_execution_return', 'ReportController@order_vs_execution_return')->name('order_vs_execution_return');
 
