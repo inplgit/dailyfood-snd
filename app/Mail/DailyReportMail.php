@@ -38,8 +38,12 @@ class DailyReportMail extends Mailable
         $subject = 'Daily Summary Report - ' . $this->dateStr;
         $filename = 'Daily_Report_Summary_' . $this->dateStr . '.pdf';
 
-        return $this->subject($subject)
-                    ->html('<p>Please find the consolidated daily summary report attached for ' . $this->dateStr . '.</p>')
+        return $this->from(config('mail.from.address'), config('mail.from.name'))
+                    ->subject($subject)
+                    ->view('emails.daily_report')
+                    ->with([
+                        'dateStr' => $this->dateStr,
+                    ])
                     ->attachData($this->pdfContent, $filename, [
                         'mime' => 'application/pdf',
                     ]);
