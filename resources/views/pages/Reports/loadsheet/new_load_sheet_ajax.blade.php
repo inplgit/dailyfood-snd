@@ -92,13 +92,13 @@ echo MasterFormsHelper::PrintHead($from, $to, 'New Load Sheet', $tso_id);
                 <tr style=" font-weight:600;">
                     <th style="text-align:left;border: 1px solid #000 !important; border-right: none !important;background:#dfe5ec !important;">{{ $employee_name }} Total</th>
                     <th style="border-right:1px solid #000 !important;background:#dfe5ec !important;"></th>
-                    <th style="background:#dfe5ec !important;"></th>
+                    <th style="background:#dfe5ec !important;border-bottom: 1px solid #000 !important;"></th>
                     <th style="background:#dfe5ec !important;border-bottom: 1px solid #000 !important;" class="text-right">{{ number_format($emp_qty) }}</th>
                     <th style="background:#dfe5ec !important;border-bottom: 1px solid #000 !important;" class="text-right">{{ number_format($emp_foc) }}</th>
                     <th style="background:#dfe5ec !important;border-bottom: 1px solid #000 !important;" class="text-right">{{ number_format($emp_avl) }}</th>
                     <th style="background:#dfe5ec !important;border-bottom: 1px solid #000 !important;" class="text-right">{{ number_format($emp_sample) }}</th>
                     <th style="background:#dfe5ec !important;border-bottom: 1px solid #000 !important;" class="text-right">{{ number_format($emp_amount, 2) }}</th>
-                    <th style=" border-right: 1px solid #000 !important;background:#dfe5ec !important;"></th>
+                    <th style=" border-right: 1px solid #000 !important;background:#dfe5ec !important;border-bottom: 1px solid #000 !important;"></th>
                 </tr>
 
                 @php
