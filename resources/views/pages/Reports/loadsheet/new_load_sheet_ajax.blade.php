@@ -23,18 +23,8 @@ echo MasterFormsHelper::PrintHead($from, $to, 'New Load Sheet', $tso_id);
 </style>
 
 @if(count($so_data) > 0)
-    <table class="table table-bordered table-striped">
+    <table class="table table-bordered table-striped"  style="border: 1px solid #000 !important;">
         <thead>
-            <tr>
-                <td  style="  border-bottom: none !important;"></td>
-                <td  style=" border-bottom: none !important;"></td>
-                <th style="background:#dfe5ec !important;"></th> 
-                <th style="background:#dfe5ec !important;"></th> 
-                <th style="background:#dfe5ec !important;"></th> 
-                <th colspan="2" style="text-align:center; border-bottom: none !important;background:#dfe5ec !important;">Grand Total</th>
-                <th style="background:#dfe5ec !important;"></th> 
-                <th style="background:#dfe5ec !important;"></th> 
-            </tr>
             <tr>
                 <td style="width:22%;border: 1px solid #000 !important;">Employee / TSO Name</td>
                 <td style="width:28%; border: 1px solid #000 !important;">Product Name</td>
@@ -65,7 +55,7 @@ echo MasterFormsHelper::PrintHead($from, $to, 'New Load Sheet', $tso_id);
                     $emp_avl    = 0;
                     $emp_sample = 0;
                     $emp_amount = 0;
-                    $rowspan = count($products) + 1; // products + total row
+                    $rowspan = count($products) + 0; // products + total row
                     $first = true;
                 @endphp
 
@@ -86,7 +76,7 @@ echo MasterFormsHelper::PrintHead($from, $to, 'New Load Sheet', $tso_id);
                         <td class="text-right" style="border-bottom: 1px solid #000 !important;">{{ number_format($product->avl) }}</td>
                         <td class="text-right" style="border-bottom: 1px solid #000 !important;">{{ number_format($product->sample) }}</td>
                         <td class="text-right" style="border-bottom: 1px solid #000 !important;">{{ number_format($product->amount, 2) }}</td>
-                        <td class="text-right" style="border-bottom: 1px solid #000 !important;">{{ $product->remarks ?? '0' }}</td>
+                        <td class="text-right" style="border-bottom: 1px solid #000 !important; border-right: 1px solid #000 !important;">{{ $product->remarks ?? '0' }}</td>
                     </tr>
 
                     @php
@@ -100,15 +90,15 @@ echo MasterFormsHelper::PrintHead($from, $to, 'New Load Sheet', $tso_id);
 
                 <!-- Employee Total -->
                 <tr style=" font-weight:600;">
-                    <!-- <td>{{ $employee_name }} Total</td> -->
-                    <!-- <td></td>
+                    <td style="text-align:left;border: 1px solid #000 !important; border-right: none !important;">{{ $employee_name }} Total</td>
+                    <td style="border-right:1px solid #000 !important;"></td>
                     <td></td>
                     <td class="text-right">{{ number_format($emp_qty) }}</td>
                     <td class="text-right">{{ number_format($emp_foc) }}</td>
                     <td class="text-right">{{ number_format($emp_avl) }}</td>
                     <td class="text-right">{{ number_format($emp_sample) }}</td>
                     <td class="text-right">{{ number_format($emp_amount, 2) }}</td>
-                    <td></td> -->
+                    <td style=" border-right: 1px solid #000 !important;"></td>
                 </tr>
 
                 @php
@@ -122,18 +112,16 @@ echo MasterFormsHelper::PrintHead($from, $to, 'New Load Sheet', $tso_id);
 
             <!-- Grand Total -->
             <tr style=" font-weight:bold;">
-                <!-- <td colspan="2" style="text-align:left;">Grand Total</td> -->
-                <th  style="text-align:left;border: 1px solid #000 !important; border-right: none !important;background:#dfe5ec !important;">{{ $employee_name }} Total</th>
+                <th  style="text-align:left;border: 1px solid #000 !important; border-right: none !important;background:#dfe5ec !important;">Grand Total</th>
                 <th style="text-align:left;border: 1px solid #000 !important;  border-left: none !important;background:#dfe5ec !important;"></th>
-                   <td style="border-top: 1px solid #000 !important;"></td>
+                <td style="border-top: 1px solid #000 !important;"></td>   
                 <td class="text-right" style="border-top: 1px solid #000 !important;">{{ number_format($grand_qty) }}</td>
                 <td class="text-right" style="border-top: 1px solid #000 !important;">{{ number_format($grand_foc) }}</td>
                 <td class="text-right" style="border-top: 1px solid #000 !important;">{{ number_format($grand_avl) }}</td>
                 <td class="text-right" style="border-top: 1px solid #000 !important;">{{ number_format($grand_sample) }}</td>
                 <td class="text-right" style="border-top: 1px solid #000 !important;">{{ number_format($grand_amount, 2) }}</td>
-                <td style="border-top: 1px solid #000 !important;"></td>
+                <td style="border-top: 1px solid #000 !important; border-right: 1px solid #000 !important;"></td>
             </tr>
-
         </tbody>
     </table>
 
