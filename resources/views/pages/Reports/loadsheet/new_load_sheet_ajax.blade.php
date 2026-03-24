@@ -26,15 +26,15 @@ echo MasterFormsHelper::PrintHead($from, $to, 'New Load Sheet', $tso_id);
     <table class="table table-bordered table-striped"  style="border: 1px solid #000 !important;">
         <thead>
             <tr>
-                <td style="width:22%;border: 1px solid #000 !important;">Employee / TSO Name</td>
-                <td style="width:28%; border: 1px solid #000 !important;">Product Name</td>
-                <th style="width:8%; text-align:right;background:#dfe5ec !important;">Rate</th>
-                <th style="width:6%;text-align:right; background:#dfe5ec !important;">Qty</th>
-                <th style="width:6%;text-align:right;background:#dfe5ec !important;">FOC</th>
-                <th style="width:6%; text-align:right;background:#dfe5ec !important;">Avl</th>
-                <th style="width:8%; text-align:right;background:#dfe5ec !important;">Sample</th>
-                <th style="width:10%; text-align:right;background:#dfe5ec !important;">Amount</th>
-                <th style="width:6%; text-align:right;background:#dfe5ec !important;">Remarks</th>
+                <th style="width:22%;border: 1px solid #000 !important;background:#dfe5ec !important;">Employee / TSO Name</th>
+                <th style="width:28%; border: 1px solid #000 !important;background:#dfe5ec !important;">Product Name</th>
+                <th style="width:8%; text-align:right;background:#dfe5ec !important;border-bottom: 1px solid #000 !important;">Rate</th>
+                <th style="width:6%;text-align:right; background:#dfe5ec !important;border-bottom: 1px solid #000 !important;">Qty</th>
+                <th style="width:6%;text-align:right;background:#dfe5ec !important;border-bottom: 1px solid #000 !important;">FOC</th>
+                <th style="width:6%; text-align:right;background:#dfe5ec !important;border-bottom: 1px solid #000 !important;">Avl</th>
+                <th style="width:8%; text-align:right;background:#dfe5ec !important;border-bottom: 1px solid #000 !important;">Sample</th>
+                <th style="width:10%; text-align:right;background:#dfe5ec !important;border-bottom: 1px solid #000 !important;">Amount</th>
+                <th style="width:6%; text-align:right;background:#dfe5ec !important;border-bottom: 1px solid #000 !important;">Remarks</th>
             </tr>
         </thead>
         <tbody>
@@ -90,15 +90,15 @@ echo MasterFormsHelper::PrintHead($from, $to, 'New Load Sheet', $tso_id);
 
                 <!-- Employee Total -->
                 <tr style=" font-weight:600;">
-                    <th style="text-align:left;border: 1px solid #000 !important; border-right: none !important;">{{ $employee_name }} Total</th>
-                    <th style="border-right:1px solid #000 !important;"></th>
-                    <td></td>
-                    <td class="text-right">{{ number_format($emp_qty) }}</td>
-                    <td class="text-right">{{ number_format($emp_foc) }}</td>
-                    <td class="text-right">{{ number_format($emp_avl) }}</td>
-                    <td class="text-right">{{ number_format($emp_sample) }}</td>
-                    <td class="text-right">{{ number_format($emp_amount, 2) }}</td>
-                    <td style=" border-right: 1px solid #000 !important;"></td>
+                    <th style="text-align:left;border: 1px solid #000 !important; border-right: none !important;background:#dfe5ec !important;">{{ $employee_name }} Total</th>
+                    <th style="border-right:1px solid #000 !important;background:#dfe5ec !important;"></th>
+                    <th style="background:#dfe5ec !important;"></th>
+                    <th style="background:#dfe5ec !important;border-bottom: 1px solid #000 !important;" class="text-right">{{ number_format($emp_qty) }}</th>
+                    <th style="background:#dfe5ec !important;border-bottom: 1px solid #000 !important;" class="text-right">{{ number_format($emp_foc) }}</th>
+                    <th style="background:#dfe5ec !important;border-bottom: 1px solid #000 !important;" class="text-right">{{ number_format($emp_avl) }}</th>
+                    <th style="background:#dfe5ec !important;border-bottom: 1px solid #000 !important;" class="text-right">{{ number_format($emp_sample) }}</th>
+                    <th style="background:#dfe5ec !important;border-bottom: 1px solid #000 !important;" class="text-right">{{ number_format($emp_amount, 2) }}</th>
+                    <th style=" border-right: 1px solid #000 !important;background:#dfe5ec !important;"></th>
                 </tr>
 
                 @php
@@ -114,13 +114,13 @@ echo MasterFormsHelper::PrintHead($from, $to, 'New Load Sheet', $tso_id);
             <tr style=" font-weight:bold;">
                 <th  style="text-align:left;border: 1px solid #000 !important; border-right: none !important;background:#dfe5ec !important;">Grand Total</th>
                 <th style="text-align:left;border: 1px solid #000 !important;  border-left: none !important;background:#dfe5ec !important;"></th>
-                <td style="border-top: 1px solid #000 !important;"></td>   
-                <td class="text-right" style="border-top: 1px solid #000 !important;">{{ number_format($grand_qty) }}</td>
-                <td class="text-right" style="border-top: 1px solid #000 !important;">{{ number_format($grand_foc) }}</td>
-                <td class="text-right" style="border-top: 1px solid #000 !important;">{{ number_format($grand_avl) }}</td>
-                <td class="text-right" style="border-top: 1px solid #000 !important;">{{ number_format($grand_sample) }}</td>
-                <td class="text-right" style="border-top: 1px solid #000 !important;">{{ number_format($grand_amount, 2) }}</td>
-                <td style="border-top: 1px solid #000 !important; border-right: 1px solid #000 !important;"></td>
+                <th style="border-top: 1px solid #000 !important;background:#dfe5ec !important;"></th>   
+                <th style="background:#dfe5ec !important;" class="text-right" style="border-top: 1px solid #000 !important;">{{ number_format($grand_qty) }}</th>
+                <th style="background:#dfe5ec !important;" class="text-right" style="border-top: 1px solid #000 !important;">{{ number_format($grand_foc) }}</th>
+                <th style="background:#dfe5ec !important;" class="text-right" style="border-top: 1px solid #000 !important;">{{ number_format($grand_avl) }}</th>
+                <th style="background:#dfe5ec !important;" class="text-right" style="border-top: 1px solid #000 !important;">{{ number_format($grand_sample) }}</th>
+                <th style="background:#dfe5ec !important;" class="text-right" style="border-top: 1px solid #000 !important;">{{ number_format($grand_amount, 2) }}</th>
+                <th style="border-top: 1px solid #000 !important; border-right: 1px solid #000 !important;background:#dfe5ec !important;"></th>
             </tr>
         </tbody>
     </table>
