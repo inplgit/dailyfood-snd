@@ -200,6 +200,14 @@ $master = new MasterFormsHelper();
                                                 </a>
                                             </li>
                                             @endcan
+                                            @can('new_load_sheet')
+                                            <li>
+                                                <a href="{{ route('new_load_sheet') }}">
+                                                    <i class="fas fa-circle"></i>
+                                                    <span>New Load Sheet</span>
+                                                </a>
+                                            </li>
+                                            @endcan
                                         </ul>
                                     </div>
                                 </div>
