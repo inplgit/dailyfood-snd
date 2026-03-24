@@ -84,50 +84,6 @@ $master = new MasterFormsHelper();
 
 @section('script')
 <script>
-    function get_tso() {
-        var distributor_id = $('#distribuotr_id').val();
-        if (distributor_id) {
-            $.ajax({
-                url: "{{ route('tso.by.distributor') }}",
-                type: "GET",
-                data: {
-                    distributor_id: distributor_id
-                },
-                success: function(data) {
-                    $('#tso_id').empty();
-                    $('#tso_id').append('<option value="">select</option>');
-                    $.each(data, function(key, value) {
-                        $('#tso_id').append('<option value="' + value.id + '">' + value.name + '</option>');
-                    });
-                }
-            });
-        }
-    }
-
-    function get_ajax_data() {
-        var from = $('#from').val();
-        var to = $('#to').val();
-        var distributor_id = $('#distribuotr_id').val();
-        var tso_id = $('#tso_id').val();
-        var execution = $('#execution').val();
-
-        $.ajax({
-            url: "{{ route('new_load_sheet') }}",
-            type: "GET",
-            data: {
-                ajax: 1,
-                from: from,
-                to: to,
-                distributor_id: distributor_id,
-                tso_id: tso_id,
-                execution: execution
-            },
-            success: function(data) {
-                $('#data').html(data);
-            }
-        });
-    }
-
     function printTable(tableId) {
         var printContents = document.getElementById(tableId).outerHTML;
         var originalContents = document.body.innerHTML;
