@@ -35,7 +35,9 @@ body::before{content:"";position:absolute;inset:0;background-image: url('{{ url(
 .powered{text-align:center;margin-top:30px;font-size:12px;color:#64748b;}
 .powered a{color:#3b82f6;text-decoration:none;}
 .password-field{position:relative;}
-.password-field input{width:100%;padding:15px 45px 15px 16px;/* right padding for eye icon */
+.pas
+
+sword-field input{width:100%;padding:15px 45px 15px 16px;/* right padding for eye icon */
  border-radius:16px;border:1px solid #CBD5E1;outline:none;background:#F1F5F9;color:#1F2937;font-size:14px;}
 .toggle-eye{position:absolute;right:15px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:18px;opacity:0.7;transition:0.2s;}
 .toggle-eye:hover{opacity:1;}
@@ -173,6 +175,11 @@ body::before{content:"";position:absolute;inset:0;background-image: url('{{ url(
         </div>
     </form> -->
 
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            {{ $errors->first() }}
+        </div>
+    @endif
 
     <form method="POST" action="{{ route('login') }}">
         @csrf
