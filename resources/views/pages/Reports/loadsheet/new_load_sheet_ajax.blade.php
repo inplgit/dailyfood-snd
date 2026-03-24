@@ -90,15 +90,15 @@ echo MasterFormsHelper::PrintHead($from, $to, 'New Load Sheet', $tso_id);
 
                 <!-- Employee Total -->
                 <tr style=" font-weight:600;">
-                    <td style="text-align:left;border: 1px solid #000 !important; border-right: none !important;">{{ $employee_name }} Total</td>
-                    <td style="border-right:1px solid #000 !important;"></td>
-                    <td></td>
-                    <td class="text-right">{{ number_format($emp_qty) }}</td>
-                    <td class="text-right">{{ number_format($emp_foc) }}</td>
-                    <td class="text-right">{{ number_format($emp_avl) }}</td>
-                    <td class="text-right">{{ number_format($emp_sample) }}</td>
-                    <td class="text-right">{{ number_format($emp_amount, 2) }}</td>
-                    <td style=" border-right: 1px solid #000 !important;"></td>
+                    <th style="text-align:left;border: 1px solid #000 !important; border-right: none !important;">{{ $employee_name }} Total</th>
+                    <th style="border-right:1px solid #000 !important;"></th>
+                    <th></th>
+                    <th class="text-right">{{ number_format($emp_qty) }}</th>
+                    <th class="text-right">{{ number_format($emp_foc) }}</th>
+                    <th class="text-right">{{ number_format($emp_avl) }}</th>
+                    <th class="text-right">{{ number_format($emp_sample) }}</th>
+                    <th class="text-right">{{ number_format($emp_amount, 2) }}</th>
+                    <th style=" border-right: 1px solid #000 !important;"></th>
                 </tr>
 
                 @php
