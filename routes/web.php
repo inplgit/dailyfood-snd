@@ -19,7 +19,8 @@ use App\Models\ShopType;
 
 
 Route::get('/import-shops', function () {
-    return view('shop-import');
+    // return view('shop-import');
+    return "";
 })->name('shops.import');
 
 Route::post('/import-shops', function (Request $request) {
