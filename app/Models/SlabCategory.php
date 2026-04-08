@@ -13,6 +13,10 @@ class SlabCategory extends Model
     protected $guarded = [];
     protected $primarykey = 'id';
 
+    protected $casts = [
+        'channel_ids' => 'array'
+    ];
+
      // default save username
      protected static function booted()
      {

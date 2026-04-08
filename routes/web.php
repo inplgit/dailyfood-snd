@@ -242,7 +242,9 @@ Route::delete('/destroy_pcs/{id}', 'SchemeProductController@destroy_pcs')->name(
         Route::get('/daily-report-settings', 'DailyReportConfigController@index')->name('settings.daily_report.index');
         Route::post('/daily-report-settings', 'DailyReportConfigController@store')->name('settings.daily_report.store');
         Route::get('/daily-report-settings/download', 'DailyReportConfigController@downloadPdf')->name('settings.daily_report.download');
+        Route::get('/daily-report-settings/download-city/{city_id}', 'DailyReportConfigController@downloadCityPdf')->name('settings.daily_report.download_city');
         Route::post('/daily-report-settings/send-now', 'DailyReportConfigController@sendNow')->name('settings.daily_report.send_now');
+        Route::post('/daily-report-settings/send-city-now/{city_id}', 'DailyReportConfigController@sendCityNow')->name('settings.daily_report.send_city_now');
     });
 
     Route::group(['namespace' => 'Backend','prefix'=>'shop'],function () {

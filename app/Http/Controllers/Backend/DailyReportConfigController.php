@@ -18,21 +18,27 @@ class DailyReportConfigController extends Controller
     {
         $config = DailyReportConfig::first();
         $cities = City::where('status', 1)->get();
-        return view('pages.Settings.daily_report', compact('config', 'cities'));
+        $designations = \App\Models\Designation::where('status', 1)->get(); // 1 is active
+        return view('pages.Settings.daily_report', compact('config', 'cities', 'designations'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'emails' => 'required|string',
+            'cc_emails' => 'nullable|string',
             'city_ids' => 'nullable|array',
             'city_ids.*' => 'integer',
+            'city_emails' => 'nullable|array',
+            'designation_ids' => 'nullable|array',
+            'designation_ids.*' => 'integer',
         ]);
 
         $config = DailyReportConfig::first() ?? new DailyReportConfig();
         
-        $config->emails = $request->input('emails');
+        $config->cc_emails = $request->input('cc_emails');
         $config->city_ids = $request->input('city_ids', []);
+        $config->city_emails = $request->input('city_emails', []);
+        $config->designation_ids = $request->input('designation_ids', []);
         $config->show_tso_attendance = $request->has('show_tso_attendance');
         $config->show_distributor_sales = $request->has('show_distributor_sales');
         $config->show_product_sales = $request->has('show_product_sales');
@@ -64,19 +70,83 @@ class DailyReportConfigController extends Controller
         );
     }
 
-    public function sendNow(DailyReportService $reportService)
+    public function downloadCityPdf(DailyReportService $reportService, $cityId)
     {
         $config = DailyReportConfig::first();
-        if (!$config || empty($config->emails)) {
-             return redirect()->back()->with('error', 'Please configure recipient emails first.');
+        if (!$config) {
+             return redirect()->back()->with('error', 'Please configure settings first.');
         }
 
         $dateStr = Carbon::today()->format('Y-m-d');
-        $pdfContent = $reportService->generatePdfContent($config, $dateStr);
-        $emailsArray = array_map('trim', explode(',', $config->emails));
+        $pdfContent = $reportService->generatePdfContentForCity($config, $dateStr, $cityId);
+
+        $city = City::find($cityId);
+        $cityName = $city ? $city->name : 'City';
+        $filename = "Daily_Report_{$cityName}_{$dateStr}.pdf";
         
-        Mail::to($emailsArray)->send(new DailyReportMail($pdfContent, $dateStr));
+        return response()->streamDownload(
+            fn () => print($pdfContent),
+            $filename,
+            ['Content-Type' => 'application/pdf']
+        );
+    }
+
+    public function sendCityNow(DailyReportService $reportService, $cityId)
+    {
+        $config = DailyReportConfig::first();
+        if (!$config) {
+             return redirect()->back()->with('error', 'Please configure settings first.');
+        }
+
+        $allCcEmails = !empty($config->cc_emails) ? array_map('trim', explode(',', $config->cc_emails)) : [];
         
-        return redirect()->back()->with('success', 'Daily Report Sent Successfully.');
+        $dateStr = Carbon::today()->format('Y-m-d');
+        $cityEmailsMapping = $config->city_emails ?? [];
+
+        $citySpecificEmails = !empty($cityEmailsMapping[$cityId]) 
+            ? array_map('trim', explode(',', $cityEmailsMapping[$cityId])) 
+            : [];
+
+        if (empty($citySpecificEmails)) {
+            return redirect()->back()->with('error', 'No target emails configured for this city.');
+        }
+
+        $pdfContent = $reportService->generatePdfContentForCity($config, $dateStr, $cityId);
+        Mail::to($citySpecificEmails)->cc($allCcEmails)->send(new DailyReportMail($pdfContent, $dateStr, $cityId, $allCcEmails));
+        
+        return redirect()->back()->with('success', 'City-wise Report Sent Successfully.');
+    }
+
+    public function sendNow(DailyReportService $reportService)
+    {
+        $config = DailyReportConfig::first();
+        if (!$config) {
+             return redirect()->back()->with('error', 'Please configure settings first.');
+        }
+        
+        $allCcEmails = !empty($config->cc_emails) ? array_map('trim', explode(',', $config->cc_emails)) : [];
+        
+        $dateStr = Carbon::today()->format('Y-m-d');
+        $cityIds = $config->city_ids ?? [];
+        $cityEmailsMapping = $config->city_emails ?? [];
+
+        if (empty($cityIds)) {
+            // Fallback: Send single consolidated report to CC list if no cities selected
+            $pdfContent = $reportService->generatePdfContent($config, $dateStr);
+            Mail::to($allCcEmails)->send(new DailyReportMail($pdfContent, $dateStr, null, []));
+        } else {
+            foreach ($cityIds as $cityId) {
+                $citySpecificEmails = !empty($cityEmailsMapping[$cityId]) 
+                    ? array_map('trim', explode(',', $cityEmailsMapping[$cityId])) 
+                    : [];
+
+                if (!empty($citySpecificEmails)) {
+                    $pdfContent = $reportService->generatePdfContentForCity($config, $dateStr, $cityId);
+                    Mail::to($citySpecificEmails)->cc($allCcEmails)->send(new DailyReportMail($pdfContent, $dateStr, $cityId, $allCcEmails));
+                }
+            }
+        }
+        
+        return redirect()->back()->with('success', 'Daily Reports Sent Successfully (City-wise).');
     }
 }

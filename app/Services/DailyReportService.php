@@ -18,9 +18,9 @@ class DailyReportService
      * @param string $dateStr (Y-m-d format)
      * @return array
      */
-    public function getReportData(DailyReportConfig $config, string $dateStr)
+    public function getReportData(DailyReportConfig $config, string $dateStr, $targetCityId = null)
     {
-        $cityIds = $config->city_ids ?? [];
+        $cityIds = $targetCityId ? [$targetCityId] : ($config->city_ids ?? []);
         $sections = [];
 
         // If no specifically selected cities, treat as "All Cities" (one block)
@@ -74,53 +74,63 @@ class DailyReportService
      */
     private function getCityData($cityId, $config, $dateStr)
     {
-        $cityName = $cityId ? (\App\Models\City::find($cityId)->name ?? 'Unknown') : 'All Cities';
+        $cityName = 'All Cities';
+        if ($cityId) {
+            $cityModel = \App\Models\City::find($cityId);
+            $cityName = $cityModel ? $cityModel->name : 'Unknown';
+        }
         
         $data = [
             'cityName' => $cityName,
+            'cityId' => $cityId,
             'overall' => [],
             'tsoData' => [],
             'distributorSales' => [],
+            'distributorTotals' => ['orders' => 0, 'qty' => 0, 'amount' => 0],
             'productSales' => [],
+            'productTotals' => ['qty' => 0],
             'topTsos' => [],
             'bottomTsos' => [],
             'topShops' => [],
             'bottomShops' => [],
+            'attendanceDetails' => [],
         ];
 
-        // TSO Attendance
+        // Detailed Attendance (Designation-wise)
         if ($config->show_tso_attendance) {
-            $tsoQuery = TSO::with('distributor')
-                ->where('status', 1)
-                ->where('active', 1);
+            $attendanceQuery = DB::table('tso as t')
+                ->leftJoin('attendences as a', function($join) use ($dateStr) {
+                    $join->on('a.user_id', '=', 't.user_id')
+                         ->whereDate('a.in', $dateStr);
+                })
+                ->join('designations as d', 'd.id', '=', 't.designation_id')
+                ->where('t.status', 1)
+                ->where('t.active', 1);
 
             if ($cityId) {
-                $tsoQuery->where('city', $cityId);
+                $attendanceQuery->where('t.city', $cityId);
             }
 
-            $allTsos = $tsoQuery->get();
-            $allTsoIds = $allTsos->pluck('id')->toArray();
-            
-            $presentTsoIds = DB::table('attendences')
-                ->whereDate('in', $dateStr)
-                ->whereIn('tso_id', $allTsoIds)
-                ->pluck('tso_id')
-                ->toArray();
-                
-            $absentList = $allTsos->filter(function($tso) use ($presentTsoIds) {
-                return !in_array($tso->id, $presentTsoIds);
-            })->map(function($tso) {
-                return (object)[
-                    'name' => $tso->name,
-                    'distributor_name' => $tso->distributor ? $tso->distributor->distributor_name : 'N/A'
-                ];
-            });
+            if (!empty($config->designation_ids)) {
+                $attendanceQuery->whereIn('t.designation_id', $config->designation_ids);
+            }
 
+            $attendanceRecords = $attendanceQuery->select(
+                't.name',
+                'd.name as designation',
+                'a.in as check_in',
+                'a.out as check_out'
+            )->orderBy('d.id')->orderBy('t.name')->get();
+
+            $data['attendanceDetails'] = $attendanceRecords->groupBy('designation');
+
+            // Legacy TSO Attendance counters (optional but kept for compatibility)
+            $totalTsos = $attendanceRecords->count();
+            $presentCount = $attendanceRecords->whereNotNull('check_in')->count();
             $data['tsoData'] = [
-                'total' => $allTsos->count(),
-                'present_count' => count($presentTsoIds),
-                'absent_count' => $absentList->count(),
-                'absent_list' => $absentList
+                'total' => $totalTsos,
+                'present_count' => $presentCount,
+                'absent_count' => $totalTsos - $presentCount,
             ];
         }
 
@@ -145,6 +155,12 @@ class DailyReportService
                 ->groupBy('d.id', 'd.distributor_name')
                 ->orderByDesc('total_amount')
                 ->get();
+
+            foreach ($data['distributorSales'] as $dist) {
+                $data['distributorTotals']['orders'] += $dist->total_orders;
+                $data['distributorTotals']['qty'] += $dist->total_qty;
+                $data['distributorTotals']['amount'] += $dist->total_amount;
+            }
         }
 
         // Product Sales
@@ -167,6 +183,10 @@ class DailyReportService
                 ->groupBy('p.id', 'p.product_name')
                 ->orderByDesc('total_qty')
                 ->get();
+
+            foreach ($data['productSales'] as $prod) {
+                $data['productTotals']['qty'] += $prod->total_qty;
+            }
         }
 
         // Top/Bottom TSO
@@ -229,6 +249,16 @@ class DailyReportService
     public function generatePdfContent(DailyReportConfig $config, string $dateStr)
     {
         $data = $this->getReportData($config, $dateStr);
+        $pdf = Pdf::loadView('emails.daily_report_pdf', $data);
+        return $pdf->output();
+    }
+
+    /**
+     * Generate the PDF content for a specific city.
+     */
+    public function generatePdfContentForCity(DailyReportConfig $config, string $dateStr, $cityId)
+    {
+        $data = $this->getReportData($config, $dateStr, $cityId);
         $pdf = Pdf::loadView('emails.daily_report_pdf', $data);
         return $pdf->output();
     }

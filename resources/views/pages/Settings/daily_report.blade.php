@@ -13,40 +13,95 @@
                     @csrf
 
                     <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="emails" class="form-label">Recipient Emails</label>
-                            <input type="text" class="form-control" id="emails" name="emails" value="{{ old('emails', $config->emails ?? '') }}" placeholder="email1@example.com, email2@example.com" required>
-                            <small class="text-muted">Enter multiple email addresses separated by commas.</small>
+                        <div class="col-md-12">
+                            <label for="cc_emails" class="form-label">CC Emails (Dynamic)</label>
+                            <input type="text" class="form-control" id="cc_emails" name="cc_emails" value="{{ old('cc_emails', $config->cc_emails ?? '') }}" placeholder="cc1@example.com, cc2@example.com" autocomplete="off">
+                            <small class="text-muted">Will be added to EVERY city-wise email.</small>
                         </div>
-                        <div class="col-md-6 d-flex align-items-center">
-                            <div class="form-check form-switch form-switch-lg mt-3">
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12 d-flex align-items-center">
+                            <div class="form-check form-switch form-switch-lg">
                                 <input type="checkbox" class="form-check-input" id="is_active" name="is_active" value="1" {{ old('is_active', $config->is_active ?? true) ? 'checked' : '' }}>
                                 <label class="form-check-label" for="is_active">Enable Daily Automated Email (at 8:00 PM)</label>
                             </div>
                         </div>
                     </div>
 
-                    <h5 class="mb-3 mt-4">Select Cities to Include in Report</h5>
+                    <h5 class="mb-3 mt-4">Select Cities & Enter Target Emails</h5>
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="border p-3 rounded" style="max-height: 400px; overflow-y: auto; background-color: #f8f9fa;">
+                                @php
+                                    $selectedCities = $config->city_ids ?? [];
+                                    $cityEmails = $config->city_emails ?? [];
+                                @endphp
+                                <table class="table table-sm table-borderless">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50px;">Select</th>
+                                            <th style="width: 150px;">City Name</th>
+                                            <th>Target Emails</th>
+                                            <th class="text-center" style="width: 250px;">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($cities as $city)
+                                            <tr>
+                                                <td>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="city_ids[]" id="city_{{ $city->id }}" value="{{ $city->id }}" {{ in_array($city->id, $selectedCities) ? 'checked' : '' }}>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <label class="form-check-label" for="city_{{ $city->id }}">
+                                                        {{ $city->name }}
+                                                    </label>
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm" name="city_emails[{{ $city->id }}]" value="{{ $cityEmails[$city->id] ?? '' }}" placeholder="asm1@example.com, asm2@example.com" autocomplete="off">
+                                                </td>
+                                                <td class="text-center">
+                                                    <div class="btn-group" role="group">
+                                                        <a href="{{ route('settings.daily_report.download_city', $city->id) }}" class="btn btn-sm btn-outline-success" title="Download This City PDF">
+                                                            <i class="fa fa-download"></i>
+                                                        </a>
+                                                        <button type="submit" formaction="{{ route('settings.daily_report.send_city_now', $city->id) }}" class="btn btn-sm btn-outline-info" title="Send This City Now">
+                                                            <i class="fa fa-paper-plane"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                            <small class="text-muted">Only checked cities will be included in the report. If no specific emails are entered for a checked city, it will fallback to the Recipient Emails list above.</small>
+                        </div>
+                    </div>
+
+                    <h5 class="mb-3 mt-4">Select Designations for Attendance Report</h5>
                     <div class="row mb-3">
                         <div class="col-12">
                             <div class="border p-3 rounded" style="max-height: 200px; overflow-y: auto; background-color: #f8f9fa;">
                                 @php
-                                    $selectedCities = $config->city_ids ?? [];
+                                    $selectedDesignations = $config->designation_ids ?? [];
                                 @endphp
                                 <div class="row">
-                                    @foreach($cities as $city)
+                                    @foreach($designations as $designation)
                                         <div class="col-md-3 mb-2">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="city_ids[]" id="city_{{ $city->id }}" value="{{ $city->id }}" {{ in_array($city->id, $selectedCities) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="city_{{ $city->id }}">
-                                                    {{ $city->name }}
+                                                <input class="form-check-input" type="checkbox" name="designation_ids[]" id="desig_{{ $designation->id }}" value="{{ $designation->id }}" {{ in_array($designation->id, $selectedDesignations) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="desig_{{ $designation->id }}">
+                                                    {{ $designation->name }}
                                                 </label>
                                             </div>
                                         </div>
                                     @endforeach
                                 </div>
                             </div>
-                            <small class="text-muted">If no cities are selected, the report will show "All Cities" data combined.</small>
+                            <small class="text-muted">Only selected designations will be included in the "Daily Attendance" section of the report.</small>
                         </div>
                     </div>
 

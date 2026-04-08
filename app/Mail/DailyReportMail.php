@@ -15,17 +15,19 @@ class DailyReportMail extends Mailable
     public $pdfContent;
     public $dateStr;
     public $cityId;
+    public $ccEmails;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($pdfContent, $dateStr, $cityId = null)
+    public function __construct($pdfContent, $dateStr, $cityId = null, $ccEmails = [])
     {
         $this->pdfContent = $pdfContent;
         $this->dateStr = $dateStr;
         $this->cityId = $cityId;
+        $this->ccEmails = $ccEmails;
     }
 
     /**
@@ -38,7 +40,7 @@ class DailyReportMail extends Mailable
         $subject = 'Daily Summary Report - ' . $this->dateStr;
         $filename = 'Daily_Report_Summary_' . $this->dateStr . '.pdf';
 
-        return $this->from(config('mail.from.address'), config('mail.from.name'))
+        $mail = $this->from(config('mail.from.address'), config('mail.from.name'))
                     ->subject($subject)
                     ->view('emails.daily_report')
                     ->with([
@@ -47,5 +49,11 @@ class DailyReportMail extends Mailable
                     ->attachData($this->pdfContent, $filename, [
                         'mime' => 'application/pdf',
                     ]);
+
+        if (!empty($this->ccEmails)) {
+            $mail->cc($this->ccEmails);
+        }
+
+        return $mail;
     }
 }
