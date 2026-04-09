@@ -12,9 +12,9 @@
         .table th { background-color: #f2f2f2; font-weight: bold;}
         .text-right { text-align: right;}
         .text-center { text-align: center;}
-        .page-break1{page-break-before:always;}
+        .page-break1{page-break-before:auto;}
         .page-break-after{page-break-after:always;}
-        .table1{page-break-inside:avoid;}
+        .table1{page-break-inside:auto;}
         .tr1{page-break-inside:avoid;page-break-after:auto;}
         .header-box h1{text-align:center;}
         .header-box{display:flex;align-items:center;justify-content:space-between;}
@@ -159,15 +159,12 @@
      
                  @if($config->show_product_sales)
                  <div class="mb-4">
-                     {{-- <h3 style="border-bottom: 2px solid #0056b3; padding-bottom: 5px;">Product Sales (Qty)</h3> --}}
-                     <table class="table">
+
+                    <div class="{{ $totalAttendance >= 15 ? 'page-break1' : '' }}">
+                         <h3 style="border-bottom: 2px solid #0056b3; padding-bottom: 5px;">Product Sales (Qty)</h3>
+                     </div>
+                     <table class="table {{ $totalAttendance <= 15 ? 'table1' : '' }}">
                          <thead>
-                             <tr>
-                                 <th colspan="2">
-     
-                                     <h3 style="border-bottom: 2px solid #0056b3; padding-bottom: 5px;">Product Sales (Qty)</h3>
-                                 </th>
-                             </tr>
                              <tr>
                                  <th>Product Name</th>
                                  <th class="text-right">Quantity Sold</th>
@@ -197,15 +194,12 @@
      
                  @if($config->show_top_bottom_tso)
                  <div class="mb-4">
-                     {{-- <h3 style="border-bottom: 2px solid #0056b3; padding-bottom: 5px;">Top 10 TSOs (By Sales)</h3> --}}
-                     <table class="table page-break">
+                    <div class="{{ $totalAttendance >= 15 ? 'page-break1' : '' }}">
+                        <h3 style="border-bottom: 2px solid #0056b3; padding-bottom: 5px;">Top 10 TSOs (By Sales)</h3>
+                     </div>
+                  
+                     <table class="table {{ $totalAttendance <= 15 ? 'table1' : '' }}">
                          <thead>
-                             <tr>
-                                 <th colspan="2">
-     
-                                     <h3 style="border-bottom: 2px solid #0056b3; padding-bottom: 5px;">Top 10 TSOs (By Sales)</h3>
-                                 </th>
-                             </tr>
                              <tr>
                                  <th>TSO Name</th>
                                  <th class="text-right">Sales Amount</th>
@@ -232,14 +226,12 @@
                      </table>
                      
                      @if(count($data['bottomTsos']) > 0)
-                     {{-- <h3 style="border-bottom: 2px solid #0056b3; padding-bottom: 5px;">Bottom 10 TSOs</h3> --}}
-                     <table class="table">
+
+                    <div class="{{ $totalAttendance >= 15 ? 'page-break1' : '' }}">
+                        <h3 style="border-bottom: 2px solid #0056b3; padding-bottom: 5px;">Bottom 10 TSOs</h3>
+                     </div>
+                     <table class="table {{ $totalAttendance <= 15 ? 'table1' : '' }}">
                          <thead>
-                             <tr>
-                                 <th colspan="2">
-                                     <h3 style="border-bottom: 2px solid #0056b3; padding-bottom: 5px;">Bottom 10 TSOs</h3>
-                                 </th>
-                             </tr>
                              <tr>
                                  <th>TSO Name</th>
                                  <th class="text-right">Sales Amount</th>
@@ -266,15 +258,11 @@
      
                  @if($config->show_top_bottom_shop)
                  <div class="mb-4">
-                     {{-- <h3 style="border-bottom: 2px solid #0056b3; padding-bottom: 5px;">Top 10 Shops</h3> --}}
-                     <table class="table">
+                    <div class="{{ $totalAttendance >= 15 ? 'page-break1' : '' }}">
+                       <h3 style="border-bottom: 2px solid #0056b3; padding-bottom: 5px;">Top 10 Shops</h3>
+                     </div>
+                     <table class="table {{ $totalAttendance <= 15 ? 'table1' : '' }}">
                          <thead>
-                             <tr>
-                                 <th colspan="2">
-     
-                                     <h3 style="border-bottom: 2px solid #0056b3; padding-bottom: 5px;">Top 10 Shops</h3>
-                                 </th>
-                             </tr>
                              <tr>
                                  <th>Shop Name</th>
                                  <th class="text-right">Amount</th>
@@ -301,15 +289,14 @@
                      </table>
      
                      @if(count($data['bottomShops']) > 0)
-                     {{-- <h3 style="border-bottom: 2px solid #0056b3; padding-bottom: 5px;">Bottom 10 Shops</h3> --}}
-                     <table class="table">
+
+                    <div class="{{ $totalAttendance >= 15 ? 'page-break1' : '' }}">
+                       <h3 style="border-bottom: 2px solid #0056b3; padding-bottom: 5px;">Bottom 10 Shops</h3> 
+                     </div>
+
+
+                     <table class="table {{ $totalAttendance <= 15 ? 'table1' : '' }}">
                          <thead>
-                             <tr>
-                                 <th colspan="2">
-     
-                                     <h3 style="border-bottom: 2px solid #0056b3; padding-bottom: 5px;">Bottom 10 Shops</h3>
-                                 </th>
-                             </tr>
                              <tr>
                                  <th>Shop Name</th>
                                  <th class="text-right">Amount</th>
@@ -338,9 +325,13 @@
      
          @if($config->show_overall_sales)
          <div class="mb-4" style="border-top: 2px solid #333; padding-top: 10px;">
-             <table class="table">
+
+            <div class="{{ $totalAttendance >= 15 ? 'page-break1' : '' }}">
+                <h2 class="text-center">GRAND TOTAL SUMMARY</h2>
+            </div>
+
+             <table class="table {{ $totalAttendance <= 15 ? 'table1' : '' }}">
                  <thead>
-                     <tr><th colspan="3"><h2 class="text-center">GRAND TOTAL SUMMARY</h2></th></tr>
                      <tr>
                          <th class="text-center">Total Orders</th>
                          <th class="text-center">Total Quantity</th>
