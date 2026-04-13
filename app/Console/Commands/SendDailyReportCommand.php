@@ -44,25 +44,59 @@ class SendDailyReportCommand extends Command
     {
         $config = DailyReportConfig::where('is_active', 1)->first();
 
-        if (!$config || empty($config->emails)) {
-            $this->info('No active daily report configuration found or no emails set.');
+        if (!$config) {
+            $this->info('No active daily report configuration found.');
             return 0;
         }
 
-        $dateStr = Carbon::today()->format('Y-m-d');
-        $emails = array_map('trim', explode(',', $config->emails));
-        
-        // Generate PDF
-        $pdfContent = $reportService->generatePdfContent($config, $dateStr);
+        $allCcEmails = !empty($config->cc_emails)
+            ? array_map('trim', explode(',', $config->cc_emails))
+            : [];
 
-        // Send Email to all recipients
-        foreach ($emails as $email) {
-            if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                Mail::to($email)->send(new DailyReportMail($pdfContent, $dateStr));
+        $dateStr = Carbon::today()->format('Y-m-d');
+        $cityIds = $config->city_ids ?? [];
+        $cityEmailsMapping = $config->city_emails ?? [];
+
+        if (empty($cityIds)) {
+            // ✅ Fallback: send consolidated report
+            $pdfContent = $reportService->generatePdfContent($config, $dateStr);
+
+            if (!empty($allCcEmails)) {
+                Mail::to($allCcEmails)
+                    ->send(new DailyReportMail($pdfContent, $dateStr, null, []));
+            }
+
+            $this->info('Consolidated report sent to CC emails.');
+        } else {
+            foreach ($cityIds as $cityId) {
+
+                $citySpecificEmails = !empty($cityEmailsMapping[$cityId])
+                    ? array_map('trim', explode(',', $cityEmailsMapping[$cityId]))
+                    : [];
+
+                if (!empty($citySpecificEmails)) {
+
+                    $pdfContent = $reportService->generatePdfContentForCity(
+                        $config,
+                        $dateStr,
+                        $cityId
+                    );
+
+                    Mail::to($citySpecificEmails)
+                        ->cc($allCcEmails)
+                        ->send(new DailyReportMail(
+                            $pdfContent,
+                            $dateStr,
+                            $cityId,
+                            $allCcEmails
+                        ));
+
+                    $this->info("Report sent for city ID: {$cityId}");
+                }
             }
         }
 
-        $this->info("Consolidated daily report sent to: " . implode(', ', $emails));
+        $this->info('Daily Reports Sent Successfully (City-wise).');
         return 0;
     }
 }
