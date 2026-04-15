@@ -748,7 +748,6 @@ class ReportController extends Controller
                 ->groupBy('a.id', 'b.distributor_name', 'c.name', 'c.id')
                 ->orderBy('a.id', 'ASC')
                 ->get();
-            dd($data);
             // preload sale orders
             // preload sale orders
             // $saleOrdersAll = DB::table('sale_orders')
