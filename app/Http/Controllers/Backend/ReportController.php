@@ -707,7 +707,7 @@ class ReportController extends Controller
                     }
                 })
                 ->join('tso as c', 'c.id', '=', 'st.tso_id')
-                ->join('users as d', 'd.id', '=', 'c.manager')
+                ->leftJoin('users as d', 'd.id', '=', 'c.manager')
                 ->leftJoin($ordersAgg, function ($join) {
                     $join->on('a.id', '=', 'ord.shop_id')
                         ->on('sv.visit_date', '=', 'ord.order_date');
@@ -725,6 +725,7 @@ class ReportController extends Controller
                     'c.id as tso_id',
                     'c.user_id',
                     'd.name as manager_name',
+                    'c.manager as manager_id',
                     'sv.visit_date',
                     'sv.created_at as visit_created_at',
                     'sv.latitude as visit_latitude',
@@ -747,6 +748,7 @@ class ReportController extends Controller
                 ->groupBy('a.id', 'b.distributor_name', 'c.name', 'c.id')
                 ->orderBy('a.id', 'ASC')
                 ->get();
+            dd($data);
             // preload sale orders
             // preload sale orders
             // $saleOrdersAll = DB::table('sale_orders')
@@ -791,6 +793,8 @@ class ReportController extends Controller
                 ->groupBy(function ($order) {
                     return $order->shop_id . '|' . $order->tso_id . '|' . $order->distributor_id;
                 });
+                // $saleOrdersAll = SaleOrder::with(['usersLocation'])->whereBetween('dc_date', [$from, $to])->where('tso_id', $tso_id)->get();
+                // dd($saleOrdersAll);
             // preload visits
             $allShopVisits = DB::table('shop_visits')
                 ->whereBetween('visit_date', [$from, $to])
@@ -817,6 +821,48 @@ class ReportController extends Controller
             );
         }
         return view($this->page . 'orderBookerDailyActivityLocation.order_booker_daily_activity_location_list');
+    }
+
+    public function tso_tracking_report(Request $request)
+    {
+        $from = $request->from;
+        $to = $request->to;
+        $distributor_id = $request->distributor_id;
+        $tso_id = $request->tso_id;
+
+        // Filter out empty values if arrays are provided
+        if (is_array($distributor_id)) {
+            $distributor_id = array_filter($distributor_id);
+        }
+        if (is_array($tso_id)) {
+            $tso_id = array_filter($tso_id);
+        }
+
+        if ($request->ajax()) {
+            $data = \DB::table('tso_tracking_histories as a')
+                ->join('tso as b', 'a.tso_id', '=', 'b.id')
+                ->join('distributors as c', 'a.distributor_id', '=', 'c.id')
+                ->join('users as d', 'a.user_id', '=', 'd.id')
+                ->when(!empty($distributor_id), function ($q) use ($distributor_id) {
+                    return is_array($distributor_id) ? $q->whereIn('a.distributor_id', $distributor_id) : $q->where('a.distributor_id', $distributor_id);
+                })
+                ->when(!empty($tso_id), function ($q) use ($tso_id) {
+                    return is_array($tso_id) ? $q->whereIn('a.tso_id', $tso_id) : $q->where('a.tso_id', $tso_id);
+                })
+                ->when($from && $to, fn($q) => $q->whereBetween(\DB::raw('DATE(a.sync_date_time)'), [$from, $to]))
+                ->select(
+                    'a.*',
+                    'b.name as tso_name',
+                    'c.distributor_name',
+                    'd.name as user_name'
+                )
+                ->orderBy('a.sync_date_time', 'ASC')
+                ->get();
+
+            return view($this->page . 'tsoTracking.report_ajax', compact('data', 'from', 'to', 'distributor_id', 'tso_id'));
+        }
+
+        return view($this->page . 'tsoTracking.report');
     }
     public function sales_return_report(Request $request)
     {

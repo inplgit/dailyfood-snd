@@ -136,6 +136,8 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'API\V1'], functi
 
     
 
-    // Route::get('rack/search','RackController@search');
+    Route::controller('TrackingController')->prefix("tracking")->group(function(){
+      Route::post('store', "store");
+    });
   });
 });

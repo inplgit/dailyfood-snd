@@ -229,7 +229,7 @@
                         <td>{{ $date }}</td>
                         <td>{{ $time }}</td>
                         <td>{{ $row->tso }}</td>
-                        <td>{{ $row->manager_name }}</td>
+                        <td>{{ $row->manager_name ?? '-' }}</td>
                         <td>{{ $row->distributor_name }}</td>
                         <td>{{ $row->shop_name }}</td>
                         <td>Productive Shop</td>
@@ -252,7 +252,7 @@
                         <td>{{ $date }}</td>
                         <td>{{ $time }}</td>
                         <td>{{ $row->tso }}</td>
-                        <td>{{ $row->manager_name }}</td>
+                        <td>{{ $row->manager_name ?? '-' }}</td>
                         <td>{{ $row->distributor_name }}</td>
                         <td>{{ $row->shop_name }}</td>
                         <td>Unproductive Shop</td>

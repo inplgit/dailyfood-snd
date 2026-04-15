@@ -468,6 +468,14 @@ $master = new MasterFormsHelper();
                                                 </a>
                                             </li>
                                             @endcan
+                                            @can('tso_tracking_report')
+                                            <li>
+                                                <a href="{{ route('report.tso_tracking_report') }}">
+                                                    <i class="fas fa-circle"></i>
+                                                    <span>TSO Tracking Report</span>
+                                                </a>
+                                            </li>
+                                            @endcan
                                         </ul>
                                     </div>
                                 </div>

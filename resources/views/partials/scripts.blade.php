@@ -83,6 +83,7 @@
 <script src="{{ url('/public/assets/vendors/js/pickers/flatpickr/flatpickr.min.js') }}"></script>
 <script src="{{ url('/public/assets/js/scripts/pages/app-email.js') }}"></script>
 
+@if (!View::hasSection('disable_global_google_map'))
 <script>
     var latitude = parseFloat({{ isset($shop->latitude)?$shop->latitude:24.8607343}}); // Example latitude
     var longitude = parseFloat({{ isset($shop->longitude)?$shop->longitude:67.0011364}}); // Example longitude
@@ -91,6 +92,7 @@
     src="https://maps.googleapis.com/maps/api/js?key={{ env('MAP_KEY') }}&libraries=places&callback=initAutocomplete">
 </script>
 <script src="{{ url('/public/assets/js/map.js') }}"></script>
+@endif
 <!-- END: Page JS-->
 <script>
     $(document).ready(function() {

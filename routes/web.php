@@ -365,6 +365,7 @@ Route::group(['middleware' => ['auth', 'track']], function () {
         Route::get('order_vs_execution_product_wise', 'ReportController@order_vs_execution_product_wise')->name('order_vs_execution_product_wise');
         Route::get('distributer_product_sales_value_report', 'ReportController@distributer_product_sales_value_report')->name('distributer_product_sales_value_report');
         Route::get('daily_booking_unit_summary', 'ReportController@daily_booking_unit_summary')->name('daily_booking_unit_summary');
+        Route::get('tso_tracking_report', 'ReportController@tso_tracking_report')->name('report.tso_tracking_report');
         Route::get('app_version_report', 'ReportController@app_version_report')->name('app_version_report');
         Route::get('non_dispatch_order_report', 'ReportController@non_dispatch_order_report')->name('non_dispatch_order_report');
         Route::get('product_wise_sale', 'ReportController@product_wise_sale')->name('product_wise_sale');
