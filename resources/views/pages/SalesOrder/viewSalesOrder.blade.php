@@ -15,7 +15,7 @@
 .logo.logo-flex-cont{display:flex;align-items:baseline;}
 .logo-text p{color:#000;font-weight:bold;font-size:18px;}
 body{font-family:Arial,sans-serif;margin:0;padding:0;background:#fff;}
-.invoice-container{width:900px;margin:auto;padding:20px 0px;}
+.invoice-container{width:800px;margin:auto;padding:20px 0px;}
 h2,h3,h4,p,table{margin:0;padding:0;}
 .header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
 .logo img{width:80px;}
