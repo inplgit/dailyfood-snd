@@ -497,16 +497,16 @@ h2,h3,h4,p,table{margin:0;padding:0;}
 
 
               <tr style="border-bottom:5px solid #000;">
+                <td></td>
+                <td></td>
+                <td></td>
                 <td><u>{{ number_format($total_qty) }}</u></td>
                 <td></td>
                 <td></td>
                 <td></td>
                 <td></td>
                 <td></td>
-                <td></td>
                 <td><u>{{number_format($item_total_amounts,2)}}</u></td>
-                <td></td>
-                <td></td>
                    <td></td>
                 <td></td>
                 <td></td>
@@ -527,9 +527,9 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                 <td></td>
                 <td></td>
                 <td></td>
-                <td><u>{{number_format($row_percentage_amount_total, 2) }}</u></td>
-                 <td></td>
                 <td></td>
+                <td></td>
+                <td><u>{{number_format($row_percentage_amount_total, 2) }}</u></td>
                 <td></td>
                 <td></td>
                
