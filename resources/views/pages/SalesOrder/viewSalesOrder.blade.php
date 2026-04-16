@@ -15,7 +15,7 @@
 .logo.logo-flex-cont{display:flex;align-items:baseline;}
 .logo-text p{color:#000;font-weight:bold;font-size:18px;}
 body{font-family:Arial,sans-serif;margin:0;padding:0;background:#fff;}
-.invoice-container{width:800px;margin:auto;padding:20px 0px;}
+.invoice-container{width:900px;margin:auto;padding:20px 0px;}
 h2,h3,h4,p,table{margin:0;padding:0;}
 .header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
 .logo img{width:80px;}
@@ -520,8 +520,8 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                 <td></td>
                 <td></td>
                 <td></td>
-                <!-- <td></td>
-                <td></td> -->
+                <td></td>
+                <td></td>
                 <td><u>{{number_format($a_d_amt_total,2)}}</u></td> 
                 <td></td>
                 <td></td>
@@ -530,8 +530,8 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                 <td><u>{{number_format($row_percentage_amount_total, 2) }}</u></td>
                  <td></td>
                 <td></td>
-                <!-- <td></td>
-                <td></td> -->
+                <td></td>
+                <td></td>
                
                 <td><u>{{ number_format($grand_total, 2) }}</u></td>
                 </tr>
