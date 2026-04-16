@@ -530,8 +530,8 @@ h2,h3,h4,p,table{margin:0;padding:0;}
                 <td></td>
                 <td></td>
                 <td><u>{{number_format($row_percentage_amount_total, 2) }}</u></td>
-                <td></td>
-                <td></td>
+                <!-- <td></td>
+                <td></td> -->
                
                 <td><u>{{ number_format($grand_total, 2) }}</u></td>
                 </tr>
