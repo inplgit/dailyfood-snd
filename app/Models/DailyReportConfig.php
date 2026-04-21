@@ -18,12 +18,16 @@ class DailyReportConfig extends Model
         'cc_emails',
         'city_emails',
         'designation_ids',
+        'zero_sale_designation_ids',
+        'show_zero_sale_tso',
     ];
     
     protected $casts = [
         'city_ids' => 'array',
         'city_emails' => 'array',
         'designation_ids' => 'array',
+        'zero_sale_designation_ids' => 'array',
+        'show_zero_sale_tso' => 'boolean',
         'show_tso_attendance' => 'boolean',
         'show_distributor_sales' => 'boolean',
         'show_product_sales' => 'boolean',

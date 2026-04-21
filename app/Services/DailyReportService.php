@@ -87,6 +87,8 @@ class DailyReportService
             'tsoData' => [],
             'distributorSales' => [],
             'distributorTotals' => ['orders' => 0, 'qty' => 0, 'amount' => 0],
+            'distributorMtdSales' => [],
+            'distributorMtdTotals' => ['orders' => 0, 'qty' => 0, 'amount' => 0],
             'productSales' => [],
             'productTotals' => ['qty' => 0],
             'topTsos' => [],
@@ -94,6 +96,7 @@ class DailyReportService
             'topShops' => [],
             'bottomShops' => [],
             'attendanceDetails' => [],
+            'zeroSaleTsos' => [],
         ];
 
         // Detailed Attendance (Designation-wise)
@@ -160,6 +163,34 @@ class DailyReportService
                 $data['distributorTotals']['orders'] += $dist->total_orders;
                 $data['distributorTotals']['qty'] += $dist->total_qty;
                 $data['distributorTotals']['amount'] += $dist->total_amount;
+            }
+
+            // MTD Distributor Sales (1st of month to today)
+            $monthStart = Carbon::parse($dateStr)->startOfMonth()->format('Y-m-d');
+            $mtdQuery = DB::table('sale_orders as so')
+                ->join('distributors as d', 'd.id', '=', 'so.distributor_id')
+                ->whereBetween('so.dc_date', [$monthStart, $dateStr])
+                ->where('so.status', 1);
+
+            if ($cityId) {
+                $mtdQuery->join('tso as t_mtd', 't_mtd.id', '=', 'so.tso_id')
+                          ->where('t_mtd.city', $cityId);
+            }
+
+            $data['distributorMtdSales'] = $mtdQuery->select(
+                    'd.distributor_name',
+                    DB::raw('COUNT(so.id) as total_orders'),
+                    DB::raw('SUM(so.total_pcs) as total_qty'),
+                    DB::raw('SUM(so.total_amount) as total_amount')
+                )
+                ->groupBy('d.id', 'd.distributor_name')
+                ->orderByDesc('total_amount')
+                ->get();
+
+            foreach ($data['distributorMtdSales'] as $dist) {
+                $data['distributorMtdTotals']['orders'] += $dist->total_orders;
+                $data['distributorMtdTotals']['qty'] += $dist->total_qty;
+                $data['distributorMtdTotals']['amount'] += $dist->total_amount;
             }
         }
 
@@ -238,6 +269,41 @@ class DailyReportService
 
             $data['topShops'] = $shopSales->take(10);
             $data['bottomShops'] = $shopSales->slice(-10)->reverse();
+        }
+
+        // Zero Sale TSOs (active TSOs with 0 sales today)
+        if (!empty($config->show_zero_sale_tso)) {
+            $zeroSaleQuery = DB::table('tso as t')
+                ->join('designations as d', 'd.id', '=', 't.designation_id')
+                ->join('distributors as dist', 'dist.id', '=', 't.distributor_id')
+                ->leftJoin('sale_orders as so', function($join) use ($dateStr) {
+                    $join->on('so.tso_id', '=', 't.id')
+                         ->whereDate('so.dc_date', $dateStr)
+                         ->where('so.status', 1);
+                })
+                ->where('t.status', 1)
+                ->where('t.active', 1)
+                ->whereNull('so.id'); // no sale today
+
+            if ($cityId) {
+                $zeroSaleQuery->where('t.city', $cityId);
+            }
+
+            if (!empty($config->zero_sale_designation_ids)) {
+                $zeroSaleQuery->whereIn('t.designation_id', $config->zero_sale_designation_ids);
+            }
+
+            $zeroSaleRecords = $zeroSaleQuery->select(
+                    't.name as tso_name',
+                    'd.name as designation',
+                    'dist.distributor_name',
+                    DB::raw('0 as total_sale')
+                )
+                ->orderBy('dist.distributor_name')
+                ->orderBy('t.name')
+                ->get();
+
+            $data['zeroSaleTsos'] = $zeroSaleRecords->groupBy('designation');
         }
 
         return $data;

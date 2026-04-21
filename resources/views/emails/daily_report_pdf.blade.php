@@ -156,6 +156,40 @@
                      </table>
                  </div>
                  @endif
+
+                 @if($config->show_distributor_sales && count($data['distributorMtdSales']) > 0)
+                 <div class="mb-4">
+                     <h3 style="border-bottom: 2px solid #0056b3; padding-bottom: 5px; color: #0056b3;">Distributor MTD Sales ({{ \Carbon\Carbon::parse($dateStr)->startOfMonth()->format('d M') }} – {{ \Carbon\Carbon::parse($dateStr)->format('d M Y') }})</h3>
+                     <table class="table">
+                         <thead>
+                             <tr>
+                                 <th>Distributor Name</th>
+                                 <th class="text-right">Orders</th>
+                                 <th class="text-right">Qty</th>
+                                 <th class="text-right">Amount</th>
+                             </tr>
+                         </thead>
+                         <tbody>
+                             @foreach($data['distributorMtdSales'] as $dist)
+                             <tr>
+                                 <td>{{ $dist->distributor_name }}</td>
+                                 <td class="text-right">{{ number_format($dist->total_orders) }}</td>
+                                 <td class="text-right">{{ number_format($dist->total_qty) }}</td>
+                                 <td class="text-right">{{ number_format($dist->total_amount, 2) }}</td>
+                             </tr>
+                             @endforeach
+                         </tbody>
+                         <tfoot>
+                             <tr style="background-color: #eee; font-weight: bold;">
+                                 <td>MTD TOTAL</td>
+                                 <td class="text-right">{{ number_format($data['distributorMtdTotals']['orders']) }}</td>
+                                 <td class="text-right">{{ number_format($data['distributorMtdTotals']['qty']) }}</td>
+                                 <td class="text-right">{{ number_format($data['distributorMtdTotals']['amount'], 2) }}</td>
+                             </tr>
+                         </tfoot>
+                     </table>
+                 </div>
+                 @endif
      
                  @if($config->show_product_sales)
                  <div class="mb-4">
@@ -321,33 +355,71 @@
                  </div>
                  @endif
              </div>
+                
+            @if($config->show_overall_sales)
+            <div class="mb-4" style="border-top: 2px solid #333; padding-top: 10px;">
+
+                <div class="{{ $totalAttendance >= 15 ? 'page-break1' : '' }}">
+                    <h2 class="text-center">GRAND TOTAL SUMMARY</h2>
+                </div>
+
+                <table class="table {{ $totalAttendance <= 15 ? 'table1' : '' }}">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Total Orders</th>
+                            <th class="text-center">Total Quantity</th>
+                            <th class="text-center">Total Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="font-size: 14px; font-weight: bold;">
+                            <td class="text-center">{{ number_format($overallTotals['total_orders']) }}</td>
+                            <td class="text-center">{{ number_format($overallTotals['total_qty']) }}</td>
+                            <td class="text-center">{{ number_format($overallTotals['total_amount'], 2) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            @endif
+             @if($config->show_zero_sale_tso && count($data['zeroSaleTsos']) > 0)
+             <div class="mb-4" style="page-break-before: always;">
+                 <div style="background-color: #0056b3; padding: 8px 12px; border: 1px solid #0056b3; margin-bottom: 12px;">
+                     <h2 style="color: #fff; margin: 0; text-align: center;">{{ $data['cityName'] }} — Zero Sale TSOs (Today)</h2>
+                 </div>
+                 @foreach($data['zeroSaleTsos'] as $designation => $tsos)
+                     <h4 style="color: #c0392b; margin-top: 12px;">{{ $designation }}</h4>
+                     <table class="table">
+                         <thead>
+                             <tr>
+                                 <th style="width: 40px;">#</th>
+                                 <th>TSO Name</th>
+                                 <th>Distributor</th>
+                                 <th class="text-right">Today's Sale</th>
+                             </tr>
+                         </thead>
+                         <tbody>
+                             @foreach($tsos as $idx => $tso)
+                             <tr>
+                                 <td>{{ $idx + 1 }}</td>
+                                 <td>{{ $tso->tso_name }}</td>
+                                 <td>{{ $tso->distributor_name }}</td>
+                                 <td class="text-right" style="color: red; font-weight: bold;">0</td>
+                             </tr>
+                             @endforeach
+                         </tbody>
+                         <tfoot>
+                             <tr style="background-color: #ffeaea; font-weight: bold;">
+                                 <td colspan="2">Total ({{ $designation }})</td>
+                                 <td>{{ count($tsos) }} TSOs</td>
+                                 <td class="text-right" style="color: red;">0</td>
+                             </tr>
+                         </tfoot>
+                     </table>
+                 @endforeach
+             </div>
+             @endif
          @endforeach
      
-         @if($config->show_overall_sales)
-         <div class="mb-4" style="border-top: 2px solid #333; padding-top: 10px;">
-
-            <div class="{{ $totalAttendance >= 15 ? 'page-break1' : '' }}">
-                <h2 class="text-center">GRAND TOTAL SUMMARY</h2>
-            </div>
-
-             <table class="table {{ $totalAttendance <= 15 ? 'table1' : '' }}">
-                 <thead>
-                     <tr>
-                         <th class="text-center">Total Orders</th>
-                         <th class="text-center">Total Quantity</th>
-                         <th class="text-center">Total Amount</th>
-                     </tr>
-                 </thead>
-                 <tbody>
-                     <tr style="font-size: 14px; font-weight: bold;">
-                         <td class="text-center">{{ number_format($overallTotals['total_orders']) }}</td>
-                         <td class="text-center">{{ number_format($overallTotals['total_qty']) }}</td>
-                         <td class="text-center">{{ number_format($overallTotals['total_amount'], 2) }}</td>
-                     </tr>
-                 </tbody>
-             </table>
-         </div>
-         @endif
     </div>
     <div class="abus-footer " style="position: absolute; bottom: 0; width: 100%;">
         <div class="footer">

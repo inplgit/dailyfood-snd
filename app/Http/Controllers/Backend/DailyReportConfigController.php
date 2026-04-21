@@ -31,6 +31,8 @@ class DailyReportConfigController extends Controller
             'city_emails' => 'nullable|array',
             'designation_ids' => 'nullable|array',
             'designation_ids.*' => 'integer',
+            'zero_sale_designation_ids' => 'nullable|array',
+            'zero_sale_designation_ids.*' => 'integer',
         ]);
 
         $config = DailyReportConfig::first() ?? new DailyReportConfig();
@@ -39,12 +41,14 @@ class DailyReportConfigController extends Controller
         $config->city_ids = $request->input('city_ids', []);
         $config->city_emails = $request->input('city_emails', []);
         $config->designation_ids = $request->input('designation_ids', []);
+        $config->zero_sale_designation_ids = $request->input('zero_sale_designation_ids', []);
         $config->show_tso_attendance = $request->has('show_tso_attendance');
         $config->show_distributor_sales = $request->has('show_distributor_sales');
         $config->show_product_sales = $request->has('show_product_sales');
         $config->show_top_bottom_tso = $request->has('show_top_bottom_tso');
         $config->show_top_bottom_shop = $request->has('show_top_bottom_shop');
         $config->show_overall_sales = $request->has('show_overall_sales');
+        $config->show_zero_sale_tso = $request->has('show_zero_sale_tso');
         $config->is_active = $request->has('is_active');
         
         $config->save();

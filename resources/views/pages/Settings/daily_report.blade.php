@@ -1,4 +1,5 @@
 @extends('layouts.master')
+@section('title', 'Daily Report Settings')
 
 @section('content')
 <div class="row">
@@ -24,7 +25,7 @@
                         <div class="col-md-12 d-flex align-items-center">
                             <div class="form-check form-switch form-switch-lg">
                                 <input type="checkbox" class="form-check-input" id="is_active" name="is_active" value="1" {{ old('is_active', $config->is_active ?? true) ? 'checked' : '' }}>
-                                <label class="form-check-label" for="is_active">Enable Daily Automated Email (at 8:00 PM)</label>
+                                <label class="form-check-label" for="is_active">Enable Daily Automated Email (at 11:30 PM)</label>
                             </div>
                         </div>
                     </div>
@@ -105,6 +106,30 @@
                         </div>
                     </div>
 
+                    <h5 class="mb-3 mt-4">Select Designations for Zero Sale TSO Report</h5>
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="border p-3 rounded" style="max-height: 200px; overflow-y: auto; background-color: #f8f9fa;">
+                                @php
+                                    $selectedZeroDesig = $config->zero_sale_designation_ids ?? [];
+                                @endphp
+                                <div class="row">
+                                    @foreach($designations as $designation)
+                                        <div class="col-md-3 mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="zero_sale_designation_ids[]" id="zero_desig_{{ $designation->id }}" value="{{ $designation->id }}" {{ in_array($designation->id, $selectedZeroDesig) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="zero_desig_{{ $designation->id }}">
+                                                    {{ $designation->name }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                            <small class="text-muted">Only selected designations will be included in the "Zero Sale TSOs" section of the report.</small>
+                        </div>
+                    </div>
+
                     <h5 class="mb-3 mt-4">Report Sections to Include</h5>
                     <div class="row">
                         <div class="col-md-4 mb-3">
@@ -141,6 +166,12 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="show_overall_sales" id="show_overall_sales" value="1" {{ old('show_overall_sales', $config->show_overall_sales ?? true) ? 'checked' : '' }}>
                                 <label class="form-check-label" for="show_overall_sales">Grand Total Summary Section</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="show_zero_sale_tso" id="show_zero_sale_tso" value="1" {{ old('show_zero_sale_tso', $config->show_zero_sale_tso ?? false) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="show_zero_sale_tso">Zero Sale TSOs (Today)</label>
                             </div>
                         </div>
                     </div>
