@@ -12,14 +12,14 @@
                 <div class="card">
                     <div class="card-header">
                         <h4 class="card-title">Daily Report</h4>
-                        <button type="button" onclick="downloadCSV()"class="btn btn-success">Export Excel</button>
+                        <button type="button" onclick="exportBtnWithFilters('Order Book Productive Report')" class="btn btn-success">Export Excel</button>
                     </div>
                     <div class="card-body">
                         <form method="get" action="{{ route('order_booker_productive_report') }}" id="list_data" class="form">
                             @csrf
                             <div class="row align-items-end">
-                                <div class="col-md-10">
-                                    <div class="row ">
+                                <div class="col-md-12">
+                                    <div class="row">
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label class="control-label">from</label>
@@ -57,13 +57,21 @@
                                                 </select>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-2 d-flex align-items-end">
-                                    <div class="form-group w-100">
-                                        <div class="d-flex justify-content-between">
-                                            <button onclick="get_ajax_data()" type="button" class="btn btn-primary" style="width: 49%; white-space: nowrap;">Generate</button>
-                                            <button type="button" onclick="printTableNew('.printBody')" class="btn btn-primary text-right"> Print </button>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label class="control-label">Type</label>
+                                                <select class="form-control" name="type" id="type">
+                                                    <option value="all">All</option>
+                                                    <option value="sale_order">Sale Order Wise</option>
+                                                    <option value="shop_visit">Shop Visit Wise</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 d-flex align-items-end">
+                                            <div class="form-group">
+                                                <button onclick="get_ajax_data()" type="button" class="btn btn-primary">Generate</button>
+                                                <button type="button" onclick="printTableNew('.printBody')" class="btn btn-primary ml-1"> Print </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

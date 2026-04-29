@@ -3821,11 +3821,8 @@ public function distributer_product_sales_value_report(Request $request)
         $distributor_id = $request->distributor_id;
         $tso_id = $request->tso_id;
         if ($request->ajax()) :
-            // 1. Prepare Attendance Subquery (Max Duration per shop/tso/day)
-            // We use a simplified approach: just get the attendance for the range.
-            // Ideally should match the "Max Duration" logic if multiple attendances exist.
-            // For performance and simplicity matching previous logic's intent:
-             $maxAttendenceSub = DB::table('shop_attendences as sa')
+            // 1. Get Attendances
+            $attendances = DB::table('shop_attendences as sa')
                 ->whereBetween('sa.sync_date_time', [$date . ' 00:00:00', $to . ' 23:59:59'])
                 ->when($request->distributor_id, function ($query) use ($request) {
                     $query->where('sa.distributor_id', $request->distributor_id);
@@ -3833,60 +3830,265 @@ public function distributer_product_sales_value_report(Request $request)
                 ->when($request->tso_id, function ($query) use ($request) {
                     $query->where('sa.tso_id', $request->tso_id);
                 })
-                ->select('sa.shop_id', 'sa.tso_id', 'sa.distributor_id', 'sa.check_in', 'sa.check_out', 'sa.sync_date_time');
+                ->select(
+                    'sa.shop_id', 
+                    'sa.tso_id', 
+                    DB::raw('DATE(sa.sync_date_time) as action_date'),
+                    DB::raw('MAX(sa.check_in) as time_in'),
+                    DB::raw('MAX(sa.check_out) as time_out')
+                )
+                ->groupBy('sa.shop_id', 'sa.tso_id', DB::raw('DATE(sa.sync_date_time)'))
+                ->get()
+                ->keyBy(function($item) {
+                    return $item->shop_id . '_' . $item->tso_id . '_' . $item->action_date;
+                });
 
-
-            // 2. Main Query driven by Sale Orders
-            // This ensures we get ALL Productive Shops (shops with orders) regardless of Route configuration.
-            $productivityQuery = DB::table('sale_orders as so')
-                ->join('tso', 'tso.id', '=', 'so.tso_id')
-                ->join('shops', 'shops.id', '=', 'so.shop_id')
-                // Join Attendance: match Shop, TSO, and Date
-                ->leftJoinSub($maxAttendenceSub, 'max_sa', function($join) {
-                    $join->on('max_sa.shop_id', '=', 'so.shop_id')
-                         ->on('max_sa.tso_id', '=', 'so.tso_id')
-                         // Ensure attendance is on the same day as the order
-                         ->whereRaw('DATE(max_sa.sync_date_time) = so.dc_date');
-                })
-                ->leftJoin('users_distributors', 'users_distributors.distributor_id', '=', 'so.distributor_id')
-                ->where('users_distributors.user_id', \Auth::id()) // Security check if needed, or use $this->master helper
+            // 2. Get Sale Orders
+            $orders = DB::table('sale_orders as so')
                 ->where('so.status', 1)
                 ->whereBetween('so.dc_date', [$date, $to])
-                
-                // Filters
                 ->when($request->distributor_id, function ($query) use ($request) {
                     $query->where('so.distributor_id', $request->distributor_id);
                 })
                 ->when($request->tso_id, function ($query) use ($request) {
                     $query->where('so.tso_id', $request->tso_id);
                 })
-                ->when($request->designation, function ($query) use ($request) {
-                    $query->where('tso.designation_id', $request->designation);
+                ->leftJoin('users_locations as ul', function($join) {
+                    $join->on('ul.table_id', '=', 'so.id')
+                         ->where('ul.table_name', '=', 'sale_orders');
                 })
-                ->when($request->city, function ($query) use ($request) {
-                    $query->where('tso.city', $request->city);
-                })
-                
-                ->groupBy('so.dc_date', 'so.tso_id', 'so.shop_id')
                 ->select(
-                    'so.dc_date as dated',
-                    'tso.name as employee_name',
-                    DB::raw('GROUP_CONCAT(so.invoice_no) as sale_order_no'), // Combine multiple orders for same shop/day
-                    'shops.company_name as customer',
+                    'so.shop_id', 
+                    'so.tso_id', 
+                    'so.dc_date as action_date',
+                    DB::raw('GROUP_CONCAT(so.invoice_no) as sale_order_no'),
                     DB::raw('SUM(so.total_amount) as net_amount'),
-                    
-                    // Take max/first attendance for that day (since we group by shop/day)
-                    DB::raw('MAX(max_sa.check_in) as time_in'),
-                    DB::raw('MAX(max_sa.check_out) as time_out'),
-                    
-                    'shops.latitude as shop_lat',
-                    'shops.longitude as shop_lng'
+                    DB::raw('MAX(ul.latitude) as action_lat'),
+                    DB::raw('MAX(ul.longitude) as action_lng')
                 )
-                ->orderBy('so.dc_date')
-                ->orderBy('max_sa.check_in')
-                ->orderBy('tso.name');
+                ->groupBy('so.shop_id', 'so.tso_id', 'so.dc_date')
+                ->get()
+                ->keyBy(function($item) {
+                    return $item->shop_id . '_' . $item->tso_id . '_' . $item->action_date;
+                });
 
-            $productivity = $productivityQuery->get();
+            // 3. Get Shop Visits locations (from UsersLocation linked to shop_visits)
+            $shopVisitsLocs = DB::table('shop_visits as sv')
+                ->whereBetween('sv.created_at', [$date . ' 00:00:00', $to . ' 23:59:59'])
+                ->leftJoin('users_locations as ul', function($join) {
+                    $join->on('ul.table_id', '=', 'sv.id')
+                         ->where('ul.table_name', '=', 'shop_visits');
+                })
+                ->select(
+                    'sv.shop_id',
+                    DB::raw('DATE(sv.created_at) as action_date'),
+                    DB::raw('MAX(ul.latitude) as action_lat'),
+                    DB::raw('MAX(ul.longitude) as action_lng')
+                )
+                ->groupBy('sv.shop_id', DB::raw('DATE(sv.created_at)'))
+                ->get()
+                ->keyBy(function($item) {
+                    return $item->shop_id . '_' . $item->action_date;
+                });
+
+            $productivityArray = [];
+            $processedKeys = [];
+
+            $period = new \DatePeriod(
+                new \DateTime($date),
+                new \DateInterval('P1D'),
+                (new \DateTime($to))->modify('+1 day')
+            );
+
+            // 3. Process Scheduled Shops ("Today Shops" route & day-wise)
+            foreach ($period as $dt) {
+                $currentDate = $dt->format('Y-m-d');
+                $dayName = $dt->format('l');
+
+                $dayShops = DB::table('shops as s')
+                    ->join('shop_tso as st', 'st.shop_id', '=', 's.id')
+                    ->join('tso', 'tso.id', '=', 'st.tso_id')
+                    ->join('routes as r', 'r.id', '=', 's.route_id')
+                    ->join('route_tso as rt', function($join) {
+                        $join->on('rt.route_id', '=', 'r.id')
+                             ->on('rt.tso_id', '=', 'tso.id');
+                    })
+                    ->join('route_days as rd', function($join) use ($dayName) {
+                        $join->on('rd.route_id', '=', 'r.id')
+                             ->where('rd.day', '=', $dayName);
+                    })
+                    ->leftJoin('users_distributors', 'users_distributors.distributor_id', '=', 's.distributor_id')
+                    ->where('users_distributors.user_id', \Auth::id())
+                    ->where('s.status', 1)
+                    ->where('s.active', 1)
+                    ->when($request->distributor_id, function ($query) use ($request) {
+                        $query->where('s.distributor_id', $request->distributor_id);
+                    })
+                    ->when($request->tso_id, function ($query) use ($request) {
+                        $query->where('st.tso_id', $request->tso_id);
+                    })
+                    ->when($request->designation, function ($query) use ($request) {
+                        $query->where('tso.designation_id', $request->designation);
+                    })
+                    ->when($request->city, function ($query) use ($request) {
+                        $query->where('tso.city', $request->city);
+                    })
+                    ->select(
+                        's.id as shop_id', 
+                        'tso.id as tso_id', 
+                        'tso.name as employee_name', 
+                        's.company_name as customer', 
+                        's.latitude as shop_lat', 
+                        's.longitude as shop_lng'
+                    )
+                    ->distinct()
+                    ->get();
+
+                foreach ($dayShops as $shop) {
+                    $key = $shop->shop_id . '_' . $shop->tso_id . '_' . $currentDate;
+                    $processedKeys[$key] = true;
+
+                    $att = $attendances->get($key);
+                    $ord = $orders->get($key);
+
+                    $type = '-';
+                    if ($ord && $att) {
+                        $type = 'Sale Order, Shop Visit';
+                    } elseif ($ord) {
+                        $type = 'Sale Order';
+                    } elseif ($att) {
+                        $type = 'Shop Visit';
+                    }
+
+                    $visitLoc = $shopVisitsLocs->get($shop->shop_id . '_' . $currentDate);
+
+                    $actionLat = null;
+                    $actionLng = null;
+
+                    if ($ord && $ord->action_lat) {
+                        $actionLat = $ord->action_lat;
+                        $actionLng = $ord->action_lng;
+                    } elseif ($visitLoc && $visitLoc->action_lat) {
+                        $actionLat = $visitLoc->action_lat;
+                        $actionLng = $visitLoc->action_lng;
+                    } else {
+                        $actionLat = null;
+                        $actionLng = null;
+                    }
+
+                    if ($att || $ord) {
+                        $productivityArray[] = (object)[
+                            'dated' => $currentDate,
+                            'employee_name' => $shop->employee_name,
+                            'type' => $type,
+                            'sale_order_no' => $ord ? $ord->sale_order_no : '-',
+                            'customer' => $shop->customer,
+                            'net_amount' => $ord ? $ord->net_amount : 0,
+                            'time_in' => $att ? $att->time_in : null,
+                            'time_out' => $att ? $att->time_out : null,
+                            'shop_lat' => $actionLat,
+                            'shop_lng' => $actionLng,
+                            'tso_id' => $shop->tso_id,
+                        ];
+                    } else {
+                        // No action on scheduled shop
+                        $productivityArray[] = (object)[
+                            'dated' => $currentDate, 
+                            'employee_name' => $shop->employee_name,
+                            'type' => $type,
+                            'sale_order_no' => '-',
+                            'customer' => $shop->customer,
+                            'net_amount' => 0,
+                            'time_in' => null,
+                            'time_out' => null,
+                            'shop_lat' => null,
+                            'shop_lng' => null,
+                            'tso_id' => $shop->tso_id,
+                        ];
+                    }
+                }
+            }
+
+            // 4. Add any Unscheduled (Out-of-route) productive shops
+            $allActionKeys = collect($attendances->keys())->merge($orders->keys())->unique();
+            $unprocessedKeys = $allActionKeys->diff(array_keys($processedKeys));
+
+            if ($unprocessedKeys->isNotEmpty()) {
+                // Fetch missing shop details
+                foreach ($unprocessedKeys as $key) {
+                    [$shopId, $tsoId, $actionDate] = explode('_', $key);
+                    
+                    $shop = DB::table('shops as s')
+                        ->join('tso', 'tso.id', '=', DB::raw($tsoId))
+                        ->where('s.id', $shopId)
+                        ->select(
+                            's.id as shop_id', 
+                            'tso.id as tso_id', 
+                            'tso.name as employee_name', 
+                            's.company_name as customer', 
+                            's.latitude as shop_lat', 
+                            's.longitude as shop_lng'
+                        )
+                        ->first();
+                        
+                    if ($shop) {
+                        $att = $attendances->get($key);
+                        $ord = $orders->get($key);
+                        
+                        $type = '-';
+                        if ($ord && $att) {
+                            $type = 'Sale Order, Shop Visit';
+                        } elseif ($ord) {
+                            $type = 'Sale Order';
+                        } elseif ($att) {
+                            $type = 'Shop Visit';
+                        }
+
+                        $visitLoc = $shopVisitsLocs->get($shopId . '_' . $actionDate);
+
+                        $actionLat = null;
+                        $actionLng = null;
+
+                        if ($ord && $ord->action_lat) {
+                            $actionLat = $ord->action_lat;
+                            $actionLng = $ord->action_lng;
+                        } elseif ($visitLoc && $visitLoc->action_lat) {
+                            $actionLat = $visitLoc->action_lat;
+                            $actionLng = $visitLoc->action_lng;
+                        } else {
+                            $actionLat = null;
+                            $actionLng = null;
+                        }
+
+                        $productivityArray[] = (object)[
+                            'dated' => $actionDate,
+                            'employee_name' => $shop->employee_name,
+                            'type' => $type,
+                            'sale_order_no' => $ord ? $ord->sale_order_no : '-',
+                            'customer' => $shop->customer,
+                            'net_amount' => $ord ? $ord->net_amount : 0,
+                            'time_in' => $att ? $att->time_in : null,
+                            'time_out' => $att ? $att->time_out : null,
+                            'shop_lat' => $actionLat,
+                            'shop_lng' => $actionLng,
+                            'tso_id' => $shop->tso_id,
+                        ];
+                    }
+                }
+            }
+
+            $type = $request->type;
+            if ($type === 'sale_order') {
+                $productivityArray = array_filter($productivityArray, function($row) {
+                    return $row->sale_order_no !== '-';
+                });
+            } elseif ($type === 'shop_visit') {
+                $productivityArray = array_filter($productivityArray, function($row) {
+                    return $row->time_in !== null;
+                });
+            }
+
+            $productivity = collect($productivityArray);
 
             // 3. Post-processing (Time Diff, Distance)
             $productivity = $productivity->sortBy([
@@ -3948,34 +4150,40 @@ public function distributer_product_sales_value_report(Request $request)
                 */
                 $item->distance = 0;
 
-                if ($index > 0) {
+                if ($index > 0 && $item->shop_lat && $item->shop_lng) {
 
-                    $previous = $productivity[$index - 1];
-
-                    // Only calculate if same employee and same date
-                    if ($previous->employee_name == $item->employee_name && $previous->dated == $item->dated) {
-                        if ($previous->shop_lat && $previous->shop_lng &&
-                            $item->shop_lat && $item->shop_lng) {
-
-                            $lat1 = (float) $previous->shop_lat;
-                            $lon1 = (float) $previous->shop_lng;
-                            $lat2 = (float) $item->shop_lat;
-                            $lon2 = (float) $item->shop_lng;
-
-                            $earthRadius = 6371; // KM
-
-                            $dLat = deg2rad($lat2 - $lat1);
-                            $dLon = deg2rad($lon2 - $lon1);
-
-                            $a = sin($dLat/2) * sin($dLat/2) +
-                                cos(deg2rad($lat1)) *
-                                cos(deg2rad($lat2)) *
-                                sin($dLon/2) * sin($dLon/2);
-
-                            $c = 2 * atan2(sqrt($a), sqrt(1-$a));
-
-                            $item->distance = round($earthRadius * $c, 2);
+                    // Find the last valid visited shop for this employee on this date
+                    $previous = null;
+                    for ($i = $index - 1; $i >= 0; $i--) {
+                        $candidate = $productivity[$i];
+                        if ($candidate->employee_name != $item->employee_name || $candidate->dated != $item->dated) {
+                            break; // Moved to a different date or employee
                         }
+                        if ($candidate->shop_lat && $candidate->shop_lng) {
+                            $previous = $candidate;
+                            break;
+                        }
+                    }
+
+                    if ($previous) {
+                        $lat1 = (float) $previous->shop_lat;
+                        $lon1 = (float) $previous->shop_lng;
+                        $lat2 = (float) $item->shop_lat;
+                        $lon2 = (float) $item->shop_lng;
+
+                        $earthRadius = 6371; // KM
+
+                        $dLat = deg2rad($lat2 - $lat1);
+                        $dLon = deg2rad($lon2 - $lon1);
+
+                        $a = sin($dLat/2) * sin($dLat/2) +
+                            cos(deg2rad($lat1)) *
+                            cos(deg2rad($lat2)) *
+                            sin($dLon/2) * sin($dLon/2);
+
+                        $c = 2 * atan2(sqrt($a), sqrt(1-$a));
+
+                        $item->distance = round($earthRadius * $c, 2);
                     }
                 }
 
@@ -3985,7 +4193,7 @@ public function distributer_product_sales_value_report(Request $request)
             $totalSeconds = $productivity->sum('time_spent_sec');
             $totalTimeSpent = sprintf('%02d:%02d:%02d', ($totalSeconds/3600),($totalSeconds/60%60), $totalSeconds%60);
             
-            return view($this->page . 'OrderBookerProductive.ajax', compact('productivity', 'totalNet', 'totalTimeSpent', 'from', 'to', 'distributor_id', 'tso_id'));
+            return view($this->page . 'OrderBookerProductive.ajax', compact('productivity', 'totalNet', 'totalTimeSpent', 'from', 'to', 'distributor_id', 'tso_id', 'type'));
         else :
             return view($this->page . 'OrderBookerProductive.view');
         endif;

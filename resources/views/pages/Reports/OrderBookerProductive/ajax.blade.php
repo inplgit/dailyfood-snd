@@ -23,6 +23,7 @@
                 <th>SNo</th>
                 <th>Dated</th>
                 <th>Employee Name</th>
+                <th>Type</th>
                 <th>Sale Order No</th>
                 <th>Customer</th>
                 <th>Net Amount</th>
@@ -40,6 +41,7 @@
                     <td>{{ $key + 1 }}</td>
                     <td>{{ $row->dated }}</td>
                     <td>{{ $row->employee_name }}</td>
+                    <td>{{ $row->type }}</td>
                     <td>{{ $row->sale_order_no }}</td>
                     <td>{{ $row->customer }}</td>
                     <td>{{ number_format($row->net_amount,2) }}</td>
@@ -54,7 +56,7 @@
 
         <tfoot>
             <tr>
-                <th colspan="5">Total</th>
+                <th colspan="6">Total</th>
                 <th>{{ number_format($totalNet,2) }}</th>
                 <th colspan="4"></th>
                 <th>{{ $totalTimeSpent }}</th>
