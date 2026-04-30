@@ -21,6 +21,10 @@ class LoginController extends Controller
 
 
     protected function authenticated($request, $user){
+        if ($user->user_type == 5) {
+            auth()->logout();
+            return redirect()->back()->withErrors(['email' => 'Access Denied: Your account type is not permitted to login here.']);
+        }
         if ($user->tso)
         {
             return;
