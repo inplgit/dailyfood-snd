@@ -24,8 +24,18 @@ $master = new MasterFormsHelper();
 
 @if (isset($from) && isset($to))
     @php
-        $distributorName = $distributor_id ? \App\Models\Distributor::find($distributor_id)->distributor_name : 'All';
-        $tsoName = $tso_id ? \App\Models\TSO::find($tso_id)->name : 'All';
+        if (!empty($distributor_id)) {
+            $distributorIds = is_array($distributor_id) ? $distributor_id : explode(',', $distributor_id);
+            $distributorName = \App\Models\Distributor::whereIn('id', $distributorIds)->pluck('distributor_name')->implode(', ');
+        } else {
+            $distributorName = 'All';
+        }
+        if (!empty($tso_id)) {
+            $tsoIds = is_array($tso_id) ? $tso_id : explode(',', $tso_id);
+            $tsoName = \App\Models\TSO::whereIn('id', $tsoIds)->pluck('name')->implode(', ');
+        } else {
+            $tsoName = 'All';
+        }
     @endphp
 
     <div class="dates-info-head text-center mb-3">

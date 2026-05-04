@@ -544,6 +544,8 @@ class ReportController extends Controller
                 ->where('s2.status', 1);
             if ($distributor_id) {
                 $totalShopQuery->where('s2.distributor_id', $distributor_id);
+            } else if (Auth::user()->user_type != 1) {
+                $totalShopQuery->whereIn('s2.distributor_id', MasterFormsHelper::get_users_distributors(Auth::user()->id));
             }
             if ($tso_id) {
                 $totalShopQuery->where('st2.tso_id', $tso_id);
@@ -577,11 +579,18 @@ class ReportController extends Controller
                 ->groupBy('e.shop_id', DB::raw('DATE(e.dc_date)'));
 
             $tsoIds = null;
-            if ($distributor_id && !$tso_id) {
-                $tsoIds = DB::table('tso')
-                    ->where('distributor_id', $distributor_id)
-                    ->pluck('id')
-                    ->toArray();
+            if (!$tso_id) {
+                if ($distributor_id) {
+                    $tsoIds = DB::table('tso')
+                        ->where('distributor_id', $distributor_id)
+                        ->pluck('id')
+                        ->toArray();
+                } else if (Auth::user()->user_type != 1) {
+                    $tsoIds = DB::table('tso')
+                        ->whereIn('distributor_id', MasterFormsHelper::get_users_distributors(Auth::user()->id))
+                        ->pluck('id')
+                        ->toArray();
+                }
             }
 
             $query = DB::table('shops as a')
@@ -607,7 +616,11 @@ class ReportController extends Controller
                     $join->on('a.id', '=', 'ord.shop_id')
                         ->on('sv.visit_date', '=', 'ord.order_date');
                 })  // No extra bindings array needed here
-                ->when($distributor_id, fn($q) => $q->where('a.distributor_id', $distributor_id))
+                ->when($distributor_id, fn($q) => $q->where('a.distributor_id', $distributor_id), function ($q) {
+                    if (Auth::user()->user_type != 1) {
+                        $q->whereIn('a.distributor_id', MasterFormsHelper::get_users_distributors(Auth::user()->id));
+                    }
+                })
                 ->when($tso_id, fn($q) => $q->where('st.tso_id', $tso_id))
                 ->when($tsoIds, fn($q) => $q->whereIn('st.tso_id', $tsoIds))
                 ->when($request->route_id, fn($q) => $q->where('a.route_id', $request->route_id))
@@ -680,11 +693,18 @@ class ReportController extends Controller
             ");
             // tso ids by distributor
             $tsoIds = null;
-            if ($distributor_id && !$tso_id) {
-                $tsoIds = DB::table('tso')
-                    ->where('distributor_id', $distributor_id)
-                    ->pluck('id')
-                    ->toArray();
+            if (!$tso_id) {
+                if ($distributor_id) {
+                    $tsoIds = DB::table('tso')
+                        ->where('distributor_id', $distributor_id)
+                        ->pluck('id')
+                        ->toArray();
+                } else if (Auth::user()->user_type != 1) {
+                    $tsoIds = DB::table('tso')
+                        ->whereIn('distributor_id', MasterFormsHelper::get_users_distributors(Auth::user()->id))
+                        ->pluck('id')
+                        ->toArray();
+                }
             }
             // main query
             $data = DB::table('shops as a')
@@ -712,7 +732,11 @@ class ReportController extends Controller
                     $join->on('a.id', '=', 'ord.shop_id')
                         ->on('sv.visit_date', '=', 'ord.order_date');
                 })
-                ->when($distributor_id, fn($q) => $q->where('a.distributor_id', $distributor_id))
+                ->when($distributor_id, fn($q) => $q->where('a.distributor_id', $distributor_id), function ($q) {
+                    if (Auth::user()->user_type != 1) {
+                        $q->whereIn('a.distributor_id', MasterFormsHelper::get_users_distributors(Auth::user()->id));
+                    }
+                })
                 ->when($shop_id, fn($q) => $q->where('a.id', $shop_id))
                 ->when($tsoIds, fn($q) => $q->whereIn('st.tso_id', $tsoIds))
                 ->when($route_id, fn($q) => $q->where('a.route_id', $route_id))
@@ -3193,12 +3217,36 @@ public function distributer_product_sales_value_report(Request $request)
                 ->join('shops as s', 's.id', '=', 'a.shop_id')
                 ->whereBetween('a.dc_date', [$from, $to])
 
-                ->when($request->distributor_id != null, function ($query) use ($request) {
-                    $query->where('a.distributor_id', $request->distributor_id);
+                // ->when($request->distributor_id != null, function ($query) use ($request) {
+                //     $query->where('a.distributor_id', $request->distributor_id);
+                // })
+                // ->when($request->tso_id != null, function ($query) use ($request) {
+                //     $query->where('a.tso_id', $request->tso_id);
+                // })
+                ->when($request->distributor_id, function ($query) use ($request) {
+                    $ids = is_array($request->distributor_id)
+                        ? $request->distributor_id
+                        : explode(',', $request->distributor_id);
+
+                    $ids = array_filter($ids);
+                    if (!empty($ids)) {
+                        $query->whereIn('a.distributor_id', $ids);
+                    } else {
+                        if (Auth::user()->user_type != 1) {
+                            $query->whereIn('a.distributor_id', MasterFormsHelper::get_users_distributors(Auth::user()->id));
+                        }
+                    }
+                }, function ($query) {
+                    if (Auth::user()->user_type != 1) {
+                        $query->whereIn('a.distributor_id', MasterFormsHelper::get_users_distributors(Auth::user()->id));
+                    }
                 })
-                ->when($request->tso_id != null, function ($query) use ($request) {
- 
-                    $query->where('a.tso_id', $request->tso_id);
+                ->when($request->tso_id, function ($query) use ($request) {
+                    $ids = is_array($request->tso_id)
+                        ? $request->tso_id
+                        : explode(',', $request->tso_id);
+
+                    $query->whereIn('a.tso_id', $ids);
                 })
                 ->when($request->shop_id != null, function ($query) use ($request) {
                     return $query->where('shop_id', $request->shop_id);
@@ -3214,10 +3262,10 @@ public function distributer_product_sales_value_report(Request $request)
                 ->where('c.status', 1)
                 ->select('c.name', 'c.cnic', 'f.distributor_name as distributor_name', 'a.tso_id', 'd.product_name', 'd.carton_size', 'b.product_id', 'b.flavour_id', DB::raw('sum(b.total) as total'), DB::raw('sum(b.rate) as rate'), DB::raw('sum(b.discount_amount) as discount_amount'), DB::raw('sum(b.qty) as qty'), 'e.name as city_name')
                 ->groupBy('b.product_id', 'b.flavour_id')
-                ->groupBy('b.product_id')
                 // ->orderBy('a.tso_id')
                 ->orderBy('d.orderby', 'ASC')
                 ->get();
+                // dd($data);
             return view($this->page . 'productWiseSales.product_wise_list_ajax', compact('data', 'from', 'to', 'distributor_id', 'tso_id', 'city'));
        
         endif;
