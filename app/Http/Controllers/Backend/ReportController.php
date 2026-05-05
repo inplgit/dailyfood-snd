@@ -273,6 +273,9 @@ class ReportController extends Controller
                 ->when($request->product_id != null, function ($query) use ($request) {
                     $query->where('d.product_id', $request->product_id);
                 })
+                ->when($request->city != null, function ($query) use ($request) {
+                    $query->where('c.city', $request->city);
+                })
                 ->whereBetween('a.return_date', [$from, $to])
                 ->where('a.status', 1)
 		        ->where('a.excecution', 1)
@@ -625,6 +628,7 @@ class ReportController extends Controller
                 ->when($tsoIds, fn($q) => $q->whereIn('st.tso_id', $tsoIds))
                 ->when($request->route_id, fn($q) => $q->where('a.route_id', $request->route_id))
                 ->when($shop_id, fn($q) => $q->where('a.id', $shop_id))
+                ->when($request->city != null, fn($q) => $q->where('c.city', $request->city))
                 ->where('a.status', 1)
                 ->select(
                     'a.id',
@@ -740,6 +744,7 @@ class ReportController extends Controller
                 ->when($shop_id, fn($q) => $q->where('a.id', $shop_id))
                 ->when($tsoIds, fn($q) => $q->whereIn('st.tso_id', $tsoIds))
                 ->when($route_id, fn($q) => $q->where('a.route_id', $route_id))
+                ->when($request->city != null, fn($q) => $q->where('c.city', $request->city))
                 ->where('a.status', 1)
                 ->select(
                     'a.id',
@@ -852,6 +857,7 @@ class ReportController extends Controller
         $to = $request->to;
         $distributor_id = $request->distributor_id;
         $tso_id = $request->tso_id;
+        $city = $request->city;
 
         // Filter out empty values if arrays are provided
         if (is_array($distributor_id)) {
@@ -871,6 +877,9 @@ class ReportController extends Controller
                 })
                 ->when(!empty($tso_id), function ($q) use ($tso_id) {
                     return is_array($tso_id) ? $q->whereIn('a.tso_id', $tso_id) : $q->where('a.tso_id', $tso_id);
+                })
+                ->when($request->city != null, function ($query) use ($request) {
+                    $query->where('b.city', $request->city);
                 })
                 ->when($from && $to, fn($q) => $q->whereBetween(\DB::raw('DATE(a.sync_date_time)'), [$from, $to]))
                 ->select(
@@ -932,6 +941,9 @@ class ReportController extends Controller
                 })
                 ->when($request->product_id != null, function ($query) use ($request) {
                     $query->where('d.product_id', $request->product_id);
+                })
+                ->when($request->city != null, function ($query) use ($request) {
+                    $query->where('c.city', $request->city);
                 })
                 ->whereBetween('a.return_date', [$from, $to])
                 ->where('a.status', 1)
@@ -2967,13 +2979,16 @@ public function distributer_product_sales_value_report(Request $request)
                         if ($request->city != null)
                             $join->where('c.city', $request->city);
                     })
-                   ->leftJoin('users_distributors', 'c.user_id', '=', 'users_distributors.user_id')
-                  ->when($request->distributor_id == null, function ($query) use ($request) {
-    $query->whereIn('a.distributor_id', MasterFormsHelper::get_users_distributors(Auth::user()->id));
-})
+                    ->leftJoin('users_distributors', 'c.user_id', '=', 'users_distributors.user_id')
+                    ->when($request->distributor_id == null, function ($query) use ($request) {
+                        $query->whereIn('a.distributor_id', MasterFormsHelper::get_users_distributors(Auth::user()->id));
+                    })
                     ->join('cities', 'cities.id', 'c.city')
                     ->when($request->distributor_id != null, function ($query) use ($request) {
                         $query->where('a.distributor_id', $request->distributor_id);
+                    })
+                    ->when($request->city != null, function ($query) use ($request) {
+                        $query->where('c.city', $request->city);
                     })
                     ->when($request->tso_id != null, function ($query) use ($request) {
                         $query->where('a.tso_id', $request->tso_id);
@@ -2991,22 +3006,22 @@ public function distributer_product_sales_value_report(Request $request)
                     ->where('a.status', 1)
                     ->where('c.status', 1)
                   ->select(
-    'a.id',
-    'b.distributor_name',
-    'c.name as tso',
-    'c.id as tso_id',
-    'c.user_id',
-    'a.dc_date',
-    'shops.company_name as shop_name',
-    'routes.route_name',
-    'cities.name as city',
-    'products.product_name',
-    'd.qty as booking_qty',
-    DB::raw("CASE WHEN a.excecution = 1 THEN d.qty ELSE 0 END as execution_qty"),
-    'a.excecution',
-    'a.invoice_no'
-)
-->distinct()
+                        'a.id',
+                        'b.distributor_name',
+                        'c.name as tso',
+                        'c.id as tso_id',
+                        'c.user_id',
+                        'a.dc_date',
+                        'shops.company_name as shop_name',
+                        'routes.route_name',
+                        'cities.name as city',
+                        'products.product_name',
+                        'd.qty as booking_qty',
+                        DB::raw("CASE WHEN a.excecution = 1 THEN d.qty ELSE 0 END as execution_qty"),
+                        'a.excecution',
+                        'a.invoice_no'
+                    )
+                    ->distinct()
                     ->orderBy('products.orderby', 'ASC')
                     ->orderBy('a.invoice_no', 'ASC')
                     ->get();
@@ -3868,10 +3883,16 @@ public function distributer_product_sales_value_report(Request $request)
         $to = $request->to;
         $distributor_id = $request->distributor_id;
         $tso_id = $request->tso_id;
+        $city = $request->city;
+
         if ($request->ajax()) :
             // 1. Get Attendances
             $attendances = DB::table('shop_attendences as sa')
+                ->join('tso', 'tso.id', '=', 'sa.tso_id') // New 5/5/26
                 ->whereBetween('sa.sync_date_time', [$date . ' 00:00:00', $to . ' 23:59:59'])
+                ->when($request->city, function ($query) use ($request) { // New 5/5/26
+                    $query->where('tso.city', $request->city); // New 5/5/26
+                }) // New 5/5/26
                 ->when($request->distributor_id, function ($query) use ($request) {
                     $query->where('sa.distributor_id', $request->distributor_id);
                 })
@@ -3893,8 +3914,12 @@ public function distributer_product_sales_value_report(Request $request)
 
             // 2. Get Sale Orders
             $orders = DB::table('sale_orders as so')
+                ->join('tso', 'tso.id', '=', 'so.tso_id') // New 5/5/26
                 ->where('so.status', 1)
                 ->whereBetween('so.dc_date', [$date, $to])
+                ->when($request->city, function ($query) use ($request) { // New 5/5/26
+                    $query->where('tso.city', $request->city); // New 5/5/26
+                }) // New 5/5/26
                 ->when($request->distributor_id, function ($query) use ($request) {
                     $query->where('so.distributor_id', $request->distributor_id);
                 })
@@ -3922,7 +3947,11 @@ public function distributer_product_sales_value_report(Request $request)
 
             // 3. Get Shop Visits locations (from UsersLocation linked to shop_visits)
             $shopVisitsLocs = DB::table('shop_visits as sv')
+                ->join('tso', 'tso.user_id', '=', 'sv.user_id') // New 5/5/26
                 ->whereBetween('sv.created_at', [$date . ' 00:00:00', $to . ' 23:59:59'])
+                ->when($request->city, function ($query) use ($request) { // New 5/5/26
+                    $query->where('tso.city', $request->city); // New 5/5/26
+                }) // New 5/5/26
                 ->leftJoin('users_locations as ul', function($join) {
                     $join->on('ul.table_id', '=', 'sv.id')
                          ->where('ul.table_name', '=', 'shop_visits');
@@ -4288,6 +4317,7 @@ public function distributer_product_sales_value_report(Request $request)
                 ->when($tsoIds, fn($q) => $q->whereIn('st.tso_id', $tsoIds))
                 ->when($request->route_id != null, fn($q) => $q->where('a.route_id', $request->route_id))
                 ->when($request->shop_id != null, fn($q) => $q->where('a.id', $request->shop_id))
+                ->when($request->city != null, fn($q) => $q->where('c.city', $request->city))
                 ->where('a.status', 1)
                 // this line ensures only shops with NO sale orders are returned
                 ->whereNull('so.id')
