@@ -69,11 +69,20 @@
                         </div>
                     @endif
 
-                    {{-- ✅ Form Start --}}
-                    <form method="POST" action="{{ route('shop.import_shops_store') }}" enctype="multipart/form-data">
-                        @csrf
-                        <div class="row">
+                    {{-- Progress Bar --}}
+                    <div id="import-progress-container" style="display: none;">
+                        <div class="progress progress-bar-primary" style="height: 25px;">
+                            <div id="import-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" 
+                                 aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">0%</div>
+                        </div>
+                        <p id="import-message" class="text-center mt-1">Processing...</p>
+                    </div>
 
+                    {{-- ✅ Form Start --}}
+                    <form id="import-form" method="POST" action="{{ route('shop.import_shops_store') }}" enctype="multipart/form-data">
+                        @csrf
+                        <input type="hidden" name="import_id" id="import_id" value="{{ time() }}">
+                        <div class="row">
                             <div class="col-md-12">
                                 {{-- Sample File Download --}}
                                 <table class="table table-bordered table-striped table-condensed">
@@ -95,7 +104,7 @@
                                         <tr>
                                             <td>Shops File</td>
                                             <td>
-                                                <input type="file" name="file" class="form-control">
+                                                <input type="file" name="file" class="form-control" required>
                                                 @error('file')
                                                     <span class="invalid-feedback" role="alert" style="display: block;">
                                                         <strong>{{ $message }}</strong>
@@ -108,9 +117,8 @@
                             </div>
 
                             <div class="col-12 d-flex justify-content-end p-2">
-                                <button type="submit" class="btn btn-primary">Import</button>
+                                <button type="submit" id="submit-btn" class="btn btn-primary">Import</button>
                             </div>
-
                         </div> {{-- row --}}
                     </form>
                     {{-- ✅ Form End --}}
@@ -119,4 +127,39 @@
         </div>
     </div>
 </section>
+
+@section('script')
+<script>
+    $(document).ready(function() {
+        $('#import-form').on('submit', function(e) {
+            $('#import-progress-container').show();
+            $('#import-form').hide();
+            $('#submit-btn').prop('disabled', true);
+            
+            var importId = $('#import_id').val();
+            var interval = setInterval(function() {
+                $.ajax({
+                    url: "{{ route('shop.import_status', '') }}/" + importId,
+                    type: "GET",
+                    success: function(data) {
+                        if (data.progress) {
+                            $('#import-progress-bar').css('width', data.progress + '%');
+                            $('#import-progress-bar').text(data.progress + '%');
+                            $('#import-progress-bar').attr('aria-valuenow', data.progress);
+                        }
+                        if (data.message) {
+                            $('#import-message').text(data.message);
+                        }
+                        if (data.status === 'completed') {
+                            clearInterval(interval);
+                        }
+                    },
+                    error: function() {
+                    }
+                });
+            }, 2000);
+        });
+    });
+</script>
+@endsection
 @endsection

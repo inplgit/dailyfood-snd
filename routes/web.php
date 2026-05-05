@@ -269,6 +269,7 @@ Route::group(['middleware' => ['auth', 'track']], function () {
         Route::get('shopVisitList', 'ShopController@shopVisitList')->name('shop.shopVisitList');
         Route::get('ImportShop', 'ShopController@ImportShop')->name('shop.ImportShop');
         Route::post('import_shops_store', 'ShopController@import_shops_store')->name('shop.import_shops_store');
+        Route::get('import_status/{id}', 'ShopController@getImportStatus')->name('shop.import_status');
     });
     Route::group(['namespace' => 'Backend', 'prefix' => 'distributor'], function () {
         Route::resource('/distributor', 'DistributorController');

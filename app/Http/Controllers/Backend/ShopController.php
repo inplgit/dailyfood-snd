@@ -27,6 +27,7 @@ use App\Exports\ShopsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Notifications\RequestNotification;
 use App\Models\RouteTso;
+use Illuminate\Support\Facades\Cache;
 
 class ShopController extends Controller
 {
@@ -1280,290 +1281,169 @@ public function import_shops_store_old_4_29_26(Request $request)
         dd("❌ Error: " . $th->getMessage(), $th->getTraceAsString());
     }
 }
-public function import_shops_store(Request $request)
-{
-    ini_set('max_execution_time', 300);
-    ini_set('memory_limit', '512M');
+    public function import_shops_store(Request $request)
+    {
+        ini_set('max_execution_time', 0);
+        ini_set('memory_limit', '-1');
 
-    $request->validate([
-        'file' => 'required|mimes:xlsx,xls,csv'
-    ]);
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv'
+        ]);
 
-    try {
-
-        /*
-        |--------------------------------------------------------------------------
-        | Load Excel File
-        |--------------------------------------------------------------------------
-        */
-        $sheets = Excel::toArray([], $request->file('file'));
-
-        /*
-        |--------------------------------------------------------------------------
-        | Preload Master Data (1 Time Only)
-        |--------------------------------------------------------------------------
-        */
-        $distributors = Distributor::pluck('id', 'distributor_code')->toArray();
-        $cities       = City::pluck('id', 'name')->toArray();
-        $allTsos      = TSO::pluck('id', 'tso_code')->toArray();
-
-        $invalidRows     = [];
-        $shopExistsList  = [];
-        $formatNotMatch  = [];
-        $insertedCount   = 0;
+        $importId = $request->input('import_id', 'default');
+        Cache::put("import_progress_{$importId}", 0, 300);
+        Cache::put("import_status_{$importId}", 'processing', 300);
+        Cache::put("import_message_{$importId}", 'Loading file...', 300);
 
         DB::beginTransaction();
+        try {
+            $sheets = Excel::toArray([], $request->file('file'));
 
-        foreach ($sheets as $sheetIndex => $rows) {
+            Cache::put("import_message_{$importId}", 'Processing rows...', 300);
 
-            /*
-            |--------------------------------------------------------------------------
-            | Validate Header
-            |--------------------------------------------------------------------------
-            */
-            if (!isset($rows[0][0]) || trim($rows[0][0]) !== 'Distributor Code') {
-                $formatNotMatch[] = 'Sheet ' . ($sheetIndex + 1);
-                continue;
+            $distributors = Distributor::pluck('id', 'distributor_code')->toArray();
+            $cities       = City::pluck('id', 'name')->toArray();
+            $allTsos      = TSO::pluck('id', 'tso_code')->toArray();
+
+            // Calculate total rows for progress bar
+            $totalRows = 0;
+            foreach ($sheets as $sheet) {
+                $totalRows += (count($sheet) > 0) ? count($sheet) - 1 : 0;
             }
+            $totalRows = max($totalRows, 1); // Avoid division by zero
+            $processedCount = 0;
 
-            foreach ($rows as $key => $value) {
+            $insertedCount = 0;
+            $shopExistsList = [];
 
-                /*
-                |--------------------------------------------------------------------------
-                | Skip Header / Empty Shop Name
-                |--------------------------------------------------------------------------
-                */
-                if ($key == 0 || empty($value[9])) {
-                    continue;
+            foreach ($sheets as $sheetIndex => $rows) {
+                if (!isset($rows[0][0]) || trim($rows[0][0]) !== 'Distributor Code') {
+                    throw new \Exception("Sheet " . ($sheetIndex + 1) . ": Invalid header format.");
                 }
 
-                $rowNumber = $key + 1;
+                foreach ($rows as $key => $value) {
+                    if ($key == 0 || empty($value[9])) continue;
 
-                /*
-                |--------------------------------------------------------------------------
-                | Read Row Data
-                |--------------------------------------------------------------------------
-                */
-                $distributor_code = trim($value[0] ?? '');
-                $tso_code_raw     = str_replace(' ', '', $value[2] ?? '');
-                $tso_codes        = array_filter(explode(',', $tso_code_raw));
-                $shop_code        = trim($value[8] ?? '');
+                    $rowNumber = $key + 1;
+                    $distributor_code = trim($value[0] ?? '');
+                    $tso_code_raw     = str_replace(' ', '', $value[2] ?? '');
+                    $tso_codes        = array_filter(explode(',', $tso_code_raw));
+                    $cityName         = trim($value[14] ?? '');
+                    $shop_code        = trim($value[8] ?? '');
 
-                /*
-                |--------------------------------------------------------------------------
-                | Distributor Check
-                |--------------------------------------------------------------------------
-                */
-                $distributor_id = $distributors[$distributor_code] ?? null;
+                    if (!isset($distributors[$distributor_code])) {
+                        throw new \Exception("Row $rowNumber: Distributor Code '$distributor_code' not found.");
+                    }
+                    $distributor_id = $distributors[$distributor_code];
 
-                /*
-                |--------------------------------------------------------------------------
-                | TSO Check
-                |--------------------------------------------------------------------------
-                */
-                $valid_tso_ids = [];
-
-                foreach ($tso_codes as $code) {
-                    if (isset($allTsos[$code])) {
+                    $valid_tso_ids = [];
+                    foreach ($tso_codes as $code) {
+                        if (!isset($allTsos[$code])) {
+                            throw new \Exception("Row $rowNumber: TSO Code '$code' not found.");
+                        }
                         $valid_tso_ids[] = $allTsos[$code];
                     }
-                }
 
-                if (!$distributor_id || count($valid_tso_ids) != count($tso_codes)) {
-                    $invalidRows[] = [
-                        'row' => $rowNumber,
-                        'distributor_code' => $distributor_code,
-                        'tso_codes' => $tso_code_raw,
-                        'message' => 'TSO mismatch or distributor not found.'
-                    ];
-                    continue;
-                }
-
-                /*
-                |--------------------------------------------------------------------------
-                | Shop Already Exists
-                |--------------------------------------------------------------------------
-                */
-                if (!empty($shop_code)) {
-                    $exists = Shop::where('shop_code', $shop_code)->exists();
-
-                    if ($exists) {
-                        $shopExistsList[] = $shop_code;
-                        continue;
+                    if (!isset($cities[$cityName])) {
+                        throw new \Exception("Row $rowNumber: City '$cityName' not found.");
                     }
-                } else {
-                    $shop_code = Shop::UniqueNo();
-                }
+                    $city_id = $cities[$cityName];
 
-                /*
-                |--------------------------------------------------------------------------
-                | Route Create / Find
-                |--------------------------------------------------------------------------
-                */
-                $route = Route::firstOrCreate(
-                    [
-                        'route_name'     => strtolower(trim($value[4] ?? '')),
-                        'distributor_id' => $distributor_id
-                    ],
-                    [
-                        'username' => optional(Auth::user())->name ?? 'Imported'
-                    ]
-                );
+                    if (!empty($shop_code)) {
+                        if (Shop::where('shop_code', $shop_code)->exists()) {
+                            $shopExistsList[] = $shop_code;
+                            continue;
+                        }
+                    } else {
+                        $shop_code = Shop::UniqueNo();
+                    }
 
-                /*
-                |--------------------------------------------------------------------------
-                | Route TSO Mapping
-                |--------------------------------------------------------------------------
-                */
-                foreach ($valid_tso_ids as $tsoId) {
-
-                    RouteTso::updateOrInsert(
-                        [
-                            'route_id' => $route->id,
-                            'tso_id'   => $tsoId
-                        ],
-                        []
+                    $route = Route::firstOrCreate(
+                        ['route_name' => strtolower(trim($value[4] ?? '')), 'distributor_id' => $distributor_id],
+                        ['username' => optional(Auth::user())->name ?? 'Imported']
                     );
-                }
 
-                /*
-                |--------------------------------------------------------------------------
-                | Route Day
-                |--------------------------------------------------------------------------
-                */
-                if (!empty($value[6])) {
+                    foreach ($valid_tso_ids as $tsoId) {
+                        RouteTso::updateOrInsert(['route_id' => $route->id, 'tso_id' => $tsoId], []);
+                    }
 
-                    RouteDay::updateOrInsert(
-                        [
-                            'route_id' => $route->id,
-                            'day'      => ucfirst(trim($value[6]))
-                        ],
-                        []
-                    );
-                }
+                    if (!empty($value[6])) {
+                        RouteDay::updateOrInsert(['route_id' => $route->id, 'day' => ucfirst(trim($value[6]))], []);
+                    }
 
-                /*
-                |--------------------------------------------------------------------------
-                | Sub Route
-                |--------------------------------------------------------------------------
-                */
-                $sub_route = SubRoutes::firstOrCreate([
-                    'name'     => ucfirst(trim($value[5] ?? '')),
-                    'route_id' => $route->id
-                ]);
+                    $sub_route = SubRoutes::firstOrCreate(['name' => ucfirst(trim($value[5] ?? '')), 'route_id' => $route->id]);
 
-                /*
-                |--------------------------------------------------------------------------
-                | City
-                |--------------------------------------------------------------------------
-                */
-                $cityName = trim($value[14] ?? '');
-                $city_id  = $cities[$cityName] ?? null;
-
-                /*
-                |--------------------------------------------------------------------------
-                | Insert Shop
-                |--------------------------------------------------------------------------
-                */
-                $shop = new Shop();
-                $shop->company_name        = ucfirst(trim($value[9] ?? ''));
-                $shop->shop_code           = $shop_code ?: null;
-                $shop->email               = trim($value[10] ?? '');
-                $shop->city                = $city_id;
-                $shop->state               = ucfirst(trim($value[15] ?? ''));
-                $shop->distributor_id      = $distributor_id;
-                $shop->route_id            = $route->id;
-                $shop->contact_person      = trim($value[18] ?? '');
-                $shop->phone               = trim($value[11] ?? '');
-                $shop->mobile_no           = trim($value[12] ?? '');
-                $shop->address             = ucfirst(trim($value[13] ?? ''));
-                $shop->class               = $value[25] ?? null;
-                $shop->cnic                = trim($value[17] ?? '');
-                $shop->allow_credit_days   = $value[19] ?? 0;
-                $shop->allow_credit_amount = $value[20] ?? 0;
-                $shop->delvery_days        = $value[21] ?? 0;
-                $shop->sub_route_id        = $sub_route->id;
-                $shop->latitude            = $value[22] ?? null;
-                $shop->longitude           = $value[23] ?? null;
-                $shop->location_radius     = $value[24] ?? null;
-
-                $shop->save();
-
-                /*
-                |--------------------------------------------------------------------------
-                | Generate Shop Code
-                |--------------------------------------------------------------------------
-                */
-                if (empty($shop_code)) {
-                    $shop->shop_code = sprintf('%05d', $shop->id);
+                    $shop = new Shop();
+                    $shop->company_name        = ucfirst(trim($value[9] ?? ''));
+                    $shop->shop_code           = $shop_code;
+                    $shop->email               = trim($value[10] ?? '');
+                    $shop->city                = $city_id;
+                    $shop->state               = ucfirst(trim($value[15] ?? ''));
+                    $shop->distributor_id      = $distributor_id;
+                    $shop->route_id            = $route->id;
+                    $shop->contact_person      = trim($value[18] ?? '');
+                    $shop->phone               = trim($value[11] ?? '');
+                    $shop->mobile_no           = trim($value[12] ?? '');
+                    $shop->address             = ucfirst(trim($value[13] ?? ''));
+                    $shop->class               = $value[25] ?? null;
+                    $shop->cnic                = trim($value[17] ?? '');
+                    $shop->allow_credit_days   = $value[19] ?? 0;
+                    $shop->allow_credit_amount = $value[20] ?? 0;
+                    $shop->delvery_days        = $value[21] ?? 0;
+                    $shop->sub_route_id        = $sub_route->id;
+                    $shop->latitude            = $value[22] ?? null;
+                    $shop->longitude           = $value[23] ?? null;
+                    $shop->location_radius     = $value[24] ?? null;
                     $shop->save();
-                }
 
-                /*
-                |--------------------------------------------------------------------------
-                | Shop TSO Mapping
-                |--------------------------------------------------------------------------
-                */
-                foreach ($valid_tso_ids as $tsoId) {
+                    if (empty($value[8])) {
+                        $shop->shop_code = sprintf('%05d', $shop->id);
+                        $shop->save();
+                    }
 
-                    DB::table('shop_tso')->updateOrInsert(
-                        [
-                            'shop_id' => $shop->id,
-                            'tso_id'  => $tsoId
-                        ],
-                        []
-                    );
-                }
+                    foreach ($valid_tso_ids as $tsoId) {
+                        DB::table('shop_tso')->updateOrInsert(['shop_id' => $shop->id, 'tso_id' => $tsoId], []);
+                    }
 
-                $insertedCount++;
+                    $insertedCount++;
+                    $processedCount++;
 
-                /*
-                |--------------------------------------------------------------------------
-                | Commit Every 50 Rows (Prevent Heavy Load)
-                |--------------------------------------------------------------------------
-                */
-                if ($insertedCount % 50 == 0) {
-                    DB::commit();
-                    DB::beginTransaction();
+                    // Update progress every 10 rows or at the end
+                    if ($processedCount % 10 == 0 || $processedCount == $totalRows) {
+                        $progress = round(($processedCount / $totalRows) * 100);
+                        Cache::put("import_progress_{$importId}", $progress, 300);
+                    }
                 }
             }
+
+            DB::commit();
+
+            Cache::put("import_status_{$importId}", 'completed', 300);
+            Cache::put("import_progress_{$importId}", 100, 300);
+
+            if (count($shopExistsList) > 0) {
+                Session::flash('exists_count', count($shopExistsList));
+            }
+
+            return redirect()->back()->with('success', "Import successful. $insertedCount shops added.");
+
+        } catch (\Throwable $th) {
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
+
+            return redirect()->back()->with('error', $th->getMessage());
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Rollback if Errors
-        |--------------------------------------------------------------------------
-        */
-        if (count($invalidRows) > 0 || count($formatNotMatch) > 0) {
-
-            DB::rollBack();
-
-            Session::flash('exists_count', count($shopExistsList));
-            Session::flash('invalid_rows', $invalidRows);
-            Session::flash('formatNotMatch', $formatNotMatch);
-
-            return redirect()->back();
-        }
-
-        DB::commit();
-
-        Session::flash('exists_count', count($shopExistsList));
-
-        return redirect()->back()->with(
-            'success',
-            'All shops imported successfully. Inserted: ' . $insertedCount
-        );
-
-    } catch (\Throwable $th) {
-
-        DB::rollBack();
-
-        return redirect()->back()->with(
-            'error',
-            $th->getMessage()
-        );
     }
-}
 
+
+    public function getImportStatus($id)
+    {
+        return response()->json([
+            'progress' => Cache::get("import_progress_{$id}", 0),
+            'status'   => Cache::get("import_status_{$id}", 'processing'),
+            'message'  => Cache::get("import_message_{$id}", ''),
+        ]);
+    }
 
 }
