@@ -433,7 +433,11 @@ public function route_transfer(Request $request)
         ->join('route_tso as rt', 'r.id', '=', 'rt.route_id')
         ->where('r.distributor_id', $distributor_id)
         ->when($tso_id, function ($q) use ($tso_id) {
-            $q->where('rt.tso_id', $tso_id);
+            $q->whereIn('r.id', function ($sub) use ($tso_id) {
+                $sub->select('route_id')
+                    ->from('route_tso')
+                    ->where('tso_id', $tso_id);
+            });
         })
         ->groupBy('r.id', 'r.route_name', 'r.distributor_id')
         ->select(
