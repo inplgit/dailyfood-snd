@@ -736,7 +736,7 @@ class ReportController extends Controller
                     $join->on('a.id', '=', 'ord.shop_id')
                         ->on('sv.visit_date', '=', 'ord.order_date');
                 })
-                ->when($distributor_id, fn($q) => $q->where('a.distributor_id', $distributor_id), function ($q) {
+                ->when($distributor_id &&  !$tso_id, fn($q) => $q->where('a.distributor_id', $distributor_id), function ($q) {
                     if (Auth::user()->user_type != 1) {
                         $q->whereIn('a.distributor_id', MasterFormsHelper::get_users_distributors(Auth::user()->id));
                     }
@@ -3892,7 +3892,7 @@ public function distributer_product_sales_value_report(Request $request)
                 ->when($request->city, function ($query) use ($request) { // New 5/5/26
                     $query->where('tso.city', $request->city); // New 5/5/26
                 }) // New 5/5/26
-                ->when($request->distributor_id, function ($query) use ($request) {
+                ->when($request->distributor_id &&  !$request->tso_id, function ($query) use ($request) {
                     $query->where('sa.distributor_id', $request->distributor_id);
                 })
                 ->when($request->tso_id, function ($query) use ($request) {
@@ -3919,7 +3919,7 @@ public function distributer_product_sales_value_report(Request $request)
                 ->when($request->city, function ($query) use ($request) { // New 5/5/26
                     $query->where('tso.city', $request->city); // New 5/5/26
                 }) // New 5/5/26
-                ->when($request->distributor_id, function ($query) use ($request) {
+                ->when($request->distributor_id &&  !$request->tso_id, function ($query) use ($request) {
                     $query->where('so.distributor_id', $request->distributor_id);
                 })
                 ->when($request->tso_id, function ($query) use ($request) {
@@ -3997,7 +3997,7 @@ public function distributer_product_sales_value_report(Request $request)
                     ->where('users_distributors.user_id', \Auth::id())
                     ->where('s.status', 1)
                     ->where('s.active', 1)
-                    ->when($request->distributor_id, function ($query) use ($request) {
+                    ->when($request->distributor_id &&  !$request->tso_id, function ($query) use ($request) {
                         $query->where('s.distributor_id', $request->distributor_id);
                     })
                     ->when($request->tso_id, function ($query) use ($request) {
