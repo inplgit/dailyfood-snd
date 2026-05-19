@@ -1761,8 +1761,7 @@ $sales_qty_display = $sales_qty_display - $return_qty_display;
                 $tsos =  TSO::status()->active()
                     ->join('users_distributors','users_distributors.user_id','tso.user_id')
                     ->whereIn('users_distributors.distributor_id', $this->master->get_users_distributors(Auth::user()->id))
-                    ->when($request->distributor_id != null, function ($query) use ($request) {
-
+                    ->when($request->distributor_id != null && $request->tso_id == null, function ($query) use ($request) {
                         $query->where('users_distributors.distributor_id', $request->distributor_id);
                     })->when($request->tso_id != null, function ($query) use ($request) {
 
