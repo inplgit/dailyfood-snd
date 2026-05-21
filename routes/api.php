@@ -105,6 +105,7 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'API\V1'], functi
  Route::get('getTsoDistributorWiseRoute_shop/{distributor_id}', "getTsoDistributorWiseRoute_shop");
  Route::get('getTsoDistributorWiseRoute_new/{distributor_id}', "getTsoDistributorWiseRoute_new");
       Route::get('getRoutePlan/{distributor_id}', "getRoutePlan");
+      Route::get('{routeId}/radius', "getRouteRadius");
     });
 
     Route::controller('DashboardController')->prefix("dashboard")->group(function(){

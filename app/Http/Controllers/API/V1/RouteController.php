@@ -13,6 +13,8 @@ use App\Models\Route;
 use Illuminate\Support\Facades\Auth;
 use DB;
 use Carbon\Carbon;
+use App\Models\RouteRadiusConfigurationRoute;
+
 class RouteController extends BaseController
 {
   
@@ -469,5 +471,16 @@ public function getRoutePlan($distributor_id)
     return $this->sendResponse($routes, 'Route Retrieved Successfully');
 }
 
+    public function getRouteRadius($routeId)
+    {
+        $configRoute = RouteRadiusConfigurationRoute::with('configuration')->where('route_id', $routeId)->first();
+
+        if ($configRoute && $configRoute->configuration) {
+            return $this->sendResponse(['radius' => $configRoute->configuration->radius], 'Route radius retrieved successfully');
+        }
+
+        // Return a default or null if no configuration exists
+        return $this->sendResponse(['radius' => null], 'No radius configuration found for this route');
+    }
 
 }
