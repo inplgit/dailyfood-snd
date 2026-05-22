@@ -440,7 +440,7 @@ $master = new MasterFormsHelper();
                                             <li>
                                                 <a href="{{ route('order_booker_daily_activity_location_report') }}">
                                                     <i class="fas fa-circle"></i>
-                                                    <span>Order Booker Daily Activity Timestamp Report</span>
+                                                    <span>O/B Daily Activity Timestamp Report</span>
                                                 </a>
                                             </li>
                                             <li>
@@ -473,6 +473,14 @@ $master = new MasterFormsHelper();
                                                 <a href="{{ route('report.tso_tracking_report') }}">
                                                     <i class="fas fa-circle"></i>
                                                     <span>TSO Tracking Report</span>
+                                                </a>
+                                            </li>
+                                            @endcan
+                                            @can('route_map_report')
+                                            <li>
+                                                <a href="{{ route('route_map_report') }}">
+                                                    <i class="fas fa-circle"></i>
+                                                    <span>Route Map Report</span>
                                                 </a>
                                             </li>
                                             @endcan

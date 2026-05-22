@@ -4546,5 +4546,10 @@ public function distributer_product_sales_value_report(Request $request)
         return view($this->page . 'ShopSummary.view');
     }
 
+    public function route_map_report(Request $request)
+    {
+        $distributors = Distributor::status()->get();
+        return view($this->page . 'RouteMap.route_map', compact('distributors'));
+    }
 
 }

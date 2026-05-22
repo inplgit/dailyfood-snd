@@ -471,6 +471,81 @@ public function getRoutePlan($distributor_id)
     return $this->sendResponse($routes, 'Route Retrieved Successfully');
 }
 
+    public function getNearbyShops(Request $request)
+    {
+        $lat = $request->lat;
+        $lng = $request->lng;
+        $route_id = $request->route_id;
+
+        if (!$lat || !$lng || !$route_id) {
+            return $this->sendError('lat, lng and route_id are required');
+        }
+
+        $shops = \App\Models\Shop::where('route_id', $route_id)->get();
+
+        $validShops = [];
+        $data = [];
+
+        foreach($shops as $shop) {
+            if (!empty($shop->latitude) && !empty($shop->longitude)) {
+                $distance = $this->calculateDistance($lat, $lng, $shop->latitude, $shop->longitude);
+                $shop->distance = $distance;
+                $validShops[] = $shop;
+            } else {
+                $data[] = [
+                    'id' => $shop->id,
+                    'company_name' => $shop->company_name,
+                    'status' => 0,
+                    'latitude' => null,
+                    'longitude' => null
+                ];
+            }
+        }
+
+        usort($validShops, function($a, $b) {
+            return $a->distance <=> $b->distance;
+        });
+
+        foreach($validShops as $key => $shop) {
+            $sequence = $key + 1;
+            $sequenceText = $this->ordinalSuffix($sequence) . " Shop";
+            $data[] = [
+                'id' => $shop->id,
+                'company_name' => $shop->company_name,
+                'status' => 1,
+                'latitude' => $shop->latitude,
+                'longitude' => $shop->longitude,
+                'distance' => $shop->distance,
+                'sequence' => $sequence,
+                'sequence_text' => $sequenceText
+            ];
+        }
+
+        // dd($data);
+        return $this->sendResponse($data, 'Nearby Shops retrieved successfully');
+    }
+
+    private function calculateDistance($lat1, $lon1, $lat2, $lon2) {
+        $earthRadius = 6371; // km
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+        $a = sin($dLat/2) * sin($dLat/2) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLon/2) * sin($dLon/2);
+        $c = 2 * asin(sqrt($a));
+        $distance = $earthRadius * $c;
+        return $distance;
+    }
+
+    private function ordinalSuffix($num) {
+        if (!in_array(($num % 100), array(11,12,13))){
+            switch ($num % 10) {
+                case 1:  return $num.'st';
+                case 2:  return $num.'nd';
+                case 3:  return $num.'rd';
+            }
+        }
+        return $num.'th';
+    }
+
     public function getRouteRadius($routeId)
     {
         $configRoute = RouteRadiusConfigurationRoute::with('configuration')->where('route_id', $routeId)->first();
