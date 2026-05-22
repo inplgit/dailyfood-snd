@@ -50,8 +50,8 @@
 
                 {{-- Missing Lat/Long Shops Warning --}}
                 <div id="missing-shops-section" style="display:none; margin-top:20px;">
-                    <div class="alert alert-warning">
-                        <h5><i class="fas fa-exclamation-triangle"></i> Shops with Missing Coordinates</h5>
+                    <div class="alert alert-warning p-2">
+                        <h5 class="mb-1"><i class="fas fa-exclamation-triangle"></i> Shops with Missing Coordinates</h5>
                         <p class="mb-2">The following shops could not be plotted on the map because their latitude/longitude is not set:</p>
                         <table class="table table-sm table-bordered mb-0">
                             <thead class="thead-dark">
