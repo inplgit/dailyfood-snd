@@ -1769,7 +1769,7 @@ public static function get_sales_orders($request)
             $query->where('excecution', $request->execution);
         })
 
-        ->when($request->distributor_id != null, function ($query) use ($request) {
+        ->when($request->distributor_id != null && $request->tso_id == null, function ($query) use ($request) {
             $query->where('sale_orders.distributor_id', $request->distributor_id);
         })
 
