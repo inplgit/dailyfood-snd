@@ -508,11 +508,11 @@ class TSOController extends Controller
                 $log_messaage = 'Approve Deactivate Order Booker';
                 $message = 'Deactivate Successfully!';
                 $heading = 'Deactivated!';
-                TSO::where('id', $id)->update(['active' => 0, 'status_username' => Auth::user()->name , 'status_user_id' => Auth::user()->id]);
+                TSO::where('id', $id)->update(['active' => 0, 'unactive_date' => now()->format('Y-m-d'), 'unactive_user_id' => auth()->id(),'status_username' => Auth::user()->name , 'status_user_id' => Auth::user()->id]);
             }
             else
             {
-                TSO::where('id', $id)->update(['active' => 3, 'status_username' => Auth::user()->name , 'status_user_id' => Auth::user()->id]);
+                TSO::where('id', $id)->update(['active' => 3,'unactive_date' => now()->format('Y-m-d'), 'unactive_user_id' => auth()->id(), 'status_username' => Auth::user()->name , 'status_user_id' => Auth::user()->id]);
                 $message = 'Deactivate Request Submitted!';
                 $heading = 'Request Submitted!';
                 $log_messaage = 'Order Booker Deactivate Request';
