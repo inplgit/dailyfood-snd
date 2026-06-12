@@ -104,7 +104,10 @@ $user_allocate = $master->get_assign_user()->toArray();
                                 ->join('route_tso as rt', 'rt.route_id', '=', 'routes.id')
                                 ->join('route_days as rd', 'rd.route_id', '=', 'routes.id')
                                 ->where('rt.tso_id', $tso['id'])
-                                ->where('routes.distributor_id', $tso['distributor_id'])
+                                // ->where('routes.distributor_id', $tso['distributor_id'])
+                                ->when($tso_id == null, function ($query) use ($tso) {
+                                    $query->where('routes.distributor_id', $tso['distributor_id']);
+                                })
                                 ->where('rd.day', $day)
                                 ->pluck('routes.id');
 
@@ -116,7 +119,10 @@ $user_allocate = $master->get_assign_user()->toArray();
                        $todayShop = DB::table('shops as s')
     ->join('shop_tso as st', 'st.shop_id', '=', 's.id')
     ->whereIn('s.route_id', $dayRoutes)
-    ->where('s.distributor_id', $tso['distributor_id'])
+    // ->where('s.distributor_id', $tso['distributor_id'])
+     ->when($tso_id == null, function ($query) use ($tso) {
+        $query->where('s.distributor_id', $tso['distributor_id']);
+    })
     ->where('st.tso_id', $tso['id'])
     ->where('s.status', 1)
     ->where('s.active', 1)
@@ -145,7 +151,10 @@ $user_allocate = $master->get_assign_user()->toArray();
                                 ->where('dc_date', $date)
                                 ->where('tso_id', $tso['id'])
                                 ->where('status', 1)
-                                ->where('distributor_id', $tso['distributor_id']);
+                                // ->where('distributor_id', $tso['distributor_id']);
+                                ->when($tso_id == null, function ($query) use ($tso) {
+                                    $query->where('distributor_id', $tso['distributor_id']);
+                                });
 
                             $order_count = $sales_count->count();
                             $sales_amount = $sales_count->sum('total_amount');

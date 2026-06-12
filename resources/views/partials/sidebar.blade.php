@@ -1051,6 +1051,16 @@
                                 </a>
                             </li>
                         @endcan
+                        @can('Route_Radius_Configuration')
+                            <li>
+                                <a class="d-flex align-items-center" href="{{ route('route-radius-configurations.index') }}">
+                                    <i data-feather="circle"></i>
+                                    <span class="menu-item text-truncate">
+                                        Route Radius Config
+                                    </span>
+                                </a>
+                            </li>
+                        @endcan
                     </ul>
                 </li>
             {{-- @endcan --}}

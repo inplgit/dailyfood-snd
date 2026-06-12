@@ -31,8 +31,6 @@ class SaleOrderController extends Controller
      */
     public function index(Request $request)
     {
-
-
         $sales = $this->master->get_sales_orders($request);
 
         if ($request->ajax()):

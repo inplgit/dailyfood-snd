@@ -102,7 +102,7 @@ class ReportController extends Controller
             })
             ->where('status', 1)
             ->whereIn('distributor_id', $this->master->get_users_distributors(Auth::user()->id))
-            ->when($request->distributor_id, function ($query) use ($request) {
+            ->when($request->distributor_id != null && $request->tso_id == null, function ($query) use ($request) {
                 $query->where('distributor_id', $request->distributor_id);
             })
             ->when($request->tso_id, function ($query) use ($request) {
@@ -334,11 +334,11 @@ class ReportController extends Controller
                 })
                 ->leftJoin('users', 'users.id', '=', 'c.manager')
                 ->leftJoin('users_distributors', 'c.user_id', '=', 'users_distributors.user_id')
-                ->when($request->distributor_id == null, function ($query) use ($request) {
+                ->join('cities', 'cities.id', 'c.city')
+                ->when($request->distributor_id == null && $request->tso_id == null, function ($query) use ($request) {
                     $query->whereIn('users_distributors.distributor_id', MasterFormsHelper::get_users_distributors(Auth::user()->id));
                 })
-                ->join('cities', 'cities.id', 'c.city')
-                ->when($request->distributor_id != null, function ($query) use ($request) {
+                ->when($request->distributor_id != null && $request->tso_id == null, function ($query) use ($request) {
                     $query->where('a.distributor_id', $request->distributor_id);
                 })
                 ->when($request->tso_id != null, function ($query) use ($request) {
@@ -736,7 +736,7 @@ class ReportController extends Controller
                     $join->on('a.id', '=', 'ord.shop_id')
                         ->on('sv.visit_date', '=', 'ord.order_date');
                 })
-                ->when($distributor_id, fn($q) => $q->where('a.distributor_id', $distributor_id), function ($q) {
+                ->when($distributor_id &&  !$tso_id, fn($q) => $q->where('a.distributor_id', $distributor_id), function ($q) {
                     if (Auth::user()->user_type != 1) {
                         $q->whereIn('a.distributor_id', MasterFormsHelper::get_users_distributors(Auth::user()->id));
                     }
@@ -1761,8 +1761,7 @@ $sales_qty_display = $sales_qty_display - $return_qty_display;
                 $tsos =  TSO::status()->active()
                     ->join('users_distributors','users_distributors.user_id','tso.user_id')
                     ->whereIn('users_distributors.distributor_id', $this->master->get_users_distributors(Auth::user()->id))
-                    ->when($request->distributor_id != null, function ($query) use ($request) {
-
+                    ->when($request->distributor_id != null && $request->tso_id == null, function ($query) use ($request) {
                         $query->where('users_distributors.distributor_id', $request->distributor_id);
                     })->when($request->tso_id != null, function ($query) use ($request) {
 
@@ -2750,15 +2749,23 @@ public function day_wise_attendence_report(Request $request)
             : (array) json_decode(json_encode($allowedDistributorIdsRaw), true);
 
         // 3. final list: either intersection or full allowed list
-        $finalDistributorIds = $requestedDistributorIds
-            ? array_intersect($allowedDistributorIds, $requestedDistributorIds)
-            : $allowedDistributorIds;
+        if ($request->tso_id) {
+            // Ignore distributor filtering when TSO is selected
+            $finalDistributorIds = [];
+        } else {
+            $finalDistributorIds = $requestedDistributorIds
+                ? array_intersect($allowedDistributorIds, $requestedDistributorIds)
+                : $allowedDistributorIds;
+        }
 
         // ---------------- main query ---------------------
         $attendences = TSO::status()
             ->where('active', 1)
             ->join('users_distributors', 'users_distributors.user_id', '=', 'tso.user_id')
-            ->whereIn('users_distributors.distributor_id', $finalDistributorIds)   // 👈 array‑based filter
+            ->when(!$request->tso_id, function ($q) use ($finalDistributorIds) {
+                $q->whereIn('users_distributors.distributor_id', $finalDistributorIds);
+            })
+            // ->whereIn('users_distributors.distributor_id', $finalDistributorIds)   // 👈 array‑based filter
             ->select(
                 'tso.id',
                 'tso.emp_id',
@@ -2801,20 +2808,15 @@ public function day_wise_attendence_report(Request $request)
     public function attendence_report(Request $request)
     {
         if ($request->ajax()) :
-            $monthYear = explode('-', $request->from);
-            // dd($request->from , $monthYear);
-           $attendences =  TSO::status()->select('id', 'name', 'tso_code', 'distributor_id', 'designation_id', 'city')
-                ->when($request->distributor_id != null, function ($query) use ($request) {
-
+            $monthYear = $request->from ?  explode('-', $request->from) :  date('Y-m');
+            $attendences =  TSO::status()->select('id', 'name', 'tso_code', 'distributor_id', 'designation_id', 'city')
+                ->when($request->distributor_id != null && $request->tso_id == null, function ($query) use ($request) {
                     $query->where('distributor_id', $request->distributor_id);
                 })->when($request->tso_id != null, function ($query) use ($request) {
-
                     $query->where('id', $request->tso_id);
                 })->when($request->designation != null, function ($query) use ($request) {
-
                     $query->where('designation_id', $request->designation);
                 })->when($request->city != null, function ($query) use ($request) {
-
                     $query->where('city', $request->city);
                 })->with(['designation:id,name', 'distributor:id,distributor_name', 'cities:id,name'])->get()->toArray();
 
@@ -3893,7 +3895,7 @@ public function distributer_product_sales_value_report(Request $request)
                 ->when($request->city, function ($query) use ($request) { // New 5/5/26
                     $query->where('tso.city', $request->city); // New 5/5/26
                 }) // New 5/5/26
-                ->when($request->distributor_id, function ($query) use ($request) {
+                ->when($request->distributor_id &&  !$request->tso_id, function ($query) use ($request) {
                     $query->where('sa.distributor_id', $request->distributor_id);
                 })
                 ->when($request->tso_id, function ($query) use ($request) {
@@ -3920,7 +3922,7 @@ public function distributer_product_sales_value_report(Request $request)
                 ->when($request->city, function ($query) use ($request) { // New 5/5/26
                     $query->where('tso.city', $request->city); // New 5/5/26
                 }) // New 5/5/26
-                ->when($request->distributor_id, function ($query) use ($request) {
+                ->when($request->distributor_id &&  !$request->tso_id, function ($query) use ($request) {
                     $query->where('so.distributor_id', $request->distributor_id);
                 })
                 ->when($request->tso_id, function ($query) use ($request) {
@@ -3998,7 +4000,7 @@ public function distributer_product_sales_value_report(Request $request)
                     ->where('users_distributors.user_id', \Auth::id())
                     ->where('s.status', 1)
                     ->where('s.active', 1)
-                    ->when($request->distributor_id, function ($query) use ($request) {
+                    ->when($request->distributor_id &&  !$request->tso_id, function ($query) use ($request) {
                         $query->where('s.distributor_id', $request->distributor_id);
                     })
                     ->when($request->tso_id, function ($query) use ($request) {
@@ -4547,5 +4549,10 @@ public function distributer_product_sales_value_report(Request $request)
         return view($this->page . 'ShopSummary.view');
     }
 
+    public function route_map_report(Request $request)
+    {
+        $distributors = Distributor::status()->get();
+        return view($this->page . 'RouteMap.route_map', compact('distributors'));
+    }
 
 }
