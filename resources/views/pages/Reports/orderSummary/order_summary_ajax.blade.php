@@ -84,20 +84,22 @@ $user_allocate = $master->get_assign_user()->toArray();
             @endphp
 
             @foreach ($tsos as $tso)
-                @if (in_array($tso['user_id'], $user_allocate) && !empty($tso['attendence']))
+                @if (in_array($tso['user_id'], $user_allocate))
 
-
-                @php
-    $uniqueAttendence = collect($tso['attendence'])
-        ->unique(function ($item) {
-            return \Carbon\Carbon::parse($item['in'])->format('Y-m-d');
-        })
-        ->values();
-@endphp
-                    @foreach ($uniqueAttendence as $row)
+                    @foreach ($period as $dt)
                         @php
-                            $date = \Carbon\Carbon::parse($row['created_at'])->format('Y-m-d');
-                            $day = \Carbon\Carbon::parse($row['created_at'])->format('l');
+                            $date = $dt->format('Y-m-d');
+                            $day = $dt->format('l');
+
+                            $row = collect($tso['attendence'])->first(function($item) use ($date) {
+                                if (isset($item['in']) && !empty($item['in'])) {
+                                    return \Carbon\Carbon::parse($item['in'])->format('Y-m-d') == $date;
+                                }
+                                if (isset($item['created_at']) && !empty($item['created_at'])) {
+                                    return \Carbon\Carbon::parse($item['created_at'])->format('Y-m-d') == $date;
+                                }
+                                return false;
+                            });
 
                             // Day-wise routes
                             $dayRoutes = Route::status()
@@ -173,18 +175,23 @@ $user_allocate = $master->get_assign_user()->toArray();
                                 ->distinct('sale_order_data.so_id')
                                 ->count('sale_order_data.so_id');
 
-                            // Totals
-                            $total_orders += $order_count;
-                            $total_exe += $executed_orders;
-                            $total_bal += $balance_orders;
-                            $total_productive += $order_count;
-                            $total_unproductive += $total_visited;
-                            $total_today_shop += $todayShop;
-                            $total_new_shop += $shop_create;
-                            $total_visit_shop_total += ($total_visited + $order_count);
-                            $sales_amount_total += $sales_amount;
-                            $sales_return_total += $return_orders;
+                            $has_activity = !empty($in) || $order_count > 0 || $shop_create > 0 || $total_visited > 0 || $todayShop > 0;
                         @endphp
+
+                        @if($has_activity)
+                            @php
+                                // Totals
+                                $total_orders += $order_count;
+                                $total_exe += $executed_orders;
+                                $total_bal += $balance_orders;
+                                $total_productive += $order_count;
+                                $total_unproductive += $total_visited;
+                                $total_today_shop += $todayShop;
+                                $total_new_shop += $shop_create;
+                                $total_visit_shop_total += ($total_visited + $order_count);
+                                $sales_amount_total += $sales_amount;
+                                $sales_return_total += $return_orders;
+                            @endphp
 
                         <tr>
                             <td>{{ $i++ }}</td>
@@ -207,6 +214,7 @@ $user_allocate = $master->get_assign_user()->toArray();
                             <td>{{ $return_orders }}</td>
                             <td>{{ $balance_orders }}</td>
                         </tr>
+                        @endif
                     @endforeach
                 @endif
             @endforeach
