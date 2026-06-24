@@ -38,11 +38,14 @@
                                     <td>{{ $config->createdBy ? $config->createdBy->name : 'N/A' }}</td>
                                     <td>{{ $config->created_at->format('d M Y') }}</td>
                                     <td>
+                                        <a href="{{ route('route-radius-configurations.edit', $config->id) }}" class="btn btn-sm btn-warning">
+                                            <i data-feather="edit-2"></i> Edit
+                                        </a>
                                         <form action="{{ route('route-radius-configurations.destroy', $config->id) }}" method="POST" style="display:inline-block;">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this configuration?');">
-                                                Delete
+                                                <i data-feather="trash-2"></i> Delete
                                             </button>
                                         </form>
                                     </td>
