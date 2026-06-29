@@ -56,31 +56,22 @@ $user_allocate = $master->get_assign_user()->toArray();
         <tbody>
             @php
                 $i = 1;
-                $total_orders = 0;
-                $total_exe = 0;
-                $total_bal = 0;
-                $total_productive = 0;
-                $total_unproductive = 0;
-                $total_today_shop = 0;
-                $total_new_shop = 0;
+                $total_orders           = 0;
+                $total_exe              = 0;
+                $total_bal              = 0;
+                $total_productive       = 0;
+                $total_unproductive     = 0;
+                $total_today_shop       = 0;
+                $total_new_shop         = 0;
                 $total_visit_shop_total = 0;
-                $sales_amount_total = 0;
-                $sales_return_total = 0;
-
-                $fromDate = $date;
-                $toDate = $to;
-                $uniqueDays = [];
+                $sales_amount_total     = 0;
+                $sales_return_total     = 0;
 
                 $period = new DatePeriod(
-                    new DateTime($fromDate),
+                    new DateTime($date),
                     new DateInterval('P1D'),
-                    (new DateTime($toDate))->modify('+1 day')
+                    (new DateTime($to))->modify('+1 day')
                 );
-
-                foreach ($period as $new_date) {
-                    $uniqueDays[] = $new_date->format('l');
-                }
-                $uniqueDays = array_unique($uniqueDays);
             @endphp
 
             @foreach ($tsos as $tso)
@@ -88,138 +79,159 @@ $user_allocate = $master->get_assign_user()->toArray();
 
                     @foreach ($period as $dt)
                         @php
-                            $date = $dt->format('Y-m-d');
-                            $day = $dt->format('l');
+                            $currentDate = $dt->format('Y-m-d');
+                            $day         = $dt->format('l');
 
-                            $row = collect($tso['attendence'])->first(function($item) use ($date) {
-                                if (isset($item['in']) && !empty($item['in'])) {
-                                    return \Carbon\Carbon::parse($item['in'])->format('Y-m-d') == $date;
+                            // Attendance row for this date
+                            $row = collect($tso['attendence'])->first(function ($item) use ($currentDate) {
+                                if (!empty($item['in'])) {
+                                    return \Carbon\Carbon::parse($item['in'])->format('Y-m-d') == $currentDate;
                                 }
-                                if (isset($item['created_at']) && !empty($item['created_at'])) {
-                                    return \Carbon\Carbon::parse($item['created_at'])->format('Y-m-d') == $date;
+                                if (!empty($item['created_at'])) {
+                                    return \Carbon\Carbon::parse($item['created_at'])->format('Y-m-d') == $currentDate;
                                 }
                                 return false;
                             });
 
-                            // Day-wise routes
-                            $dayRoutes = Route::status()
+                            $in  = $row['in']  ?? '';
+                            $out = $row['out'] ?? '';
+
+                            // -------------------------------------------------------
+                            // All orders for this TSO on this date (no distributor filter)
+                            // -------------------------------------------------------
+                            $salesQuery    = DB::table('sale_orders')
+                                ->where('dc_date', $currentDate)
+                                ->where('tso_id', $tso['id'])
+                                ->where('status', 1);
+
+                            $order_count   = $salesQuery->count();
+                            $sales_amount  = $salesQuery->sum('total_amount');
+                            $salesOrderIds = $salesQuery->pluck('id');
+
+                            // -------------------------------------------------------
+                            // Effective distributor from actual orders that day
+                            // -------------------------------------------------------
+                            $effectiveDistributorId = $salesQuery->value('distributor_id')
+                                ?? $tso['distributor_id'];
+
+                            // -------------------------------------------------------
+                            // Route names — pulled from shops linked to orders that day
+                            // so we always get the real routes regardless of distributor
+                            // -------------------------------------------------------
+                            $routeIdsFromOrders = DB::table('sale_orders as so')
+                                ->join('shops as s', 's.id', '=', 'so.shop_id')
+                                ->where('so.dc_date', $currentDate)
+                                ->where('so.tso_id', $tso['id'])
+                                ->where('so.status', 1)
+                                ->whereNotNull('s.route_id')
+                                ->pluck('s.route_id')
+                                ->unique();
+
+                            // Also get scheduled routes for this TSO on this day
+                            $scheduledRouteIds = Route::status()
                                 ->join('route_tso as rt', 'rt.route_id', '=', 'routes.id')
                                 ->join('route_days as rd', 'rd.route_id', '=', 'routes.id')
                                 ->where('rt.tso_id', $tso['id'])
-                                // ->where('routes.distributor_id', $tso['distributor_id'])
-                                ->when($tso_id == null, function ($query) use ($tso) {
-                                    $query->where('routes.distributor_id', $tso['distributor_id']);
-                                })
                                 ->where('rd.day', $day)
                                 ->pluck('routes.id');
 
-                             
+                            // Merge both: scheduled + actually visited routes
+                            $allRouteIds = $routeIdsFromOrders->merge($scheduledRouteIds)->unique();
 
-                            $routeNames = Route::whereIn('id', $dayRoutes)->pluck('route_name')->implode(', ');
+                            $routeNames = $allRouteIds->isNotEmpty()
+                                ? Route::whereIn('id', $allRouteIds)->pluck('route_name')->implode(', ')
+                                : '-';
 
-                            // Shops
-                       $todayShop = DB::table('shops as s')
-    ->join('shop_tso as st', 'st.shop_id', '=', 's.id')
-    ->whereIn('s.route_id', $dayRoutes)
-    // ->where('s.distributor_id', $tso['distributor_id'])
-     ->when($tso_id == null, function ($query) use ($tso) {
-        $query->where('s.distributor_id', $tso['distributor_id']);
-    })
-    ->where('st.tso_id', $tso['id'])
-    ->where('s.status', 1)
-    ->where('s.active', 1)
-    ->distinct('s.id')
-    ->count('s.id');
+                            // -------------------------------------------------------
+                            // Today shops — from scheduled routes under effective distributor
+                            // -------------------------------------------------------
+                            $todayShop = $scheduledRouteIds->isNotEmpty()
+                                ? DB::table('shops as s')
+                                    ->join('shop_tso as st', 'st.shop_id', '=', 's.id')
+                                    ->whereIn('s.route_id', $scheduledRouteIds)
+                                    ->where('st.tso_id', $tso['id'])
+                                    ->where('s.status', 1)
+                                    ->where('s.active', 1)
+                                    ->distinct('s.id')
+                                    ->count('s.id')
+                                : 0;
 
-
-
-
-                              
-
+                            // -------------------------------------------------------
+                            // New shops created & visits
+                            // -------------------------------------------------------
                             $shop_create = UsersLocation::where('user_id', $tso['user_id'])
                                 ->where('table_name', 'shops')
-                                ->whereDate('created_at', $date)
+                                ->whereDate('created_at', $currentDate)
                                 ->count();
 
                             $total_visited = ShopVisit::where('user_id', $tso['user_id'])
-                                ->whereDate('visit_date', $date)
+                                ->whereDate('visit_date', $currentDate)
                                 ->count();
 
-                            $in = $row['in'] ?? '';
-                            $out = $row['out'] ?? '';
-
-                            // Sale Orders
-                            $sales_count = DB::table('sale_orders')
-                                ->where('dc_date', $date)
-                                ->where('tso_id', $tso['id'])
-                                ->where('status', 1)
-                                // ->where('distributor_id', $tso['distributor_id']);
-                                ->when($tso_id == null, function ($query) use ($tso) {
-                                    $query->where('distributor_id', $tso['distributor_id']);
-                                });
-
-                            $order_count = $sales_count->count();
-                            $sales_amount = $sales_count->sum('total_amount');
-
+                            // -------------------------------------------------------
+                            // Executed, balance, returns
+                            // -------------------------------------------------------
                             $executed_orders = DB::table('sale_orders')
-                                ->whereIn('id', $sales_count->pluck('id'))
+                                ->whereIn('id', $salesOrderIds)
                                 ->where('excecution', 1)
                                 ->count();
 
                             $balance_orders = $order_count - $executed_orders;
 
-                            // Sales Returns
                             $return_orders = DB::table('sales_return_data')
                                 ->join('sale_order_data', 'sales_return_data.sales_order_data_id', '=', 'sale_order_data.id')
-                                ->whereIn('sale_order_data.so_id', $sales_count->pluck('id'))
+                                ->whereIn('sale_order_data.so_id', $salesOrderIds)
                                 ->distinct('sale_order_data.so_id')
                                 ->count('sale_order_data.so_id');
+
+                            // Distributor display name from actual day data
+                            $rowDistributorName = $master->get_distributor_name($effectiveDistributorId) ?? '-';
 
                             $has_activity = !empty($in) || $order_count > 0 || $shop_create > 0 || $total_visited > 0 || $todayShop > 0;
                         @endphp
 
-                        @if($has_activity)
+                        @if ($has_activity)
                             @php
-                                // Totals
-                                $total_orders += $order_count;
-                                $total_exe += $executed_orders;
-                                $total_bal += $balance_orders;
-                                $total_productive += $order_count;
-                                $total_unproductive += $total_visited;
-                                $total_today_shop += $todayShop;
-                                $total_new_shop += $shop_create;
+                                $total_orders           += $order_count;
+                                $total_exe              += $executed_orders;
+                                $total_bal              += $balance_orders;
+                                $total_productive       += $order_count;
+                                $total_unproductive     += $total_visited;
+                                $total_today_shop       += $todayShop;
+                                $total_new_shop         += $shop_create;
                                 $total_visit_shop_total += ($total_visited + $order_count);
-                                $sales_amount_total += $sales_amount;
-                                $sales_return_total += $return_orders;
+                                $sales_amount_total     += $sales_amount;
+                                $sales_return_total     += $return_orders;
                             @endphp
 
-                        <tr>
-                            <td>{{ $i++ }}</td>
-                            <td>{{ $tso['tso_code'] }}</td>
-                            <td>{{ $tso['name'] }}</td>
-                            <td>{{ $tso['designation']['name'] ?? '' }}</td>
-                            <td>{{ $master->get_distributor_name($tso['distributor_id']) ?? '' }}</td>
-                            <td>{{ $routeNames ?? '-' }}</td>
-                            <td>{{ $tso['cities']['name'] ?? '' }}</td>
-                            <td>{{ $in ? date('d-m-Y h:i:s', strtotime($in)) : '' }}</td>
-                            <td>{{ $out ? date('d-m-Y h:i:s', strtotime($out)) : '' }}</td>
-                            <td>{{ $todayShop }}</td>
-                            <td>{{ $shop_create }}</td>
-                            <td>{{ $total_visited + $order_count }}</td>
-                            <td>{{ $order_count }}</td>
-                            <td>{{ $total_visited }}</td>
-                            <td>{{ $order_count }}</td>
-                            <td>{{ number_format($sales_amount, 0) }}</td>
-                            <td>{{ $executed_orders }}</td>
-                            <td>{{ $return_orders }}</td>
-                            <td>{{ $balance_orders }}</td>
-                        </tr>
+                            <tr>
+                                <td>{{ $i++ }}</td>
+                                <td>{{ $tso['tso_code'] }}</td>
+                                <td>{{ $tso['name'] }}</td>
+                                <td>{{ $tso['designation']['name'] ?? '' }}</td>
+                                <td>{{ $rowDistributorName }}</td>
+                                <td>{{ $routeNames }}</td>
+                                <td>{{ $tso['cities']['name'] ?? '' }}</td>
+                                <td>{{ $in  ? date('d-m-Y h:i:s', strtotime($in))  : '' }}</td>
+                                <td>{{ $out ? date('d-m-Y h:i:s', strtotime($out)) : '' }}</td>
+                                <td>{{ $todayShop }}</td>
+                                <td>{{ $shop_create }}</td>
+                                <td>{{ $total_visited + $order_count }}</td>
+                                <td>{{ $order_count }}</td>
+                                <td>{{ $total_visited }}</td>
+                                <td>{{ $order_count }}</td>
+                                <td>{{ number_format($sales_amount, 0) }}</td>
+                                <td>{{ $executed_orders }}</td>
+                                <td>{{ $return_orders }}</td>
+                                <td>{{ $balance_orders }}</td>
+                            </tr>
                         @endif
                     @endforeach
+
                 @endif
             @endforeach
 
-            <tr style="background-color: darkgray;font-weight: bold">
+            <tr style="background-color: darkgray; font-weight: bold;">
                 <td>Total</td>
                 <td colspan="4"></td>
                 <td colspan="2"></td>
