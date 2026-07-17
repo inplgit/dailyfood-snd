@@ -4147,6 +4147,11 @@ public function distributer_product_sales_value_report(Request $request)
                     $att = $attendances->get($key);
                     $ord = $orders->get($key);
 
+                    // Skip shops with no sale order and no visit
+                    if (!$att && !$ord) {
+                        continue;
+                    }
+
                     $type = '-';
                     if ($ord && $att) {
                         $type = 'Sale Order, Shop Visit';
