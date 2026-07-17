@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use App\Jobs\SendSmsJob;
 use Illuminate\Support\Facades\Validator;
 
+
 use Carbon\Carbon;
 use App\Models\TSO;
 use App\Models\ShopAttendence;
@@ -843,7 +844,7 @@ public function userWiseShopList(Request $request)
                 shops_outstandings.sr_amount +
                 CASE
                     WHEN shops.debit_credit = 1 THEN shops.balance_amount
-                    WHEN shops.debit_credit = 2 THEN -shops.balance_amount
+                    WHEN shops.debit_credit = 2 THEN - shops.balance_amount
                     ELSE 0
                 END
                 - shops_outstandings.rv_amount

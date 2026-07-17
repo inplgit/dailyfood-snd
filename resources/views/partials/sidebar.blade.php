@@ -562,6 +562,13 @@
                                                 </span>
                                             </a>
                                         </li>
+                                        <li>
+                                            <a class="d-flex align-items-center" href="{{ route('shop_list_old') }}">
+                                                <span class="menu-item text-truncate">
+                                                    Shop List Old
+                                                </span>
+                                            </a>
+                                        </li>
                                           @endcan
                                           @can('Shop_add_v2')
                                          <li>
