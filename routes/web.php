@@ -397,6 +397,7 @@ Route::group(['middleware' => ['auth', 'track']], function () {
         Route::get('shop_list_old', 'ReportController@shop_list_old')->name('shop_list_old');
         Route::get('route_map_report', 'ReportController@route_map_report')->name('route_map_report');
         
+        
     });
 
 
