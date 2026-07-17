@@ -394,6 +394,7 @@ Route::group(['middleware' => ['auth', 'track']], function () {
         Route::get('top_shop_balance_report', 'ReportController@top_shop_balance_report')->name('top_shop_balance_report');
         Route::get('shops_amount_wise_report', 'ReportController@shops_amount_wise_report')->name('shops_amount_wise_report');
         Route::get('shop_summary_report', 'ReportController@shop_summary_report')->name('shop_summary_report');
+        Route::get('shop_list_old', 'ReportController@shop_list_old')->name('shop_list_old');
         Route::get('route_map_report', 'ReportController@route_map_report')->name('route_map_report');
         
     });

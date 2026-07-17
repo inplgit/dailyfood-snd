@@ -36,6 +36,123 @@ class ReportController extends Controller
 
     }
 
+    public function shop_list_old(Request $request, \App\Models\ShopOld $shop)
+    {
+       if ($request->ajax()):
+        $count =  \App\Models\ShopOld::status()->count();
+
+        $shop =  $shop::status()
+        ->with(['Distributor', 'TSO', 'Route', 'subroutes'])
+        ->when($request->distributor_id!=null, function ($query) use ($request){
+            $query->where('distributor_id',$request->distributor_id);
+        })
+        ->when($request->distributor_id==null, function ($query) use ($request){
+            $distributor = \App\Helpers\MasterFormsHelper::get_users_distributors(\Auth::user()->id);
+            $query->whereIn('distributor_id',$distributor);
+        })
+        ->when($request->tso_id!=null , function ($query) use ($request) {
+         $query->where('tso_id',$request->tso_id);
+        })
+        ->when($request->route_id!=null , function ($query) use ($request){
+            $query->where('route_id',$request->route_id);
+        })
+        ->when($request->city!=null , function ($query) use ($request){
+            $query->whereHas('Distributor', function ($q) use ($request) {
+                $q->whereIn('city_id', $request->city); 
+            });
+        })
+        ->when($request->date!=null , function ($query) use ($request) {
+            $query->whereDate('created_at',$request->date);
+        }) 
+        ->select('shop_code','company_name','shop_zone_id','distributor_id','tso_id','route_id','id','sub_route_id','city','image', 'active','status_username','status_user_id','remarks', 'latitude', 'longitude');
+
+        $statusMapping = [
+            'activate' => 1,
+            'activate request' => 2,
+            'deactivate request' => 3,
+            'deactivate' => 0,
+            'new shop create' => 4,
+        ];
+
+        return \Yajra\DataTables\DataTables::of($shop)
+                ->addIndexColumn()
+                ->editColumn('city', function($row) {
+                    return $row->Distributor ? $row->Distributor->city : '--';
+                })
+                ->editColumn('distributor', function($row) {
+                    return $row->Distributor ? $row->Distributor->distributor_name : '--';
+                })
+                ->filterColumn('distributor', function($query, $keyword) {
+                    $query->whereHas('Distributor', function($q) use ($keyword) {
+                        $q->where('distributor_name', 'like', "%$keyword%");
+                    });
+                })
+                ->editColumn('tso', function($row) {
+                    return $row->TSO ? $row->TSO->name : '--';
+                })
+                ->filterColumn('tso', function($query, $keyword) {
+                    $query->whereHas('TSO', function($q) use ($keyword) {
+                        $q->where('name', 'like', "%$keyword%");
+                    });
+                })
+                ->editColumn('route', function($row) {
+                    return $row->Route ? $row->Route->route_name : '--';
+                })
+                ->filterColumn('route', function($query, $keyword) {
+                    $query->whereHas('Route', function($q) use ($keyword) {
+                        $q->where('route_name', 'like', "%$keyword%");
+                    });
+                })
+                ->editColumn('sub_route', function($row) {
+                    return $row->subroutes ? $row->subroutes->route_name : '--';
+                })
+                ->filterColumn('sub_route', function($query, $keyword) {
+                    $query->whereHas('subroutes', function($q) use ($keyword) {
+                        $q->where('name', 'like', "%$keyword%");
+                    });
+                })
+                ->editColumn('status', function($row) {
+                    switch ($row->active) {
+                        case 1: return 'Activate' ;
+                        case 2: return 'Activate Request' .  ((\Auth::user()->id  != $row->status_user_id) ? '('. $row->status_username .')' : '');
+                        case 3: return 'Deactivate Request' . ((\Auth::user()->id  != $row->status_user_id) ? '('. $row->status_username .')' : '');
+                        case 0: return 'Deactivate';
+                        case 4: return 'New Shop Create';
+                        default: return '--';
+                    }
+                })
+                ->filterColumn('status', function($query, $keyword) use ($statusMapping) {
+                    $keyword = strtolower($keyword);
+                    $matchedStatus = [];
+                    foreach ($statusMapping as $key => $value) {
+                        if (strpos($key, $keyword) !== false) {
+                            $matchedStatus[] = $value;
+                        }
+                    }
+                    if (!empty($matchedStatus)) {
+                        $query->whereIn('active', $matchedStatus);
+                    }
+                })
+                ->orderColumn('status', function ($query, $order) use ($statusMapping) {
+                    $query->orderByRaw('FIELD(active, ' . implode(',', $statusMapping) . ') ' . $order);
+                })
+                ->addColumn('action', function($row) {
+                    if ($row->latitude && $row->longitude) {
+                        $mapUrl = 'https://www.google.com/maps/search/?api=1&query=' . $row->latitude . ',' . $row->longitude;
+                        
+                        $buttons = '<a href="' . $mapUrl . '" target="_blank" class="btn btn-sm btn-info mb-1" title="View Map"><i class="fa-solid fa-map-location-dot"></i> View Map</a>';
+                        $buttons .= ' <button type="button" onclick="navigator.clipboard.writeText(\'' . $mapUrl . '\'); alert(\'Link copied to clipboard!\');" class="btn btn-sm btn-secondary mb-1" title="Copy Share Location"><i class="fa-solid fa-copy"></i> Copy Share Location</button>';
+                        
+                        return $buttons;
+                    }
+                    return '--';
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        endif;
+
+        return  view('pages.Reports.shopListOld.shop_list_old');
+    }
 
 
 

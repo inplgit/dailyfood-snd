@@ -467,6 +467,12 @@ $master = new MasterFormsHelper();
                                                     <span>Shop Summary</span>
                                                 </a>
                                             </li>
+                                            <li>
+                                                <a href="{{ route('shop_list_old') }}">
+                                                    <i class="fas fa-circle"></i>
+                                                    <span>Shop List Old</span>
+                                                </a>
+                                            </li>
                                             @endcan
                                             @can('tso_tracking_report')
                                             <li>
