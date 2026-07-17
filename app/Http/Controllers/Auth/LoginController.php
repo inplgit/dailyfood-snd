@@ -27,6 +27,10 @@ class LoginController extends Controller
         }
         if ($user->tso)
         {
+               if ($user->tso->active != 1) {
+                auth()->logout();
+                return redirect()->back()->withErrors(['email' => 'Access Denied: Your account is not active.']);
+            }
             return;
         }
     }

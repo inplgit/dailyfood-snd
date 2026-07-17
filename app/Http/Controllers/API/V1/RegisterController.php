@@ -39,12 +39,18 @@ class RegisterController extends BaseController
 
         if(Auth::attempt(['email' => $request->email, 'password' => $request->password])){
             $user = User::find(Auth::id());
-            if ($user->tso && $user->tso->active == 1) {
+            if ($user->tso) {
+  
+                if ($user->tso->active != 1) {
+                    Auth::logout();
+                    return $this->sendError('Unauthorised.', ['error'=>'Access Denied: Your account is not active.'], 200);
+                }
+
                 $user->tso->designation;
                 $user->tso->department;
                 $user->tso->cities;
 
-  UserVersion::create([
+    UserVersion::create([
                     'user_id' => $user->id,
                     'app_version' => $request->app_version,
                     'ip_address' => $request->ip()
