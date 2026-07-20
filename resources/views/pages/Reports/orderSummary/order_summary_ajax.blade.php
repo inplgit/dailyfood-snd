@@ -43,6 +43,7 @@ $user_allocate = $master->get_assign_user()->toArray();
                 <th>Logout Time</th>
                 <th>Today Shop</th>
                 <th>New Shop</th>
+                <th>Update Shop</th>
                 <th>Total Visit Shops</th>
                 <th>Productive Shops</th>
                 <th>Unproductive Shops</th>
@@ -63,6 +64,7 @@ $user_allocate = $master->get_assign_user()->toArray();
                 $total_unproductive     = 0;
                 $total_today_shop       = 0;
                 $total_new_shop         = 0;
+                $total_update_shop      = 0;
                 $total_visit_shop_total = 0;
                 $sales_amount_total     = 0;
                 $sales_return_total     = 0;
@@ -161,6 +163,16 @@ $user_allocate = $master->get_assign_user()->toArray();
                             // -------------------------------------------------------
                             $shop_create = UsersLocation::where('user_id', $tso['user_id'])
                                 ->where('table_name', 'shops')
+                                ->where(function ($q) {
+                                    $q->where('activity_type', '!=', 'Update Shop')
+                                      ->orWhereNull('activity_type');
+                                })
+                                ->whereDate('created_at', $currentDate)
+                                ->count();
+
+                            $shop_update = UsersLocation::where('user_id', $tso['user_id'])
+                                ->where('table_name', 'shops')
+                                ->where('activity_type', 'Update Shop')
                                 ->whereDate('created_at', $currentDate)
                                 ->count();
 
@@ -187,7 +199,7 @@ $user_allocate = $master->get_assign_user()->toArray();
                             // Distributor display name from actual day data
                             $rowDistributorName = $master->get_distributor_name($effectiveDistributorId) ?? '-';
 
-                            $has_activity = !empty($in) || $order_count > 0 || $shop_create > 0 || $total_visited > 0 || $todayShop > 0;
+                            $has_activity = !empty($in) || $order_count > 0 || $shop_create > 0 || $shop_update > 0 || $total_visited > 0 || $todayShop > 0;
                         @endphp
 
                         @if ($has_activity)
@@ -199,6 +211,7 @@ $user_allocate = $master->get_assign_user()->toArray();
                                 $total_unproductive     += $total_visited;
                                 $total_today_shop       += $todayShop;
                                 $total_new_shop         += $shop_create;
+                                $total_update_shop      += $shop_update;
                                 $total_visit_shop_total += ($total_visited + $order_count);
                                 $sales_amount_total     += $sales_amount;
                                 $sales_return_total     += $return_orders;
@@ -216,6 +229,7 @@ $user_allocate = $master->get_assign_user()->toArray();
                                 <td>{{ $out ? date('d-m-Y h:i:s', strtotime($out)) : '' }}</td>
                                 <td>{{ $todayShop }}</td>
                                 <td>{{ $shop_create }}</td>
+                                <td>{{ $shop_update }}</td>
                                 <td>{{ $total_visited + $order_count }}</td>
                                 <td>{{ $order_count }}</td>
                                 <td>{{ $total_visited }}</td>
@@ -238,6 +252,7 @@ $user_allocate = $master->get_assign_user()->toArray();
                 <td colspan="2"></td>
                 <td>{{ $total_today_shop }}</td>
                 <td>{{ $total_new_shop }}</td>
+                <td>{{ $total_update_shop }}</td>
                 <td>{{ $total_visit_shop_total }}</td>
                 <td>{{ $total_productive }}</td>
                 <td>{{ $total_unproductive }}</td>
